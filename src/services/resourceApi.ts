@@ -77,7 +77,7 @@ export async function searchResources(
       use_semantic: searchQuery.length > 0,
     },
     options: {
-      limit: 50,
+      limit: 300,
       include_availability: true,
       min_similarity: 0.3,
     },
