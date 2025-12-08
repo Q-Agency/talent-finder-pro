@@ -1,9 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { FilterSidebar, Filters } from '@/components/FilterSidebar';
 import { SearchHeader } from '@/components/SearchHeader';
-import { EmployeeGrid } from '@/components/EmployeeGrid';
-import { mockEmployees, Employee } from '@/data/mockData';
+import { ResourceGrid } from '@/components/ResourceGrid';
+import { ApiModeToggle } from '@/components/ApiModeToggle';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { searchResources, Resource } from '@/services/resourceApi';
+import { useToast } from '@/hooks/use-toast';
 
 const initialFilters: Filters = {
   employmentTypes: [],
@@ -17,68 +19,57 @@ const initialFilters: Filters = {
 const Index = () => {
   const [filters, setFilters] = useState<Filters>(initialFilters);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isTestMode, setIsTestMode] = useState(true);
+  const [resources, setResources] = useState<Resource[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
-  const filteredEmployees = useMemo(() => {
-    return mockEmployees.filter((employee: Employee) => {
-      // Search filter
-      if (searchQuery) {
-        const query = searchQuery.toLowerCase();
-        const matchesSearch =
-          employee.name.toLowerCase().includes(query) ||
-          employee.roleTitle.toLowerCase().includes(query) ||
-          employee.skills.some((skill) => skill.toLowerCase().includes(query)) ||
-          employee.email.toLowerCase().includes(query);
-        if (!matchesSearch) return false;
+  const fetchResources = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await searchResources(filters, searchQuery, isTestMode);
+      if (response.success) {
+        setResources(response.results);
+      } else {
+        throw new Error('Search failed');
       }
+    } catch (error) {
+      console.error('Failed to fetch resources:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch resources. Please try again.',
+        variant: 'destructive',
+      });
+      setResources([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [filters, searchQuery, isTestMode, toast]);
 
-      // Employment type filter
-      if (filters.employmentTypes.length > 0) {
-        if (!filters.employmentTypes.includes(employee.employmentType)) return false;
-      }
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      fetchResources();
+    }, 300);
 
-      // Seniority filter
-      if (filters.seniorities.length > 0) {
-        if (!filters.seniorities.includes(employee.seniority)) return false;
-      }
-
-      // Role title filter
-      if (filters.roleTitles.length > 0) {
-        if (!filters.roleTitles.includes(employee.roleTitle)) return false;
-      }
-
-      // Skills filter (matches if employee has ANY of the selected skills)
-      if (filters.skills.length > 0) {
-        if (!filters.skills.some((skill) => employee.skills.includes(skill))) return false;
-      }
-
-      // Industries filter
-      if (filters.industries.length > 0) {
-        if (!filters.industries.some((industry) => employee.industries.includes(industry))) return false;
-      }
-
-      // Certificates filter
-      if (filters.certificates.length > 0) {
-        if (!filters.certificates.some((cert) => employee.certificates.includes(cert))) return false;
-      }
-
-      return true;
-    });
-  }, [filters, searchQuery]);
+    return () => clearTimeout(debounceTimer);
+  }, [fetchResources]);
 
   return (
     <div className="flex h-screen bg-background">
       <FilterSidebar
         filters={filters}
         onFilterChange={setFilters}
-        resultCount={filteredEmployees.length}
+        resultCount={resources.length}
       />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <SearchHeader searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+        <SearchHeader searchQuery={searchQuery} onSearchChange={setSearchQuery}>
+          <ApiModeToggle isTestMode={isTestMode} onToggle={setIsTestMode} />
+        </SearchHeader>
 
         <ScrollArea className="flex-1 scrollbar-thin">
           <main className="p-6">
-            <EmployeeGrid employees={filteredEmployees} />
+            <ResourceGrid resources={resources} isLoading={isLoading} />
           </main>
         </ScrollArea>
       </div>
