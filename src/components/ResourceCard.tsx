@@ -3,9 +3,11 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Briefcase, Sparkles, Award } from 'lucide-react';
+import { HighlightText } from './HighlightText';
 
 interface ResourceCardProps {
   resource: Resource;
+  searchQuery?: string;
 }
 
 const getEmploymentBadgeClass = (type: string) => {
@@ -33,7 +35,7 @@ const getSeniorityBadgeClass = (seniority: string) => {
   return 'bg-badge-junior/10 text-badge-junior border-badge-junior/20';
 };
 
-export function ResourceCard({ resource }: ResourceCardProps) {
+export function ResourceCard({ resource, searchQuery = '' }: ResourceCardProps) {
   const allSkills = [
     ...resource.skills.senior,
     ...resource.skills.mid,
@@ -52,17 +54,23 @@ export function ResourceCard({ resource }: ResourceCardProps) {
           
           <div className="flex-1 min-w-0">
             <div>
-              <h3 className="font-semibold text-foreground truncate">{resource.resource_name}</h3>
-              <p className="text-sm text-primary font-medium">{resource.role_category}</p>
+              <h3 className="font-semibold text-foreground truncate">
+                <HighlightText text={resource.resource_name} query={searchQuery} />
+              </h3>
+              <p className="text-sm text-primary font-medium">
+                <HighlightText text={resource.role_category} query={searchQuery} />
+              </p>
             </div>
             
             <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Briefcase className="h-3 w-3" />
-                {resource.technical_domain}
+                <HighlightText text={resource.technical_domain} query={searchQuery} />
               </span>
               {resource.vertical && (
-                <span className="text-muted-foreground/60">• {resource.vertical}</span>
+                <span className="text-muted-foreground/60">
+                  • <HighlightText text={resource.vertical} query={searchQuery} />
+                </span>
               )}
             </div>
           </div>

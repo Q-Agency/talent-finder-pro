@@ -1,9 +1,11 @@
 import { Resource } from '@/services/resourceApi';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { HighlightText } from './HighlightText';
 
 interface ResourceListItemProps {
   resource: Resource;
+  searchQuery?: string;
   onClick: () => void;
 }
 
@@ -32,7 +34,7 @@ const getSeniorityBadgeClass = (seniority: string) => {
   return 'bg-badge-junior/10 text-badge-junior border-badge-junior/20';
 };
 
-export function ResourceListItem({ resource, onClick }: ResourceListItemProps) {
+export function ResourceListItem({ resource, searchQuery = '', onClick }: ResourceListItemProps) {
   return (
     <div 
       className="flex items-center gap-4 p-3 bg-card border border-border/50 rounded-lg hover:border-primary/20 hover:bg-accent/50 transition-all duration-200 cursor-pointer"
@@ -46,8 +48,12 @@ export function ResourceListItem({ resource, onClick }: ResourceListItemProps) {
 
       <div className="flex-1 min-w-0 flex items-center gap-6">
         <div className="min-w-[180px]">
-          <h3 className="font-medium text-foreground text-sm truncate">{resource.resource_name}</h3>
-          <p className="text-xs text-muted-foreground truncate">{resource.role_category}</p>
+          <h3 className="font-medium text-foreground text-sm truncate">
+            <HighlightText text={resource.resource_name} query={searchQuery} />
+          </h3>
+          <p className="text-xs text-muted-foreground truncate">
+            <HighlightText text={resource.role_category} query={searchQuery} />
+          </p>
         </div>
 
         <div className="flex items-center gap-2">
@@ -60,7 +66,7 @@ export function ResourceListItem({ resource, onClick }: ResourceListItemProps) {
         </div>
 
         <span className="text-xs text-muted-foreground hidden lg:block">
-          {resource.technical_domain}
+          <HighlightText text={resource.technical_domain} query={searchQuery} />
         </span>
       </div>
     </div>
