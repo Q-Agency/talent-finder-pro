@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { FilterSidebar, Filters } from '@/components/FilterSidebar';
 import { SearchHeader } from '@/components/SearchHeader';
 import { ResourceGrid } from '@/components/ResourceGrid';
@@ -29,7 +29,7 @@ const Index = () => {
   const fetchResources = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await searchResources(filters, searchQuery, isTestMode);
+      const response = await searchResources(filters, '', isTestMode);
       if (response.success) {
         setResources(response.results);
       } else {
@@ -46,7 +46,7 @@ const Index = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [filters, searchQuery, isTestMode, toast]);
+  }, [filters, isTestMode, toast]);
 
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
@@ -56,12 +56,38 @@ const Index = () => {
     return () => clearTimeout(debounceTimer);
   }, [fetchResources]);
 
+  // Client-side filtering based on search query
+  const filteredResources = useMemo(() => {
+    if (!searchQuery.trim()) return resources;
+    
+    const query = searchQuery.toLowerCase();
+    return resources.filter((resource) => {
+      const allSkills = [
+        ...resource.skills.senior,
+        ...resource.skills.mid,
+        ...resource.skills.junior,
+      ];
+      
+      return (
+        resource.resource_name.toLowerCase().includes(query) ||
+        resource.role_category.toLowerCase().includes(query) ||
+        resource.technical_domain.toLowerCase().includes(query) ||
+        resource.seniority_level.toLowerCase().includes(query) ||
+        resource.employment_type.toLowerCase().includes(query) ||
+        resource.vertical?.toLowerCase().includes(query) ||
+        allSkills.some(skill => skill.toLowerCase().includes(query)) ||
+        resource.industries.some(industry => industry.toLowerCase().includes(query)) ||
+        resource.certificates?.some(cert => cert.toLowerCase().includes(query))
+      );
+    });
+  }, [resources, searchQuery]);
+
   return (
     <div className="flex h-screen bg-background">
       <FilterSidebar
         filters={filters}
         onFilterChange={setFilters}
-        resultCount={resources.length}
+        resultCount={filteredResources.length}
       />
 
       <div className="flex-1 flex flex-col min-w-0">
@@ -72,7 +98,7 @@ const Index = () => {
 
         <ScrollArea className="flex-1 scrollbar-thin">
           <main className="p-6">
-            <ResourceGrid resources={resources} isLoading={isLoading} viewMode={viewMode} />
+            <ResourceGrid resources={filteredResources} isLoading={isLoading} viewMode={viewMode} />
           </main>
         </ScrollArea>
       </div>
