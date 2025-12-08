@@ -21,6 +21,7 @@ export interface Resource {
   industries: string[];
   employment_type: string;
   vertical: string;
+  certificates?: string[];
   similarity_score?: number;
   match_reasons?: string[];
 }
