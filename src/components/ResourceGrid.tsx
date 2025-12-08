@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { Resource } from '@/services/resourceApi';
 import { ResourceCard } from './ResourceCard';
 import { ResourceListItem } from './ResourceListItem';
+import { ResourceDetailModal } from './ResourceDetailModal';
 import { Users, Loader2 } from 'lucide-react';
 import { ViewMode } from './ViewToggle';
 
@@ -11,6 +13,8 @@ interface ResourceGridProps {
 }
 
 export function ResourceGrid({ resources, isLoading, viewMode }: ResourceGridProps) {
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
@@ -30,21 +34,33 @@ export function ResourceGrid({ resources, isLoading, viewMode }: ResourceGridPro
     );
   }
 
-  if (viewMode === 'list') {
-    return (
-      <div className="flex flex-col gap-2">
-        {resources.map((resource) => (
-          <ResourceListItem key={resource.resource_id} resource={resource} />
-        ))}
-      </div>
-    );
-  }
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-      {resources.map((resource) => (
-        <ResourceCard key={resource.resource_id} resource={resource} />
-      ))}
-    </div>
+    <>
+      {viewMode === 'list' ? (
+        <div className="flex flex-col gap-1.5">
+          {resources.map((resource) => (
+            <ResourceListItem 
+              key={resource.resource_id} 
+              resource={resource} 
+              onClick={() => setSelectedResource(resource)}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {resources.map((resource) => (
+            <div key={resource.resource_id} onClick={() => setSelectedResource(resource)} className="cursor-pointer">
+              <ResourceCard resource={resource} />
+            </div>
+          ))}
+        </div>
+      )}
+
+      <ResourceDetailModal
+        resource={selectedResource}
+        open={!!selectedResource}
+        onOpenChange={(open) => !open && setSelectedResource(null)}
+      />
+    </>
   );
 }

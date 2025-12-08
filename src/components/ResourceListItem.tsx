@@ -1,10 +1,10 @@
 import { Resource } from '@/services/resourceApi';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Briefcase, Award } from 'lucide-react';
 
 interface ResourceListItemProps {
   resource: Resource;
+  onClick: () => void;
 }
 
 const getEmploymentBadgeClass = (type: string) => {
@@ -32,74 +32,36 @@ const getSeniorityBadgeClass = (seniority: string) => {
   return 'bg-badge-junior/10 text-badge-junior border-badge-junior/20';
 };
 
-export function ResourceListItem({ resource }: ResourceListItemProps) {
-  const allSkills = [
-    ...resource.skills.senior,
-    ...resource.skills.mid,
-    ...resource.skills.junior,
-  ];
-
+export function ResourceListItem({ resource, onClick }: ResourceListItemProps) {
   return (
-    <div className="flex items-center gap-4 p-4 bg-card border border-border/50 rounded-lg hover:border-primary/20 transition-all duration-200 animate-fade-in">
-      <Avatar className="h-10 w-10 ring-2 ring-background shadow-sm shrink-0">
-        <AvatarFallback className="bg-primary/10 text-primary font-medium text-sm">
+    <div 
+      className="flex items-center gap-4 p-3 bg-card border border-border/50 rounded-lg hover:border-primary/20 hover:bg-accent/50 transition-all duration-200 cursor-pointer"
+      onClick={onClick}
+    >
+      <Avatar className="h-9 w-9 ring-2 ring-background shadow-sm shrink-0">
+        <AvatarFallback className="bg-primary/10 text-primary font-medium text-xs">
           {resource.resource_name.split(' ').map(n => n[0]).join('')}
         </AvatarFallback>
       </Avatar>
 
-      <div className="flex-1 min-w-0 grid grid-cols-[200px_1fr_1fr_auto] gap-4 items-center">
-        <div className="min-w-0">
-          <h3 className="font-semibold text-foreground truncate">{resource.resource_name}</h3>
-          <p className="text-sm text-primary font-medium truncate">{resource.role_category}</p>
+      <div className="flex-1 min-w-0 flex items-center gap-6">
+        <div className="min-w-[180px]">
+          <h3 className="font-medium text-foreground text-sm truncate">{resource.resource_name}</h3>
+          <p className="text-xs text-muted-foreground truncate">{resource.role_category}</p>
         </div>
 
-        <div className="flex flex-wrap gap-1.5">
-          <Badge variant="outline" className={`text-xs font-medium ${getEmploymentBadgeClass(resource.employment_type)}`}>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className={`text-xs ${getEmploymentBadgeClass(resource.employment_type)}`}>
             {resource.employment_type}
           </Badge>
-          <Badge variant="outline" className={`text-xs font-medium ${getSeniorityBadgeClass(resource.seniority_level)}`}>
+          <Badge variant="outline" className={`text-xs ${getSeniorityBadgeClass(resource.seniority_level)}`}>
             {resource.seniority_level}
           </Badge>
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Briefcase className="h-3 w-3" />
-            {resource.technical_domain}
-          </span>
         </div>
 
-        <div className="flex flex-wrap gap-1 max-w-md">
-          {allSkills.slice(0, 4).map((skill) => (
-            <Badge key={skill} variant="secondary" className="text-xs font-normal">
-              {skill}
-            </Badge>
-          ))}
-          {allSkills.length > 4 && (
-            <Badge variant="secondary" className="text-xs font-normal">
-              +{allSkills.length - 4}
-            </Badge>
-          )}
-          {resource.certificates && resource.certificates.length > 0 && (
-            <>
-              {resource.certificates.slice(0, 2).map((cert) => (
-                <Badge key={cert} variant="outline" className="text-xs font-normal bg-amber-500/10 text-amber-600 border-amber-500/20">
-                  <Award className="h-3 w-3 mr-1" />
-                  {cert}
-                </Badge>
-              ))}
-              {resource.certificates.length > 2 && (
-                <Badge variant="outline" className="text-xs font-normal bg-amber-500/10 text-amber-600 border-amber-500/20">
-                  +{resource.certificates.length - 2}
-                </Badge>
-              )}
-            </>
-          )}
-        </div>
-
-        {resource.industries.length > 0 && (
-          <p className="text-xs text-muted-foreground whitespace-nowrap">
-            {resource.industries.slice(0, 2).join(', ')}
-            {resource.industries.length > 2 && ` +${resource.industries.length - 2}`}
-          </p>
-        )}
+        <span className="text-xs text-muted-foreground hidden lg:block">
+          {resource.technical_domain}
+        </span>
       </div>
     </div>
   );
