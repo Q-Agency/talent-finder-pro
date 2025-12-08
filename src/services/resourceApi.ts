@@ -38,13 +38,13 @@ export interface SearchResponse {
 
 interface SearchRequestBody {
   filters: {
-    role?: string;
-    seniority?: string;
+    role?: string[];
+    seniority?: string[];
     skills?: string[];
     industries?: string[];
-    employment_type?: string;
-    vertical?: string;
-    domain?: string;
+    employment_type?: string[];
+    vertical?: string[];
+    domain?: string[];
   };
   search: {
     query: string;
@@ -66,11 +66,11 @@ export async function searchResources(
 
   const requestBody: SearchRequestBody = {
     filters: {
-      ...(filters.roleTitles.length > 0 && { role: filters.roleTitles[0] }),
-      ...(filters.seniorities.length > 0 && { seniority: filters.seniorities[0] }),
+      ...(filters.roleTitles.length > 0 && { role: filters.roleTitles }),
+      ...(filters.seniorities.length > 0 && { seniority: filters.seniorities }),
       ...(filters.skills.length > 0 && { skills: filters.skills }),
       ...(filters.industries.length > 0 && { industries: filters.industries }),
-      ...(filters.employmentTypes.length > 0 && { employment_type: filters.employmentTypes[0].toLowerCase() }),
+      ...(filters.employmentTypes.length > 0 && { employment_type: filters.employmentTypes.map(t => t.toLowerCase()) }),
     },
     search: {
       query: searchQuery,
