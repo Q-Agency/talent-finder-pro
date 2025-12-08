@@ -1,13 +1,16 @@
 import { Resource } from '@/services/resourceApi';
 import { ResourceCard } from './ResourceCard';
+import { ResourceListItem } from './ResourceListItem';
 import { Users, Loader2 } from 'lucide-react';
+import { ViewMode } from './ViewToggle';
 
 interface ResourceGridProps {
   resources: Resource[];
   isLoading: boolean;
+  viewMode: ViewMode;
 }
 
-export function ResourceGrid({ resources, isLoading }: ResourceGridProps) {
+export function ResourceGrid({ resources, isLoading, viewMode }: ResourceGridProps) {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
@@ -23,6 +26,16 @@ export function ResourceGrid({ resources, isLoading }: ResourceGridProps) {
         <Users className="h-12 w-12 mb-4 opacity-50" />
         <p className="text-lg font-medium">No resources found</p>
         <p className="text-sm mt-1">Try adjusting your filters or search query</p>
+      </div>
+    );
+  }
+
+  if (viewMode === 'list') {
+    return (
+      <div className="flex flex-col gap-2">
+        {resources.map((resource) => (
+          <ResourceListItem key={resource.resource_id} resource={resource} />
+        ))}
       </div>
     );
   }

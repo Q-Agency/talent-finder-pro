@@ -3,6 +3,7 @@ import { FilterSidebar, Filters } from '@/components/FilterSidebar';
 import { SearchHeader } from '@/components/SearchHeader';
 import { ResourceGrid } from '@/components/ResourceGrid';
 import { ApiModeToggle } from '@/components/ApiModeToggle';
+import { ViewToggle, ViewMode } from '@/components/ViewToggle';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { searchResources, Resource } from '@/services/resourceApi';
 import { useToast } from '@/hooks/use-toast';
@@ -22,6 +23,7 @@ const Index = () => {
   const [isTestMode, setIsTestMode] = useState(true);
   const [resources, setResources] = useState<Resource[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const { toast } = useToast();
 
   const fetchResources = useCallback(async () => {
@@ -64,12 +66,13 @@ const Index = () => {
 
       <div className="flex-1 flex flex-col min-w-0">
         <SearchHeader searchQuery={searchQuery} onSearchChange={setSearchQuery}>
+          <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
           <ApiModeToggle isTestMode={isTestMode} onToggle={setIsTestMode} />
         </SearchHeader>
 
         <ScrollArea className="flex-1 scrollbar-thin">
           <main className="p-6">
-            <ResourceGrid resources={resources} isLoading={isLoading} />
+            <ResourceGrid resources={resources} isLoading={isLoading} viewMode={viewMode} />
           </main>
         </ScrollArea>
       </div>
