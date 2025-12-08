@@ -35,6 +35,11 @@ const getSeniorityBadgeClass = (seniority: string) => {
 };
 
 export function ResourceListItem({ resource, searchQuery = '', onClick }: ResourceListItemProps) {
+  const getInitials = (name?: string) => {
+    if (!name) return '?';
+    return name.split(' ').map(n => n[0]).join('');
+  };
+
   return (
     <div 
       className="flex items-center gap-4 p-3 bg-card border border-border/50 rounded-lg hover:border-primary/20 hover:bg-accent/50 transition-all duration-200 cursor-pointer"
@@ -42,31 +47,31 @@ export function ResourceListItem({ resource, searchQuery = '', onClick }: Resour
     >
       <Avatar className="h-9 w-9 ring-2 ring-background shadow-sm shrink-0">
         <AvatarFallback className="bg-primary/10 text-primary font-medium text-xs">
-          {resource.resource_name.split(' ').map(n => n[0]).join('')}
+          {getInitials(resource.resource_name)}
         </AvatarFallback>
       </Avatar>
 
       <div className="flex-1 min-w-0 flex items-center gap-6">
         <div className="min-w-[180px]">
           <h3 className="font-medium text-foreground text-sm truncate">
-            <HighlightText text={resource.resource_name} query={searchQuery} />
+            <HighlightText text={resource.resource_name || 'Unknown'} query={searchQuery} />
           </h3>
           <p className="text-xs text-muted-foreground truncate">
-            <HighlightText text={resource.role_category} query={searchQuery} />
+            <HighlightText text={resource.role_category || ''} query={searchQuery} />
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className={`text-xs ${getEmploymentBadgeClass(resource.employment_type)}`}>
-            {resource.employment_type}
+          <Badge variant="outline" className={`text-xs ${getEmploymentBadgeClass(resource.employment_type || '')}`}>
+            {resource.employment_type || 'Unknown'}
           </Badge>
-          <Badge variant="outline" className={`text-xs ${getSeniorityBadgeClass(resource.seniority_level)}`}>
-            {resource.seniority_level}
+          <Badge variant="outline" className={`text-xs ${getSeniorityBadgeClass(resource.seniority_level || '')}`}>
+            {resource.seniority_level || 'Unknown'}
           </Badge>
         </div>
 
         <span className="text-xs text-muted-foreground hidden lg:block">
-          <HighlightText text={resource.technical_domain} query={searchQuery} />
+          <HighlightText text={resource.technical_domain || ''} query={searchQuery} />
         </span>
       </div>
     </div>
