@@ -10,9 +10,10 @@ interface ResourceGridProps {
   resources: Resource[];
   isLoading: boolean;
   viewMode: ViewMode;
+  searchQuery?: string;
 }
 
-export function ResourceGrid({ resources, isLoading, viewMode }: ResourceGridProps) {
+export function ResourceGrid({ resources, isLoading, viewMode, searchQuery = '' }: ResourceGridProps) {
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
 
   if (isLoading) {
@@ -39,9 +40,10 @@ export function ResourceGrid({ resources, isLoading, viewMode }: ResourceGridPro
       {viewMode === 'list' ? (
         <div className="flex flex-col gap-1.5">
           {resources.map((resource) => (
-            <ResourceListItem 
+          <ResourceListItem 
               key={resource.resource_id} 
               resource={resource} 
+              searchQuery={searchQuery}
               onClick={() => setSelectedResource(resource)}
             />
           ))}
@@ -49,8 +51,8 @@ export function ResourceGrid({ resources, isLoading, viewMode }: ResourceGridPro
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {resources.map((resource) => (
-            <div key={resource.resource_id} onClick={() => setSelectedResource(resource)} className="cursor-pointer">
-              <ResourceCard resource={resource} />
+          <div key={resource.resource_id} onClick={() => setSelectedResource(resource)} className="cursor-pointer">
+              <ResourceCard resource={resource} searchQuery={searchQuery} />
             </div>
           ))}
         </div>

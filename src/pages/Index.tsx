@@ -98,7 +98,7 @@ const Index = () => {
 
         <ScrollArea className="flex-1 scrollbar-thin">
           <main className="p-6">
-            <ResourceGrid resources={filteredResources} isLoading={isLoading} viewMode={viewMode} />
+            <ResourceGrid resources={filteredResources} isLoading={isLoading} viewMode={viewMode} searchQuery={searchQuery} />
           </main>
         </ScrollArea>
       </div>
