@@ -4,6 +4,7 @@ import { SearchHeader } from '@/components/SearchHeader';
 import { ResourceGrid } from '@/components/ResourceGrid';
 import { ApiModeToggle } from '@/components/ApiModeToggle';
 import { ViewToggle, ViewMode } from '@/components/ViewToggle';
+import { SortSelect, SortOption } from '@/components/SortSelect';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { searchResources, Resource } from '@/services/resourceApi';
 import { useToast } from '@/hooks/use-toast';
@@ -17,6 +18,15 @@ const initialFilters: Filters = {
   certificates: [],
 };
 
+const seniorityOrder: Record<string, number> = {
+  'senior 2': 1,
+  'senior 1': 2,
+  'mid 2': 3,
+  'mid 1': 4,
+  'junior 2': 5,
+  'junior 1': 6,
+};
+
 const Index = () => {
   const [filters, setFilters] = useState<Filters>(initialFilters);
   const [searchQuery, setSearchQuery] = useState('');
@@ -24,6 +34,7 @@ const Index = () => {
   const [resources, setResources] = useState<Resource[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [sortOption, setSortOption] = useState<SortOption>('name-asc');
   const { toast } = useToast();
 
   const fetchResources = useCallback(async () => {
@@ -56,31 +67,54 @@ const Index = () => {
     return () => clearTimeout(debounceTimer);
   }, [fetchResources]);
 
-  // Client-side filtering based on search query
+  // Client-side filtering and sorting
   const filteredResources = useMemo(() => {
-    if (!searchQuery.trim()) return resources;
+    let result = [...resources];
     
-    const query = searchQuery.toLowerCase();
-    return resources.filter((resource) => {
-      const allSkills = [
-        ...resource.skills.senior,
-        ...resource.skills.mid,
-        ...resource.skills.junior,
-      ];
-      
-      return (
-        resource.resource_name.toLowerCase().includes(query) ||
-        resource.role_category.toLowerCase().includes(query) ||
-        resource.technical_domain.toLowerCase().includes(query) ||
-        resource.seniority_level.toLowerCase().includes(query) ||
-        resource.employment_type.toLowerCase().includes(query) ||
-        resource.vertical?.toLowerCase().includes(query) ||
-        allSkills.some(skill => skill.toLowerCase().includes(query)) ||
-        resource.industries.some(industry => industry.toLowerCase().includes(query)) ||
-        resource.certificates?.some(cert => cert.toLowerCase().includes(query))
-      );
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter((resource) => {
+        const allSkills = [
+          ...resource.skills.senior,
+          ...resource.skills.mid,
+          ...resource.skills.junior,
+        ];
+        
+        return (
+          resource.resource_name.toLowerCase().includes(query) ||
+          resource.role_category.toLowerCase().includes(query) ||
+          resource.technical_domain.toLowerCase().includes(query) ||
+          resource.seniority_level.toLowerCase().includes(query) ||
+          resource.employment_type.toLowerCase().includes(query) ||
+          resource.vertical?.toLowerCase().includes(query) ||
+          allSkills.some(skill => skill.toLowerCase().includes(query)) ||
+          resource.industries.some(industry => industry.toLowerCase().includes(query)) ||
+          resource.certificates?.some(cert => cert.toLowerCase().includes(query))
+        );
+      });
+    }
+    
+    // Sort results
+    result.sort((a, b) => {
+      switch (sortOption) {
+        case 'name-asc':
+          return a.resource_name.localeCompare(b.resource_name);
+        case 'name-desc':
+          return b.resource_name.localeCompare(a.resource_name);
+        case 'seniority':
+          const aOrder = seniorityOrder[a.seniority_level.toLowerCase()] ?? 99;
+          const bOrder = seniorityOrder[b.seniority_level.toLowerCase()] ?? 99;
+          return aOrder - bOrder;
+        case 'employment':
+          return a.employment_type.localeCompare(b.employment_type);
+        default:
+          return 0;
+      }
     });
-  }, [resources, searchQuery]);
+    
+    return result;
+  }, [resources, searchQuery, sortOption]);
 
   return (
     <div className="flex h-screen bg-background">
@@ -92,6 +126,7 @@ const Index = () => {
 
       <div className="flex-1 flex flex-col min-w-0">
         <SearchHeader searchQuery={searchQuery} onSearchChange={setSearchQuery}>
+          <SortSelect value={sortOption} onChange={setSortOption} />
           <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
           <ApiModeToggle isTestMode={isTestMode} onToggle={setIsTestMode} />
         </SearchHeader>
