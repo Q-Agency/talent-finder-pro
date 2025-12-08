@@ -37,10 +37,15 @@ const getSeniorityBadgeClass = (seniority: string) => {
 
 export function ResourceCard({ resource, searchQuery = '' }: ResourceCardProps) {
   const allSkills = [
-    ...resource.skills.senior,
-    ...resource.skills.mid,
-    ...resource.skills.junior,
+    ...(resource.skills?.senior || []),
+    ...(resource.skills?.mid || []),
+    ...(resource.skills?.junior || []),
   ];
+
+  const getInitials = (name?: string) => {
+    if (!name) return '?';
+    return name.split(' ').map(n => n[0]).join('');
+  };
 
   return (
     <Card className="group shadow-card hover:shadow-card-hover transition-all duration-200 animate-fade-in border-border/50 hover:border-primary/20">
@@ -48,24 +53,24 @@ export function ResourceCard({ resource, searchQuery = '' }: ResourceCardProps) 
         <div className="flex items-start gap-4">
           <Avatar className="h-14 w-14 ring-2 ring-background shadow-sm">
             <AvatarFallback className="bg-primary/10 text-primary font-medium">
-              {resource.resource_name.split(' ').map(n => n[0]).join('')}
+              {getInitials(resource.resource_name)}
             </AvatarFallback>
           </Avatar>
           
           <div className="flex-1 min-w-0">
             <div>
               <h3 className="font-semibold text-foreground truncate">
-                <HighlightText text={resource.resource_name} query={searchQuery} />
+                <HighlightText text={resource.resource_name || 'Unknown'} query={searchQuery} />
               </h3>
               <p className="text-sm text-primary font-medium">
-                <HighlightText text={resource.role_category} query={searchQuery} />
+                <HighlightText text={resource.role_category || ''} query={searchQuery} />
               </p>
             </div>
             
             <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Briefcase className="h-3 w-3" />
-                <HighlightText text={resource.technical_domain} query={searchQuery} />
+                <HighlightText text={resource.technical_domain || ''} query={searchQuery} />
               </span>
               {resource.vertical && (
                 <span className="text-muted-foreground/60">
@@ -77,11 +82,11 @@ export function ResourceCard({ resource, searchQuery = '' }: ResourceCardProps) 
         </div>
 
         <div className="flex flex-wrap gap-1.5 mt-4">
-          <Badge variant="outline" className={`text-xs font-medium ${getEmploymentBadgeClass(resource.employment_type)}`}>
-            {resource.employment_type}
+          <Badge variant="outline" className={`text-xs font-medium ${getEmploymentBadgeClass(resource.employment_type || '')}`}>
+            {resource.employment_type || 'Unknown'}
           </Badge>
-          <Badge variant="outline" className={`text-xs font-medium ${getSeniorityBadgeClass(resource.seniority_level)}`}>
-            {resource.seniority_level}
+          <Badge variant="outline" className={`text-xs font-medium ${getSeniorityBadgeClass(resource.seniority_level || '')}`}>
+            {resource.seniority_level || 'Unknown'}
           </Badge>
         </div>
 
@@ -123,7 +128,7 @@ export function ResourceCard({ resource, searchQuery = '' }: ResourceCardProps) 
           </div>
         )}
 
-        {resource.industries.length > 0 && (
+        {resource.industries && resource.industries.length > 0 && (
           <div className="mt-3 pt-3 border-t border-border/50">
             <p className="text-xs text-muted-foreground">
               Industries: {resource.industries.slice(0, 3).join(', ')}
