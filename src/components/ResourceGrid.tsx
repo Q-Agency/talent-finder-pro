@@ -3,7 +3,8 @@ import { Resource } from '@/services/resourceApi';
 import { ResourceCard } from './ResourceCard';
 import { ResourceListItem } from './ResourceListItem';
 import { ResourceDetailModal } from './ResourceDetailModal';
-import { Users, Loader2 } from 'lucide-react';
+import { ResourceCardSkeleton, ResourceListItemSkeleton } from './ResourceSkeleton';
+import { Users } from 'lucide-react';
 import { ViewMode } from './ViewToggle';
 
 interface ResourceGridProps {
@@ -17,10 +18,17 @@ export function ResourceGrid({ resources, isLoading, viewMode, searchQuery = '' 
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
 
   if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-        <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-        <p className="text-lg font-medium">Searching resources...</p>
+    return viewMode === 'list' ? (
+      <div className="flex flex-col gap-1.5">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <ResourceListItemSkeleton key={i} />
+        ))}
+      </div>
+    ) : (
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {Array.from({ length: 9 }).map((_, i) => (
+          <ResourceCardSkeleton key={i} />
+        ))}
       </div>
     );
   }
