@@ -45,6 +45,7 @@ interface SearchRequestBody {
     employment_type?: string[];
     vertical?: string[];
     domain?: string[];
+    certificates?: string[];
   };
   search: {
     query: string;
@@ -71,6 +72,7 @@ export async function searchResources(
       ...(filters.skills.length > 0 && { skills: filters.skills }),
       ...(filters.industries.length > 0 && { industries: filters.industries }),
       ...(filters.employmentTypes.length > 0 && { employment_type: filters.employmentTypes.map(t => t.toLowerCase()) }),
+      ...(filters.certificates.length > 0 && { certificates: filters.certificates }),
     },
     search: {
       query: searchQuery,
