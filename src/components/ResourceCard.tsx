@@ -51,16 +51,9 @@ export function ResourceCard({ resource }: ResourceCardProps) {
           </Avatar>
           
           <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <h3 className="font-semibold text-foreground truncate">{resource.resource_name}</h3>
-                <p className="text-sm text-primary font-medium">{resource.role_category}</p>
-              </div>
-              {resource.similarity_score !== undefined && (
-                <Badge variant="outline" className="text-xs bg-primary/5 text-primary border-primary/20">
-                  {Math.round(resource.similarity_score * 100)}% match
-                </Badge>
-              )}
+            <div>
+              <h3 className="font-semibold text-foreground truncate">{resource.resource_name}</h3>
+              <p className="text-sm text-primary font-medium">{resource.role_category}</p>
             </div>
             
             <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
