@@ -66,11 +66,11 @@ export async function searchResources(
 
   const requestBody: SearchRequestBody = {
     filters: {
-      ...(filters.roleTitles.length === 1 && { role: filters.roleTitles[0] }),
-      ...(filters.seniorities.length === 1 && { seniority: filters.seniorities[0] }),
+      ...(filters.roleTitles.length > 0 && { role: filters.roleTitles[0] }),
+      ...(filters.seniorities.length > 0 && { seniority: filters.seniorities[0] }),
       ...(filters.skills.length > 0 && { skills: filters.skills }),
       ...(filters.industries.length > 0 && { industries: filters.industries }),
-      ...(filters.employmentTypes.length === 1 && { employment_type: filters.employmentTypes[0].toLowerCase() }),
+      ...(filters.employmentTypes.length > 0 && { employment_type: filters.employmentTypes[0].toLowerCase() }),
     },
     search: {
       query: searchQuery,
