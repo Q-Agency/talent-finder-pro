@@ -103,8 +103,26 @@ export async function searchResources(
   
   // API returns array with single response object
   if (Array.isArray(data) && data.length > 0) {
-    return data[0];
+    const result = data[0];
+    // Filter out undefined/null results
+    if (result?.results) {
+      result.results = result.results.filter((r: Resource | undefined) => r && r.resource_id);
+    }
+    return result;
   }
   
-  return data;
+  // Handle case where data itself has results
+  if (data?.results) {
+    data.results = data.results.filter((r: Resource | undefined) => r && r.resource_id);
+    return data;
+  }
+  
+  // Return empty results if no valid data
+  return {
+    success: true,
+    count: 0,
+    filters_applied: {},
+    results: [],
+    metadata: { query_time_ms: 0, semantic_search_used: false }
+  };
 }
