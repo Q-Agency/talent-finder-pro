@@ -96,5 +96,12 @@ export async function searchResources(
     throw new Error(`API error: ${response.status}`);
   }
 
-  return response.json();
+  const data = await response.json();
+  
+  // API returns array with single response object
+  if (Array.isArray(data) && data.length > 0) {
+    return data[0];
+  }
+  
+  return data;
 }
