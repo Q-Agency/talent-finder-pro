@@ -69,29 +69,29 @@ function FilterSection({ title, icon, items, selected, onToggle, defaultOpen = t
         <div className="space-y-0.5 ml-1">
           {items.map((item) => {
             const isChecked = selected.includes(item);
+            const inputId = `${title}-${item}`.replace(/\s+/g, '-');
             return (
-              <div 
-                key={item} 
+              <label 
+                key={item}
+                htmlFor={inputId}
                 className={`flex items-center space-x-2.5 py-1.5 px-3 rounded-md cursor-pointer transition-colors ${
                   isChecked ? 'bg-primary/5' : 'hover:bg-accent/30'
                 }`}
-                onClick={() => onToggle(item)}
               >
                 <Checkbox
-                  id={`${title}-${item}`}
+                  id={inputId}
                   checked={isChecked}
                   onCheckedChange={() => onToggle(item)}
                   className="border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                 />
-                <Label
-                  htmlFor={`${title}-${item}`}
-                  className={`text-sm cursor-pointer transition-colors ${
+                <span
+                  className={`text-sm transition-colors ${
                     isChecked ? 'text-foreground font-medium' : 'text-muted-foreground'
                   }`}
                 >
                   {item}
-                </Label>
-              </div>
+                </span>
+              </label>
             );
           })}
         </div>
