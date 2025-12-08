@@ -2,7 +2,7 @@ import { Resource } from '@/services/resourceApi';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Briefcase, Sparkles } from 'lucide-react';
+import { Briefcase, Sparkles, Award } from 'lucide-react';
 
 interface ResourceCardProps {
   resource: Resource;
@@ -81,16 +81,27 @@ export function ResourceCard({ resource }: ResourceCardProps) {
           <div className="mt-4">
             <p className="text-xs font-medium text-muted-foreground mb-2">Skills</p>
             <div className="flex flex-wrap gap-1">
-              {allSkills.slice(0, 5).map((skill) => (
+              {allSkills.map((skill) => (
                 <Badge key={skill} variant="secondary" className="text-xs font-normal">
                   {skill}
                 </Badge>
               ))}
-              {allSkills.length > 5 && (
-                <Badge variant="secondary" className="text-xs font-normal">
-                  +{allSkills.length - 5}
+            </div>
+          </div>
+        )}
+
+        {resource.certificates && resource.certificates.length > 0 && (
+          <div className="mt-4">
+            <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
+              <Award className="h-3 w-3" />
+              Certificates
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {resource.certificates.map((cert) => (
+                <Badge key={cert} variant="outline" className="text-xs font-normal bg-amber-500/10 text-amber-600 border-amber-500/20">
+                  {cert}
                 </Badge>
-              )}
+              ))}
             </div>
           </div>
         )}
