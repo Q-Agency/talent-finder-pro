@@ -1,0 +1,100 @@
+import { Filters } from '@/components/FilterSidebar';
+
+const API_ENDPOINTS = {
+  test: 'https://infinite-wasp-terminally.ngrok-free.app/webhook-test/api/resources/search',
+  production: 'https://infinite-wasp-terminally.ngrok-free.app/webhook/api/resources/search',
+};
+
+export interface ResourceSkills {
+  senior: string[];
+  mid: string[];
+  junior: string[];
+}
+
+export interface Resource {
+  resource_id: string;
+  resource_name: string;
+  role_category: string;
+  seniority_level: string;
+  technical_domain: string;
+  skills: ResourceSkills;
+  industries: string[];
+  employment_type: string;
+  vertical: string;
+  similarity_score?: number;
+  match_reasons?: string[];
+}
+
+export interface SearchResponse {
+  success: boolean;
+  count: number;
+  filters_applied: Record<string, unknown>;
+  results: Resource[];
+  metadata: {
+    query_time_ms: number;
+    semantic_search_used: boolean;
+  };
+}
+
+interface SearchRequestBody {
+  filters: {
+    role?: string;
+    seniority?: string;
+    skills?: string[];
+    industries?: string[];
+    employment_type?: string;
+    vertical?: string;
+    domain?: string;
+  };
+  search: {
+    query: string;
+    use_semantic: boolean;
+  };
+  options: {
+    limit: number;
+    include_availability: boolean;
+    min_similarity: number;
+  };
+}
+
+export async function searchResources(
+  filters: Filters,
+  searchQuery: string,
+  isTestMode: boolean
+): Promise<SearchResponse> {
+  const endpoint = isTestMode ? API_ENDPOINTS.test : API_ENDPOINTS.production;
+
+  const requestBody: SearchRequestBody = {
+    filters: {
+      ...(filters.roleTitles.length === 1 && { role: filters.roleTitles[0] }),
+      ...(filters.seniorities.length === 1 && { seniority: filters.seniorities[0] }),
+      ...(filters.skills.length > 0 && { skills: filters.skills }),
+      ...(filters.industries.length > 0 && { industries: filters.industries }),
+      ...(filters.employmentTypes.length === 1 && { employment_type: filters.employmentTypes[0].toLowerCase() }),
+    },
+    search: {
+      query: searchQuery,
+      use_semantic: searchQuery.length > 0,
+    },
+    options: {
+      limit: 50,
+      include_availability: true,
+      min_similarity: 0.3,
+    },
+  };
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'ngrok-skip-browser-warning': 'true',
+    },
+    body: JSON.stringify(requestBody),
+  });
+
+  if (!response.ok) {
+    throw new Error(`API error: ${response.status}`);
+  }
+
+  return response.json();
+}
