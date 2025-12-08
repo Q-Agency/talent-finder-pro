@@ -10,16 +10,11 @@ interface ApiModeToggleProps {
 export function ApiModeToggle({ isTestMode, onToggle }: ApiModeToggleProps) {
   return (
     <div className="flex items-center gap-3 px-3 py-2 bg-muted/50 rounded-lg border border-border">
-      <div className="flex items-center gap-2">
-        {isTestMode ? (
-          <FlaskConical className="h-4 w-4 text-amber-500" />
-        ) : (
-          <Rocket className="h-4 w-4 text-emerald-500" />
-        )}
-        <Label htmlFor="api-mode" className="text-sm font-medium cursor-pointer">
-          {isTestMode ? 'Test Mode' : 'Production'}
-        </Label>
-      </div>
+      {isTestMode ? (
+        <FlaskConical className="h-4 w-4 text-amber-500" />
+      ) : (
+        <Rocket className="h-4 w-4 text-emerald-500" />
+      )}
       <Switch
         id="api-mode"
         checked={!isTestMode}
