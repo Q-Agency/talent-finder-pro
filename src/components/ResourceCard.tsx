@@ -134,18 +134,9 @@ export function ResourceCard({ resource, searchQuery = '' }: ResourceCardProps) 
         )}
 
         {resource.certificates && resource.certificates.length > 0 && (
-          <div className="mt-4">
-            <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1">
-              <Award className="h-3 w-3" />
-              Certificates
-            </p>
-            <div className="flex flex-wrap gap-1">
-              {resource.certificates.map((cert) => (
-                <Badge key={cert} variant="outline" className="text-xs font-normal bg-amber-500/10 text-amber-600 border-amber-500/20">
-                  {cert}
-                </Badge>
-              ))}
-            </div>
+          <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Award className="h-3.5 w-3.5 text-amber-500" />
+            <span>{resource.certificates.length} certificate{resource.certificates.length !== 1 ? 's' : ''}</span>
           </div>
         )}
 
