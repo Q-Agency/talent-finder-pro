@@ -8,15 +8,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { X, Filter, ChevronDown, Briefcase, GraduationCap, Users, Wrench, Building2, Award } from 'lucide-react';
-import {
-  employmentTypes,
-  seniorities,
-  roleTitles,
-  skills,
-  industries,
-  certificates,
-} from '@/data/mockData';
+import { X, Filter, ChevronDown, Briefcase, GraduationCap, Users, Wrench, Building2, Award, Loader2 } from 'lucide-react';
+import { employmentTypes, seniorities } from '@/data/mockData';
 import { useState } from 'react';
 import logo from '@/assets/logo.png';
 
@@ -29,10 +22,19 @@ export interface Filters {
   certificates: string[];
 }
 
+interface DynamicOptions {
+  roleTitles: string[];
+  skills: string[];
+  industries: string[];
+  certificates: string[];
+}
+
 interface FilterSidebarProps {
   filters: Filters;
   onFilterChange: (filters: Filters) => void;
   resultCount: number;
+  dynamicOptions?: DynamicOptions;
+  isLoadingOptions?: boolean;
 }
 
 interface FilterSectionProps {
@@ -101,7 +103,7 @@ function FilterSection({ title, icon, items, selected, onToggle, defaultOpen = t
   );
 }
 
-export function FilterSidebar({ filters, onFilterChange, resultCount }: FilterSidebarProps) {
+export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOptions, isLoadingOptions }: FilterSidebarProps) {
   const toggleFilter = (category: keyof Filters, item: string) => {
     const currentItems = filters[category];
     const newItems = currentItems.includes(item)
@@ -122,6 +124,12 @@ export function FilterSidebar({ filters, onFilterChange, resultCount }: FilterSi
   };
 
   const totalFilters = Object.values(filters).flat().length;
+
+  // Use dynamic options if available, otherwise empty arrays
+  const roleTitles = dynamicOptions?.roleTitles ?? [];
+  const skills = dynamicOptions?.skills ?? [];
+  const industries = dynamicOptions?.industries ?? [];
+  const certificates = dynamicOptions?.certificates ?? [];
 
   return (
     <aside className="w-72 bg-gradient-to-b from-card to-card/95 border-r border-border flex flex-col h-full">
@@ -187,41 +195,50 @@ export function FilterSidebar({ filters, onFilterChange, resultCount }: FilterSi
             onToggle={(item) => toggleFilter('seniorities', item)}
           />
 
-          <FilterSection
-            title="Role Title"
-            icon={<Users className="h-4 w-4" />}
-            items={roleTitles}
-            selected={filters.roleTitles}
-            onToggle={(item) => toggleFilter('roleTitles', item)}
-            defaultOpen={false}
-          />
+          {isLoadingOptions ? (
+            <div className="flex items-center justify-center py-4 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              <span className="text-sm">Loading options...</span>
+            </div>
+          ) : (
+            <>
+              <FilterSection
+                title="Role Title"
+                icon={<Users className="h-4 w-4" />}
+                items={roleTitles}
+                selected={filters.roleTitles}
+                onToggle={(item) => toggleFilter('roleTitles', item)}
+                defaultOpen={false}
+              />
 
-          <FilterSection
-            title="Skills"
-            icon={<Wrench className="h-4 w-4" />}
-            items={skills}
-            selected={filters.skills}
-            onToggle={(item) => toggleFilter('skills', item)}
-            defaultOpen={false}
-          />
+              <FilterSection
+                title="Skills"
+                icon={<Wrench className="h-4 w-4" />}
+                items={skills}
+                selected={filters.skills}
+                onToggle={(item) => toggleFilter('skills', item)}
+                defaultOpen={false}
+              />
 
-          <FilterSection
-            title="Industries"
-            icon={<Building2 className="h-4 w-4" />}
-            items={industries}
-            selected={filters.industries}
-            onToggle={(item) => toggleFilter('industries', item)}
-            defaultOpen={false}
-          />
+              <FilterSection
+                title="Industries"
+                icon={<Building2 className="h-4 w-4" />}
+                items={industries}
+                selected={filters.industries}
+                onToggle={(item) => toggleFilter('industries', item)}
+                defaultOpen={false}
+              />
 
-          <FilterSection
-            title="Certificates"
-            icon={<Award className="h-4 w-4" />}
-            items={certificates}
-            selected={filters.certificates}
-            onToggle={(item) => toggleFilter('certificates', item)}
-            defaultOpen={false}
-          />
+              <FilterSection
+                title="Certificates"
+                icon={<Award className="h-4 w-4" />}
+                items={certificates}
+                selected={filters.certificates}
+                onToggle={(item) => toggleFilter('certificates', item)}
+                defaultOpen={false}
+              />
+            </>
+          )}
         </div>
       </ScrollArea>
     </aside>
