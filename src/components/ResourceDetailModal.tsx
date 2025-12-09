@@ -202,7 +202,7 @@ export function ResourceDetailModal({ resource, open, onOpenChange }: ResourceDe
 
           {/* Skills Section */}
           {allSkills.length > 0 && (
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <div className="h-7 w-7 rounded-full bg-secondary flex items-center justify-center">
                   <GraduationCap className="h-3.5 w-3.5 text-secondary-foreground" />
@@ -210,16 +210,58 @@ export function ResourceDetailModal({ resource, open, onOpenChange }: ResourceDe
                 <h4 className="font-semibold text-sm">Skills</h4>
                 <span className="text-xs text-muted-foreground">({allSkills.length})</span>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {allSkills.map((skill) => (
-                  <Badge 
-                    key={skill} 
-                    variant="secondary" 
-                    className="text-sm px-3 py-1 hover:bg-secondary/80 transition-colors"
-                  >
-                    {skill}
-                  </Badge>
-                ))}
+              
+              <div className="space-y-3 pl-9">
+                {resource.skills.senior.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-badge-senior mb-1.5">Senior Level</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {resource.skills.senior.map((skill) => (
+                        <Badge 
+                          key={skill} 
+                          variant="outline" 
+                          className="text-xs px-2 py-0.5 bg-badge-senior/10 text-badge-senior border-badge-senior/20"
+                        >
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {resource.skills.mid.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-badge-mid mb-1.5">Mid Level</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {resource.skills.mid.map((skill) => (
+                        <Badge 
+                          key={skill} 
+                          variant="outline" 
+                          className="text-xs px-2 py-0.5 bg-badge-mid/10 text-badge-mid border-badge-mid/20"
+                        >
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {resource.skills.junior.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-badge-junior mb-1.5">Junior Level</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {resource.skills.junior.map((skill) => (
+                        <Badge 
+                          key={skill} 
+                          variant="outline" 
+                          className="text-xs px-2 py-0.5 bg-badge-junior/10 text-badge-junior border-badge-junior/20"
+                        >
+                          {skill}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
