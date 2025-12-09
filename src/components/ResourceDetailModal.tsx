@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Briefcase, Award, Building2, GraduationCap, Sparkles, MapPin, User, FileText, StickyNote, Users, UserCheck, Crown } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { toast } from '@/hooks/use-toast';
 
 interface ResourceDetailModalProps {
   resource: Resource | null;
@@ -47,6 +48,21 @@ export function ResourceDetailModal({ resource, open, onOpenChange, onSkillClick
   ];
 
   const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('');
+
+  const handleSkillClick = (skill: string) => {
+    toast({
+      title: `Filter by "${skill}"?`,
+      description: "This will add the skill to your active filters.",
+      action: (
+        <button
+          className="bg-primary text-primary-foreground px-3 py-1.5 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+          onClick={() => onSkillClick?.(skill)}
+        >
+          Confirm
+        </button>
+      ),
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -222,7 +238,7 @@ export function ResourceDetailModal({ resource, open, onOpenChange, onSkillClick
                           key={skill} 
                           variant="outline" 
                           className="text-xs px-2 py-0.5 bg-badge-senior/10 text-badge-senior border-badge-senior/20 cursor-pointer hover:bg-badge-senior/20 transition-colors"
-                          onClick={() => onSkillClick?.(skill)}
+                          onClick={() => handleSkillClick(skill)}
                         >
                           {skill}
                         </Badge>
@@ -240,7 +256,7 @@ export function ResourceDetailModal({ resource, open, onOpenChange, onSkillClick
                           key={skill} 
                           variant="outline" 
                           className="text-xs px-2 py-0.5 bg-badge-mid/10 text-badge-mid border-badge-mid/20 cursor-pointer hover:bg-badge-mid/20 transition-colors"
-                          onClick={() => onSkillClick?.(skill)}
+                          onClick={() => handleSkillClick(skill)}
                         >
                           {skill}
                         </Badge>
@@ -258,7 +274,7 @@ export function ResourceDetailModal({ resource, open, onOpenChange, onSkillClick
                           key={skill} 
                           variant="outline" 
                           className="text-xs px-2 py-0.5 bg-badge-junior/10 text-badge-junior border-badge-junior/20 cursor-pointer hover:bg-badge-junior/20 transition-colors"
-                          onClick={() => onSkillClick?.(skill)}
+                          onClick={() => handleSkillClick(skill)}
                         >
                           {skill}
                         </Badge>
