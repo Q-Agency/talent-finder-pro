@@ -2,13 +2,40 @@ import { Resource } from '@/services/resourceApi';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Briefcase, Sparkles, Award } from 'lucide-react';
+import { Briefcase, Sparkles, Award, Search } from 'lucide-react';
 import { HighlightText } from './HighlightText';
 
 interface ResourceCardProps {
   resource: Resource;
   searchQuery?: string;
 }
+
+const getHiddenFieldMatches = (resource: Resource, query: string) => {
+  if (!query) return [];
+  const q = query.toLowerCase();
+  const matches: { field: string; snippet: string }[] = [];
+  
+  if (resource.description?.toLowerCase().includes(q)) {
+    const cleanDesc = resource.description.replace(/^"|"$/g, '');
+    const idx = cleanDesc.toLowerCase().indexOf(q);
+    const start = Math.max(0, idx - 30);
+    const end = Math.min(cleanDesc.length, idx + query.length + 50);
+    const snippet = (start > 0 ? '...' : '') + cleanDesc.slice(start, end).trim() + (end < cleanDesc.length ? '...' : '');
+    matches.push({ field: 'Description', snippet });
+  }
+  if (resource.notes?.toLowerCase().includes(q)) {
+    const idx = resource.notes.toLowerCase().indexOf(q);
+    const start = Math.max(0, idx - 30);
+    const end = Math.min(resource.notes.length, idx + query.length + 50);
+    const snippet = (start > 0 ? '...' : '') + resource.notes.slice(start, end).trim() + (end < resource.notes.length ? '...' : '');
+    matches.push({ field: 'Notes', snippet });
+  }
+  if (resource.superior?.toLowerCase().includes(q)) {
+    matches.push({ field: 'Superior', snippet: resource.superior });
+  }
+  
+  return matches;
+};
 
 const getEmploymentBadgeClass = (type: string) => {
   const normalizedType = type.toLowerCase();
@@ -136,6 +163,26 @@ export function ResourceCard({ resource, searchQuery = '' }: ResourceCardProps) 
             </p>
           </div>
         )}
+
+        {(() => {
+          const hiddenMatches = getHiddenFieldMatches(resource, searchQuery);
+          if (hiddenMatches.length === 0) return null;
+          return (
+            <div className="mt-3 pt-3 border-t border-border/50 space-y-1.5">
+              {hiddenMatches.map((match, idx) => (
+                <div key={idx} className="flex items-start gap-1.5 text-xs">
+                  <Search className="h-3 w-3 text-primary mt-0.5 shrink-0" />
+                  <div className="min-w-0">
+                    <span className="text-muted-foreground font-medium">{match.field}: </span>
+                    <span className="text-muted-foreground">
+                      <HighlightText text={match.snippet} query={searchQuery} />
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
       </CardContent>
     </Card>
   );
