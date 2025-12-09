@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { FilterSidebar, Filters } from '@/components/FilterSidebar';
 import { SearchHeader } from '@/components/SearchHeader';
 import { ResourceGrid } from '@/components/ResourceGrid';
-import { ApiModeToggle } from '@/components/ApiModeToggle';
 import { ViewToggle, ViewMode } from '@/components/ViewToggle';
 import { SortSelect, SortOption } from '@/components/SortSelect';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -153,12 +152,11 @@ const Index = () => {
         <SearchHeader 
           searchQuery={searchQuery} 
           onSearchChange={setSearchQuery}
-          profileMenu={<ProfileMenu />}
+          profileMenu={<ProfileMenu isTestMode={isTestMode} onTestModeToggle={setIsTestMode} />}
         >
           <ThemeToggle />
           <SortSelect value={sortOption} onChange={setSortOption} />
           <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
-          <ApiModeToggle isTestMode={isTestMode} onToggle={setIsTestMode} />
           <RefreshDatasetButton isTestMode={isTestMode} onRefreshComplete={fetchResources} />
         </SearchHeader>
 
