@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Loader2 } from 'lucide-react';
 import { refreshDataset } from '@/services/refreshApi';
 import { toast } from 'sonner';
+import { formatDistanceToNow } from 'date-fns';
 import {
   Dialog,
   DialogContent,
@@ -12,6 +13,8 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 
+const LAST_SYNC_KEY = 'ganttic_last_sync';
+
 interface RefreshDatasetButtonProps {
   isTestMode: boolean;
   onRefreshComplete?: () => void;
@@ -20,12 +23,23 @@ interface RefreshDatasetButtonProps {
 export function RefreshDatasetButton({ isTestMode, onRefreshComplete }: RefreshDatasetButtonProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [lastSync, setLastSync] = useState<Date | null>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(LAST_SYNC_KEY);
+    if (stored) {
+      setLastSync(new Date(stored));
+    }
+  }, []);
 
   const handleRefresh = async () => {
     setShowConfirm(false);
     setIsRefreshing(true);
     try {
       await refreshDataset(isTestMode);
+      const now = new Date();
+      localStorage.setItem(LAST_SYNC_KEY, now.toISOString());
+      setLastSync(now);
       toast.success('Dataset synced successfully');
       onRefreshComplete?.();
     } catch (error) {
@@ -36,8 +50,18 @@ export function RefreshDatasetButton({ isTestMode, onRefreshComplete }: RefreshD
     }
   };
 
+  const formatLastSync = () => {
+    if (!lastSync) return null;
+    return formatDistanceToNow(lastSync, { addSuffix: true });
+  };
+
   return (
-    <>
+    <div className="flex items-center gap-2">
+      {lastSync && (
+        <span className="text-xs text-muted-foreground hidden sm:inline">
+          Synced {formatLastSync()}
+        </span>
+      )}
       <Button
         variant="outline"
         size="sm"
@@ -89,6 +113,6 @@ export function RefreshDatasetButton({ isTestMode, onRefreshComplete }: RefreshD
           </DialogHeader>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   );
 }
