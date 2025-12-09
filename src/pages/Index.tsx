@@ -5,6 +5,7 @@ import { ResourceGrid } from '@/components/ResourceGrid';
 import { ApiModeToggle } from '@/components/ApiModeToggle';
 import { ViewToggle, ViewMode } from '@/components/ViewToggle';
 import { SortSelect, SortOption } from '@/components/SortSelect';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { searchResources, Resource } from '@/services/resourceApi';
 import { useToast } from '@/hooks/use-toast';
@@ -127,6 +128,7 @@ const Index = () => {
 
       <div className="flex-1 flex flex-col min-w-0">
         <SearchHeader searchQuery={searchQuery} onSearchChange={setSearchQuery}>
+          <ThemeToggle />
           <SortSelect value={sortOption} onChange={setSortOption} />
           <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
           <ApiModeToggle isTestMode={isTestMode} onToggle={setIsTestMode} />
