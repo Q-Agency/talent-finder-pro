@@ -7,6 +7,7 @@ import { ViewToggle, ViewMode } from '@/components/ViewToggle';
 import { SortSelect, SortOption } from '@/components/SortSelect';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { ProfileMenu } from '@/components/ProfileMenu';
+import { RefreshDatasetButton } from '@/components/RefreshDatasetButton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { searchResources, Resource } from '@/services/resourceApi';
 import { useToast } from '@/hooks/use-toast';
@@ -158,6 +159,7 @@ const Index = () => {
           <SortSelect value={sortOption} onChange={setSortOption} />
           <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
           <ApiModeToggle isTestMode={isTestMode} onToggle={setIsTestMode} />
+          <RefreshDatasetButton isTestMode={isTestMode} onRefreshComplete={fetchResources} />
         </SearchHeader>
 
         <ScrollArea className="flex-1 scrollbar-thin">
