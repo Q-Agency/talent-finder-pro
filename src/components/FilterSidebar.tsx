@@ -104,7 +104,7 @@ function FilterSection({ title, icon, items, selected, onToggle, defaultOpen = t
             </div>
           </div>
         )}
-        <div className="space-y-0.5 ml-1 max-h-48 overflow-y-auto scrollbar-thin">
+        <div className={`space-y-0.5 ml-1 ${searchQuery ? 'max-h-48 overflow-y-auto scrollbar-thin' : ''}`}>
           {filteredItems.length === 0 ? (
             <p className="text-xs text-muted-foreground px-3 py-2">No matches found</p>
           ) : (
