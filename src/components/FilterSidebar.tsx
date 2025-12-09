@@ -9,7 +9,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { X, Filter, ChevronDown, Briefcase, GraduationCap, Users, Wrench, Building2, Award, Loader2, Search } from 'lucide-react';
+import { X, Filter, ChevronDown, Briefcase, GraduationCap, Users, Wrench, Building2, Award, Loader2, Search, MapPin } from 'lucide-react';
 import { employmentTypes, seniorities } from '@/data/mockData';
 import { useState, useMemo } from 'react';
 import logo from '@/assets/logo.png';
@@ -21,6 +21,7 @@ export interface Filters {
   skills: string[];
   industries: string[];
   certificates: string[];
+  verticals: string[];
 }
 
 interface DynamicOptions {
@@ -28,6 +29,7 @@ interface DynamicOptions {
   skills: string[];
   industries: string[];
   certificates: string[];
+  verticals: string[];
 }
 
 interface FilterSidebarProps {
@@ -194,6 +196,7 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
       skills: [],
       industries: [],
       certificates: [],
+      verticals: [],
     });
   };
 
@@ -204,6 +207,7 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
   const skills = dynamicOptions?.skills ?? [];
   const industries = dynamicOptions?.industries ?? [];
   const certificates = dynamicOptions?.certificates ?? [];
+  const verticals = dynamicOptions?.verticals ?? [];
 
   return (
     <aside className="w-72 bg-gradient-to-b from-card to-card/95 border-r border-border flex flex-col h-full">
@@ -312,6 +316,16 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
                 items={certificates}
                 selected={filters.certificates}
                 onToggle={(item) => toggleFilter('certificates', item)}
+                defaultOpen={false}
+                searchable
+              />
+
+              <FilterSection
+                title="Verticals"
+                icon={<MapPin className="h-4 w-4" />}
+                items={verticals}
+                selected={filters.verticals}
+                onToggle={(item) => toggleFilter('verticals', item)}
                 defaultOpen={false}
                 searchable
               />
