@@ -20,6 +20,7 @@ const initialFilters: Filters = {
   skills: [],
   industries: [],
   certificates: [],
+  verticals: [],
 };
 
 const seniorityOrder: Record<string, number> = {
@@ -51,6 +52,7 @@ const Index = () => {
       skills: properties.skills.map(s => s.readableValue),
       industries: properties.industries.map(i => i.readableValue),
       certificates: properties.certificates.map(c => c.readableValue),
+      verticals: properties.verticals.map(v => v.value),
     };
   }, [properties]);
 

@@ -81,6 +81,7 @@ export async function searchResources(
       ...(filters.industries.length > 0 && { industries: filters.industries }),
       ...(filters.employmentTypes.length > 0 && { employment_type: filters.employmentTypes.map(t => t.toLowerCase()) }),
       ...(filters.certificates.length > 0 && { certificates: filters.certificates }),
+      ...(filters.verticals.length > 0 && { vertical: filters.verticals }),
     },
     search: {
       query: searchQuery,

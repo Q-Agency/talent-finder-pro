@@ -9,11 +9,18 @@ export interface RoleItem {
   value: string;
 }
 
+// Verticals use id/value like roles
+export interface VerticalItem {
+  id: string;
+  value: string;
+}
+
 export interface PropertiesResponse {
   industries: PropertyItem[];
   roles: RoleItem[];
   skills: PropertyItem[];
   certificates: PropertyItem[];
+  verticals: VerticalItem[];
 }
 
 const TEST_URL = 'https://infinite-wasp-terminally.ngrok-free.app/webhook-test/resourcing_get_properties';
@@ -44,5 +51,6 @@ export async function fetchProperties(isTestMode: boolean): Promise<PropertiesRe
     roles: result.roles || [],
     skills: result.skills || [],
     certificates: result.certificates || [],
+    verticals: result.verticals || [],
   };
 }
