@@ -4,18 +4,32 @@ const PROD_URL = 'https://infinite-wasp-terminally.ngrok-free.app/webhook/resour
 export async function refreshDataset(isTestMode: boolean): Promise<{ success: boolean; message?: string }> {
   const url = isTestMode ? TEST_URL : PROD_URL;
   
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'ngrok-skip-browser-warning': 'true',
-    },
-  });
+  // Use AbortController with 60 second timeout since refresh takes 10-20 seconds
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 60000);
+  
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'ngrok-skip-browser-warning': 'true',
+      },
+      signal: controller.signal,
+    });
 
-  if (!response.ok) {
-    throw new Error(`Failed to refresh dataset: ${response.status}`);
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`Failed to refresh dataset: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return { success: true, message: result.message };
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('Request timed out after 60 seconds');
+    }
+    throw error;
   }
-
-  const result = await response.json();
-  return { success: true, message: result.message };
 }
