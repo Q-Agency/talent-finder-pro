@@ -2,7 +2,7 @@ import { Resource } from '@/services/resourceApi';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Briefcase, Award, Building2, GraduationCap, Sparkles, MapPin, User, FileText, StickyNote } from 'lucide-react';
+import { Briefcase, Award, Building2, GraduationCap, Sparkles, MapPin, User, FileText, StickyNote, Users, UserCheck, Crown } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 interface ResourceDetailModalProps {
@@ -115,6 +115,54 @@ export function ResourceDetailModal({ resource, open, onOpenChange }: ResourceDe
                 <div>
                   <p className="text-xs text-muted-foreground">Superior</p>
                   <p className="font-medium text-sm">{resource.superior}</p>
+                </div>
+              </div>
+            )}
+
+            {resource.department && (
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border/50">
+                <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Building2 className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Department</p>
+                  <p className="font-medium text-sm">{resource.department}</p>
+                </div>
+              </div>
+            )}
+
+            {resource.el && (
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border/50">
+                <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+                  <UserCheck className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">EL</p>
+                  <p className="font-medium text-sm">{resource.el}</p>
+                </div>
+              </div>
+            )}
+
+            {resource.eh && (
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border/50">
+                <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Users className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">EH</p>
+                  <p className="font-medium text-sm">{resource.eh}</p>
+                </div>
+              </div>
+            )}
+
+            {resource.director && (
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border/50">
+                <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Crown className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Director</p>
+                  <p className="font-medium text-sm">{resource.director}</p>
                 </div>
               </div>
             )}
