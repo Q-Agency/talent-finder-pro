@@ -12,9 +12,10 @@ interface ResourceGridProps {
   isLoading: boolean;
   viewMode: ViewMode;
   searchQuery?: string;
+  onSkillClick?: (skill: string) => void;
 }
 
-export function ResourceGrid({ resources, isLoading, viewMode, searchQuery = '' }: ResourceGridProps) {
+export function ResourceGrid({ resources, isLoading, viewMode, searchQuery = '', onSkillClick }: ResourceGridProps) {
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
 
   if (isLoading) {
@@ -70,6 +71,10 @@ export function ResourceGrid({ resources, isLoading, viewMode, searchQuery = '' 
         resource={selectedResource}
         open={!!selectedResource}
         onOpenChange={(open) => !open && setSelectedResource(null)}
+        onSkillClick={(skill) => {
+          setSelectedResource(null);
+          onSkillClick?.(skill);
+        }}
       />
     </>
   );

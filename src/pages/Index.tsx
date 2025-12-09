@@ -160,7 +160,17 @@ const Index = () => {
 
         <ScrollArea className="flex-1 scrollbar-thin">
           <main className="p-6">
-            <ResourceGrid resources={filteredResources} isLoading={isLoading} viewMode={viewMode} searchQuery={searchQuery} />
+            <ResourceGrid 
+              resources={filteredResources} 
+              isLoading={isLoading} 
+              viewMode={viewMode} 
+              searchQuery={searchQuery}
+              onSkillClick={(skill) => {
+                if (!filters.skills.includes(skill)) {
+                  setFilters(prev => ({ ...prev, skills: [...prev.skills, skill] }));
+                }
+              }}
+            />
           </main>
         </ScrollArea>
       </div>
