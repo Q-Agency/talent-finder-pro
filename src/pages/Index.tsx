@@ -128,12 +128,15 @@ const Index = () => {
       />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <SearchHeader searchQuery={searchQuery} onSearchChange={setSearchQuery}>
+        <SearchHeader 
+          searchQuery={searchQuery} 
+          onSearchChange={setSearchQuery}
+          profileMenu={<ProfileMenu />}
+        >
           <ThemeToggle />
           <SortSelect value={sortOption} onChange={setSortOption} />
           <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
           <ApiModeToggle isTestMode={isTestMode} onToggle={setIsTestMode} />
-          <ProfileMenu />
         </SearchHeader>
 
         <ScrollArea className="flex-1 scrollbar-thin">
