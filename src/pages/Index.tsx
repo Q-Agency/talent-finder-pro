@@ -93,7 +93,10 @@ const Index = () => {
           resource.vertical?.toLowerCase().includes(query) ||
           allSkills.some(skill => skill.toLowerCase().includes(query)) ||
           resource.industries.some(industry => industry.toLowerCase().includes(query)) ||
-          resource.certificates?.some(cert => cert.toLowerCase().includes(query))
+          resource.certificates?.some(cert => cert.toLowerCase().includes(query)) ||
+          resource.description?.toLowerCase().includes(query) ||
+          resource.notes?.toLowerCase().includes(query) ||
+          resource.superior?.toLowerCase().includes(query)
         );
       });
     }

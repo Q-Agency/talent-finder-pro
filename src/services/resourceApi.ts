@@ -24,6 +24,9 @@ export interface Resource {
   certificates?: string[];
   similarity_score?: number;
   match_reasons?: string[];
+  description?: string;
+  notes?: string;
+  superior?: string;
 }
 
 export interface SearchResponse {

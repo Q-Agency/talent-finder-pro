@@ -2,7 +2,7 @@ import { Resource } from '@/services/resourceApi';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Briefcase, Award, Building2, GraduationCap, Sparkles, MapPin } from 'lucide-react';
+import { Briefcase, Award, Building2, GraduationCap, Sparkles, MapPin, User, FileText, StickyNote } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 interface ResourceDetailModalProps {
@@ -106,7 +106,49 @@ export function ResourceDetailModal({ resource, open, onOpenChange }: ResourceDe
                 </div>
               </div>
             )}
+
+            {resource.superior && (
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 border border-border/50">
+                <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
+                  <User className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Superior</p>
+                  <p className="font-medium text-sm">{resource.superior}</p>
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* Description Section */}
+          {resource.description && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="h-7 w-7 rounded-full bg-blue-500/10 flex items-center justify-center">
+                  <FileText className="h-3.5 w-3.5 text-blue-600" />
+                </div>
+                <h4 className="font-semibold text-sm">Description</h4>
+              </div>
+              <p className="text-sm text-muted-foreground whitespace-pre-line pl-9">
+                {resource.description.replace(/^"|"$/g, '')}
+              </p>
+            </div>
+          )}
+
+          {/* Notes Section */}
+          {resource.notes && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="h-7 w-7 rounded-full bg-orange-500/10 flex items-center justify-center">
+                  <StickyNote className="h-3.5 w-3.5 text-orange-600" />
+                </div>
+                <h4 className="font-semibold text-sm">Notes</h4>
+              </div>
+              <p className="text-sm text-muted-foreground pl-9">
+                {resource.notes}
+              </p>
+            </div>
+          )}
 
           <Separator />
 
