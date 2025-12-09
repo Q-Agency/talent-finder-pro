@@ -3,14 +3,15 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { X, Filter, ChevronDown, Briefcase, GraduationCap, Users, Wrench, Building2, Award, Loader2 } from 'lucide-react';
+import { X, Filter, ChevronDown, Briefcase, GraduationCap, Users, Wrench, Building2, Award, Loader2, Search } from 'lucide-react';
 import { employmentTypes, seniorities } from '@/data/mockData';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import logo from '@/assets/logo.png';
 
 export interface Filters {
@@ -44,11 +45,23 @@ interface FilterSectionProps {
   selected: string[];
   onToggle: (item: string) => void;
   defaultOpen?: boolean;
+  searchable?: boolean;
 }
 
-function FilterSection({ title, icon, items, selected, onToggle, defaultOpen = true }: FilterSectionProps) {
+const SEARCH_THRESHOLD = 8; // Show search if more than this many items
+
+function FilterSection({ title, icon, items, selected, onToggle, defaultOpen = true, searchable = false }: FilterSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [searchQuery, setSearchQuery] = useState('');
   const selectedCount = selected.length;
+  
+  const showSearch = searchable && items.length > SEARCH_THRESHOLD;
+  
+  const filteredItems = useMemo(() => {
+    if (!searchQuery.trim()) return items;
+    const query = searchQuery.toLowerCase();
+    return items.filter(item => item.toLowerCase().includes(query));
+  }, [items, searchQuery]);
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -69,34 +82,60 @@ function FilterSection({ title, icon, items, selected, onToggle, defaultOpen = t
         />
       </CollapsibleTrigger>
       <CollapsibleContent className="pt-1 pb-2">
-        <div className="space-y-0.5 ml-1">
-          {items.map((item) => {
-            const isChecked = selected.includes(item);
-            const inputId = `${title}-${item}`.replace(/\s+/g, '-');
-            return (
-              <label 
-                key={item}
-                htmlFor={inputId}
-                className={`flex items-center space-x-2.5 py-1.5 px-3 rounded-md cursor-pointer transition-colors ${
-                  isChecked ? 'bg-primary/5' : 'hover:bg-accent/30'
-                }`}
-              >
-                <Checkbox
-                  id={inputId}
-                  checked={isChecked}
-                  onCheckedChange={() => onToggle(item)}
-                  className="border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                />
-                <span
-                  className={`text-sm transition-colors ${
-                    isChecked ? 'text-foreground font-medium' : 'text-muted-foreground'
+        {showSearch && (
+          <div className="px-3 pb-2">
+            <div className="relative">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder={`Search ${title.toLowerCase()}...`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-7 pl-7 pr-7 text-xs bg-background border-border/50"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+        <div className="space-y-0.5 ml-1 max-h-48 overflow-y-auto scrollbar-thin">
+          {filteredItems.length === 0 ? (
+            <p className="text-xs text-muted-foreground px-3 py-2">No matches found</p>
+          ) : (
+            filteredItems.map((item) => {
+              const isChecked = selected.includes(item);
+              const inputId = `${title}-${item}`.replace(/\s+/g, '-');
+              return (
+                <label 
+                  key={item}
+                  htmlFor={inputId}
+                  className={`flex items-center space-x-2.5 py-1.5 px-3 rounded-md cursor-pointer transition-colors ${
+                    isChecked ? 'bg-primary/5' : 'hover:bg-accent/30'
                   }`}
                 >
-                  {item}
-                </span>
-              </label>
-            );
-          })}
+                  <Checkbox
+                    id={inputId}
+                    checked={isChecked}
+                    onCheckedChange={() => onToggle(item)}
+                    className="border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  />
+                  <span
+                    className={`text-sm transition-colors ${
+                      isChecked ? 'text-foreground font-medium' : 'text-muted-foreground'
+                    }`}
+                  >
+                    {item}
+                  </span>
+                </label>
+              );
+            })
+          )}
         </div>
       </CollapsibleContent>
     </Collapsible>
@@ -209,6 +248,7 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
                 selected={filters.roleTitles}
                 onToggle={(item) => toggleFilter('roleTitles', item)}
                 defaultOpen={false}
+                searchable
               />
 
               <FilterSection
@@ -218,6 +258,7 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
                 selected={filters.skills}
                 onToggle={(item) => toggleFilter('skills', item)}
                 defaultOpen={false}
+                searchable
               />
 
               <FilterSection
@@ -227,6 +268,7 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
                 selected={filters.industries}
                 onToggle={(item) => toggleFilter('industries', item)}
                 defaultOpen={false}
+                searchable
               />
 
               <FilterSection
@@ -236,6 +278,7 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
                 selected={filters.certificates}
                 onToggle={(item) => toggleFilter('certificates', item)}
                 defaultOpen={false}
+                searchable
               />
             </>
           )}
