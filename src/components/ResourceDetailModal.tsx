@@ -9,6 +9,7 @@ interface ResourceDetailModalProps {
   resource: Resource | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSkillClick?: (skill: string) => void;
 }
 
 const getEmploymentBadgeClass = (type: string) => {
@@ -36,7 +37,7 @@ const getSeniorityBadgeClass = (seniority: string) => {
   return 'bg-badge-junior/10 text-badge-junior border-badge-junior/20';
 };
 
-export function ResourceDetailModal({ resource, open, onOpenChange }: ResourceDetailModalProps) {
+export function ResourceDetailModal({ resource, open, onOpenChange, onSkillClick }: ResourceDetailModalProps) {
   if (!resource) return null;
 
   const allSkills = [
@@ -220,7 +221,8 @@ export function ResourceDetailModal({ resource, open, onOpenChange }: ResourceDe
                         <Badge 
                           key={skill} 
                           variant="outline" 
-                          className="text-xs px-2 py-0.5 bg-badge-senior/10 text-badge-senior border-badge-senior/20"
+                          className="text-xs px-2 py-0.5 bg-badge-senior/10 text-badge-senior border-badge-senior/20 cursor-pointer hover:bg-badge-senior/20 transition-colors"
+                          onClick={() => onSkillClick?.(skill)}
                         >
                           {skill}
                         </Badge>
@@ -237,7 +239,8 @@ export function ResourceDetailModal({ resource, open, onOpenChange }: ResourceDe
                         <Badge 
                           key={skill} 
                           variant="outline" 
-                          className="text-xs px-2 py-0.5 bg-badge-mid/10 text-badge-mid border-badge-mid/20"
+                          className="text-xs px-2 py-0.5 bg-badge-mid/10 text-badge-mid border-badge-mid/20 cursor-pointer hover:bg-badge-mid/20 transition-colors"
+                          onClick={() => onSkillClick?.(skill)}
                         >
                           {skill}
                         </Badge>
@@ -254,7 +257,8 @@ export function ResourceDetailModal({ resource, open, onOpenChange }: ResourceDe
                         <Badge 
                           key={skill} 
                           variant="outline" 
-                          className="text-xs px-2 py-0.5 bg-badge-junior/10 text-badge-junior border-badge-junior/20"
+                          className="text-xs px-2 py-0.5 bg-badge-junior/10 text-badge-junior border-badge-junior/20 cursor-pointer hover:bg-badge-junior/20 transition-colors"
+                          onClick={() => onSkillClick?.(skill)}
                         >
                           {skill}
                         </Badge>
