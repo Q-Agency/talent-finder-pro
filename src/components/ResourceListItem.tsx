@@ -1,7 +1,8 @@
 import { Resource } from '@/services/resourceApi';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { HighlightText } from './HighlightText';
+import { getAvatarUrl } from '@/lib/avatar';
 
 interface ResourceListItemProps {
   resource: Resource;
@@ -46,6 +47,7 @@ export function ResourceListItem({ resource, searchQuery = '', onClick }: Resour
       onClick={onClick}
     >
       <Avatar className="h-9 w-9 ring-2 ring-background shadow-sm shrink-0">
+        <AvatarImage src={getAvatarUrl(resource.resource_name, 36)} alt={resource.resource_name} />
         <AvatarFallback className="bg-primary/10 text-primary font-medium text-xs">
           {getInitials(resource.resource_name)}
         </AvatarFallback>
