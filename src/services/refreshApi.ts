@@ -10,8 +10,9 @@ export async function refreshDataset(isTestMode: boolean): Promise<{ success: bo
   
   try {
     const response = await fetch(url, {
-      method: 'GET',
+      method: 'POST',
       headers: {
+        'Content-Type': 'application/json',
         'ngrok-skip-browser-warning': 'true',
       },
       signal: controller.signal,

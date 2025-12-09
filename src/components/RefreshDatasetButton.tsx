@@ -9,6 +9,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
 
 interface RefreshDatasetButtonProps {
@@ -18,16 +19,18 @@ interface RefreshDatasetButtonProps {
 
 export function RefreshDatasetButton({ isTestMode, onRefreshComplete }: RefreshDatasetButtonProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const handleRefresh = async () => {
+    setShowConfirm(false);
     setIsRefreshing(true);
     try {
       await refreshDataset(isTestMode);
-      toast.success('Dataset refreshed successfully');
+      toast.success('Dataset synced successfully');
       onRefreshComplete?.();
     } catch (error) {
-      console.error('Failed to refresh dataset:', error);
-      toast.error('Failed to refresh dataset. Please try again.');
+      console.error('Failed to sync dataset:', error);
+      toast.error('Failed to sync dataset. Please try again.');
     } finally {
       setIsRefreshing(false);
     }
@@ -38,14 +41,35 @@ export function RefreshDatasetButton({ isTestMode, onRefreshComplete }: RefreshD
       <Button
         variant="outline"
         size="sm"
-        onClick={handleRefresh}
+        onClick={() => setShowConfirm(true)}
         disabled={isRefreshing}
         className="gap-2"
       >
         <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-        Refresh Data
+        Sync Ganttic
       </Button>
 
+      {/* Confirmation Dialog */}
+      <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Sync with Ganttic?</DialogTitle>
+            <DialogDescription>
+              This will refresh the dataset from Ganttic. The process may take <strong>10-20 seconds</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setShowConfirm(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleRefresh}>
+              Sync Now
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Loading Dialog */}
       <Dialog open={isRefreshing} onOpenChange={() => {}}>
         <DialogContent 
           className="sm:max-w-md" 
@@ -55,23 +79,14 @@ export function RefreshDatasetButton({ isTestMode, onRefreshComplete }: RefreshD
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
-              Syncing Data with Ganttic
+              Syncing with Ganttic
             </DialogTitle>
             <DialogDescription className="pt-2">
-              Please wait while we refresh the dataset. This process may take <strong>10-20 seconds</strong>.
+              Please wait while we refresh the dataset. This may take <strong>10-20 seconds</strong>.
               <br /><br />
               Do not close this window or navigate away.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex items-center justify-center py-6">
-            <div className="flex flex-col items-center gap-4">
-              <div className="relative">
-                <div className="h-16 w-16 rounded-full border-4 border-muted animate-pulse" />
-                <RefreshCw className="absolute inset-0 m-auto h-8 w-8 text-primary animate-spin" />
-              </div>
-              <p className="text-sm text-muted-foreground">Syncing resources...</p>
-            </div>
-          </div>
         </DialogContent>
       </Dialog>
     </>
