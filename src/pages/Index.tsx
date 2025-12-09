@@ -8,6 +8,7 @@ import { SortSelect, SortOption } from '@/components/SortSelect';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { searchResources, Resource } from '@/services/resourceApi';
 import { useToast } from '@/hooks/use-toast';
+import { Chatbot } from '@/components/Chatbot';
 
 const initialFilters: Filters = {
   employmentTypes: [],
@@ -137,6 +138,8 @@ const Index = () => {
           </main>
         </ScrollArea>
       </div>
+
+      <Chatbot />
     </div>
   );
 };
