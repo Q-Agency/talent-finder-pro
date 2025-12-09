@@ -27,6 +27,10 @@ export interface Resource {
   description?: string;
   notes?: string;
   superior?: string;
+  el?: string;
+  eh?: string;
+  director?: string;
+  department?: string;
 }
 
 export interface SearchResponse {
