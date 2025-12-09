@@ -6,22 +6,26 @@ interface SearchHeaderProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   children?: ReactNode;
+  profileMenu?: ReactNode;
 }
 
-export function SearchHeader({ searchQuery, onSearchChange, children }: SearchHeaderProps) {
+export function SearchHeader({ searchQuery, onSearchChange, children, profileMenu }: SearchHeaderProps) {
   return (
     <header className="bg-card border-b border-border px-6 py-4">
-      <div className="flex items-center justify-end gap-4">
-        {children}
-        <div className="relative w-80">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by name, role, or skill..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-9 bg-background border-border focus:ring-primary/20"
-          />
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          {children}
+          <div className="relative w-80">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by name, role, or skill..."
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="pl-9 bg-background border-border focus:ring-primary/20"
+            />
+          </div>
         </div>
+        {profileMenu}
       </div>
     </header>
   );
