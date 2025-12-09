@@ -18,6 +18,7 @@ import {
   certificates,
 } from '@/data/mockData';
 import { useState } from 'react';
+import logo from '@/assets/logo.png';
 
 export interface Filters {
   employmentTypes: string[];
@@ -127,9 +128,7 @@ export function FilterSidebar({ filters, onFilterChange, resultCount }: FilterSi
       {/* Logo Header */}
       <div className="p-4 border-b border-border/50">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-lg">
-            Q
-          </div>
+          <img src={logo} alt="Company Logo" className="h-10 w-10 object-contain" />
           <div>
             <h1 className="font-bold text-foreground">Resourcing Hub</h1>
             <p className="text-xs text-muted-foreground">Find the right talent</p>
