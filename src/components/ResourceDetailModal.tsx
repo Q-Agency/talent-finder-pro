@@ -50,13 +50,16 @@ export function ResourceDetailModal({ resource, open, onOpenChange, onSkillClick
   const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('');
 
   const handleSkillClick = (skill: string) => {
-    toast({
+    const { dismiss } = toast({
       title: `Filter by "${skill}"?`,
       description: "This will add the skill to your active filters.",
       action: (
         <button
           className="bg-primary text-primary-foreground px-3 py-1.5 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
-          onClick={() => onSkillClick?.(skill)}
+          onClick={() => {
+            onSkillClick?.(skill);
+            dismiss();
+          }}
         >
           Confirm
         </button>
