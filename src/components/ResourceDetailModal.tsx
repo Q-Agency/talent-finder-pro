@@ -1,8 +1,8 @@
 import { Resource } from '@/services/resourceApi';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Briefcase, Award, Building2, GraduationCap, Sparkles, MapPin, User, FileText, StickyNote, Users, UserCheck, Crown } from 'lucide-react';
+import { Briefcase, Award, Building2, GraduationCap, Sparkles, MapPin, User, FileText, StickyNote, Users, UserCheck, Crown, Mail } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
 
@@ -76,6 +76,9 @@ export function ResourceDetailModal({ resource, open, onOpenChange, onSkillClick
           
           <div className="relative flex items-start gap-5">
             <Avatar className="h-20 w-20 ring-4 ring-background shadow-xl">
+              {resource.image_url && (
+                <AvatarImage src={resource.image_url} alt={resource.resource_name} />
+              )}
               <AvatarFallback className="bg-primary text-primary-foreground font-semibold text-xl">
                 {getInitials(resource.resource_name)}
               </AvatarFallback>
@@ -88,6 +91,16 @@ export function ResourceDetailModal({ resource, open, onOpenChange, onSkillClick
               <p className="text-primary font-semibold text-lg mt-0.5">
                 {resource.role_category}
               </p>
+              
+              {resource.email && (
+                <a 
+                  href={`mailto:${resource.email}`} 
+                  className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mt-1"
+                >
+                  <Mail className="h-3.5 w-3.5" />
+                  {resource.email}
+                </a>
+              )}
               
               <div className="flex flex-wrap gap-2 mt-3">
                 <Badge variant="outline" className={`font-medium ${getEmploymentBadgeClass(resource.employment_type)}`}>

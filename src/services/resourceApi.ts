@@ -31,6 +31,8 @@ export interface Resource {
   eh?: string;
   director?: string;
   department?: string;
+  email?: string;
+  image_url?: string;
 }
 
 export interface SearchResponse {
