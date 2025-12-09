@@ -2,12 +2,25 @@ import { Resource } from '@/services/resourceApi';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { HighlightText } from './HighlightText';
+import { Search } from 'lucide-react';
 
 interface ResourceListItemProps {
   resource: Resource;
   searchQuery?: string;
   onClick: () => void;
 }
+
+const getHiddenFieldMatches = (resource: Resource, query: string) => {
+  if (!query) return [];
+  const q = query.toLowerCase();
+  const matches: string[] = [];
+  
+  if (resource.description?.toLowerCase().includes(q)) matches.push('Description');
+  if (resource.notes?.toLowerCase().includes(q)) matches.push('Notes');
+  if (resource.superior?.toLowerCase().includes(q)) matches.push('Superior');
+  
+  return matches;
+};
 
 const getEmploymentBadgeClass = (type: string) => {
   const normalizedType = type.toLowerCase();
@@ -73,6 +86,17 @@ export function ResourceListItem({ resource, searchQuery = '', onClick }: Resour
         <span className="text-xs text-muted-foreground hidden lg:block">
           <HighlightText text={resource.technical_domain || ''} query={searchQuery} />
         </span>
+
+        {(() => {
+          const hiddenMatches = getHiddenFieldMatches(resource, searchQuery);
+          if (hiddenMatches.length === 0) return null;
+          return (
+            <span className="hidden md:flex items-center gap-1 text-xs text-primary shrink-0">
+              <Search className="h-3 w-3" />
+              <span className="text-muted-foreground">in {hiddenMatches.join(', ')}</span>
+            </span>
+          );
+        })()}
       </div>
     </div>
   );
