@@ -31,7 +31,7 @@ const seniorityOrder: Record<string, number> = {
 const Index = () => {
   const [filters, setFilters] = useState<Filters>(initialFilters);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isTestMode, setIsTestMode] = useState(true);
+  const [isTestMode, setIsTestMode] = useState(false);
   const [resources, setResources] = useState<Resource[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
