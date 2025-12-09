@@ -1,4 +1,4 @@
-import { User, LogOut, Settings } from "lucide-react";
+import { User, LogOut, Settings, FlaskConical, Rocket } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,10 +10,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
-export function ProfileMenu() {
+interface ProfileMenuProps {
+  isTestMode?: boolean;
+  onTestModeToggle?: (isTest: boolean) => void;
+}
+
+export function ProfileMenu({ isTestMode = false, onTestModeToggle }: ProfileMenuProps) {
   const { toast } = useToast();
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -48,6 +54,25 @@ export function ProfileMenu() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        {onTestModeToggle && (
+          <>
+            <div className="flex items-center justify-between px-2 py-2">
+              <div className="flex items-center gap-2">
+                {isTestMode ? (
+                  <FlaskConical className="h-4 w-4 text-amber-500" />
+                ) : (
+                  <Rocket className="h-4 w-4 text-emerald-500" />
+                )}
+                <span className="text-sm">{isTestMode ? 'Test Mode' : 'Production'}</span>
+              </div>
+              <Switch
+                checked={!isTestMode}
+                onCheckedChange={(checked) => onTestModeToggle(!checked)}
+              />
+            </div>
+            <DropdownMenuSeparator />
+          </>
+        )}
         <DropdownMenuItem>
           <Settings className="mr-2 h-4 w-4" />
           <span>Settings</span>
