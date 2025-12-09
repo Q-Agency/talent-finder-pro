@@ -3,9 +3,15 @@ export interface PropertyItem {
   readableValue: string;
 }
 
+// Roles have different field names in the API
+export interface RoleItem {
+  id: string;
+  value: string;
+}
+
 export interface PropertiesResponse {
   industries: PropertyItem[];
-  roles: PropertyItem[];
+  roles: RoleItem[];
   skills: PropertyItem[];
   certificates: PropertyItem[];
 }

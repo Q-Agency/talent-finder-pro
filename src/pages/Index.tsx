@@ -47,7 +47,7 @@ const Index = () => {
   const dynamicOptions = useMemo(() => {
     if (!properties) return undefined;
     return {
-      roleTitles: properties.roles.map(r => r.readableValue),
+      roleTitles: properties.roles.map(r => r.value),
       skills: properties.skills.map(s => s.readableValue),
       industries: properties.industries.map(i => i.readableValue),
       certificates: properties.certificates.map(c => c.readableValue),
