@@ -11,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { searchResources, Resource } from '@/services/resourceApi';
 import { useToast } from '@/hooks/use-toast';
 import { Chatbot } from '@/components/Chatbot';
+import { useProperties } from '@/hooks/useProperties';
 
 const initialFilters: Filters = {
   employmentTypes: [],
@@ -39,6 +40,19 @@ const Index = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortOption, setSortOption] = useState<SortOption>('name-asc');
   const { toast } = useToast();
+  
+  // Fetch dynamic filter options
+  const { properties, isLoading: isLoadingProperties } = useProperties(isTestMode);
+  
+  const dynamicOptions = useMemo(() => {
+    if (!properties) return undefined;
+    return {
+      roleTitles: properties.roles.map(r => r.readableValue),
+      skills: properties.skills.map(s => s.readableValue),
+      industries: properties.industries.map(i => i.readableValue),
+      certificates: properties.certificates.map(c => c.readableValue),
+    };
+  }, [properties]);
 
   const fetchResources = useCallback(async () => {
     setIsLoading(true);
@@ -128,6 +142,8 @@ const Index = () => {
         filters={filters}
         onFilterChange={setFilters}
         resultCount={filteredResources.length}
+        dynamicOptions={dynamicOptions}
+        isLoadingOptions={isLoadingProperties}
       />
 
       <div className="flex-1 flex flex-col min-w-0">
