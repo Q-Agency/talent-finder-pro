@@ -1,10 +1,9 @@
 import { Resource } from '@/services/resourceApi';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Briefcase, Sparkles, Award } from 'lucide-react';
 import { HighlightText } from './HighlightText';
-import { getAvatarUrl } from '@/lib/avatar';
 
 interface ResourceCardProps {
   resource: Resource;
@@ -53,7 +52,6 @@ export function ResourceCard({ resource, searchQuery = '' }: ResourceCardProps) 
       <CardContent className="p-5">
         <div className="flex items-start gap-4">
           <Avatar className="h-14 w-14 ring-2 ring-background shadow-sm">
-            <AvatarImage src={getAvatarUrl(resource.resource_name, 56)} alt={resource.resource_name} />
             <AvatarFallback className="bg-primary/10 text-primary font-medium">
               {getInitials(resource.resource_name)}
             </AvatarFallback>
