@@ -1,6 +1,6 @@
 import { Resource } from '@/services/resourceApi';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { HighlightText } from './HighlightText';
 import { Search } from 'lucide-react';
 
@@ -59,6 +59,9 @@ export function ResourceListItem({ resource, searchQuery = '', onClick }: Resour
       onClick={onClick}
     >
       <Avatar className="h-9 w-9 ring-2 ring-background shadow-sm shrink-0">
+        {resource.image_url && (
+          <AvatarImage src={resource.image_url} alt={resource.resource_name} />
+        )}
         <AvatarFallback className="bg-primary/10 text-primary font-medium text-xs">
           {getInitials(resource.resource_name)}
         </AvatarFallback>
