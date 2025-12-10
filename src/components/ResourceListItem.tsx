@@ -88,9 +88,36 @@ export function ResourceListItem({ resource, searchQuery = '', onClick }: Resour
           </Badge>
         </div>
 
-        <span className="text-xs text-muted-foreground hidden lg:block">
+        <span className="text-xs text-muted-foreground hidden lg:block truncate max-w-[120px]">
           <HighlightText text={resource.technical_domain || ''} query={searchQuery} />
         </span>
+
+        {resource.skills && (
+          <div className="hidden xl:flex items-center gap-1 flex-wrap max-w-[200px]">
+            {(() => {
+              const allSkills = [
+                ...(resource.skills.senior || []),
+                ...(resource.skills.mid || []),
+                ...(resource.skills.junior || [])
+              ];
+              return (
+                <>
+                  {allSkills.slice(0, 3).map((skill, idx) => {
+                    const skillName = skill.includes(' - ') ? skill.split(' - ')[1] : skill;
+                    return (
+                      <Badge key={idx} variant="outline" className="text-[10px] px-1.5 py-0 h-5 bg-muted/50">
+                        {skillName}
+                      </Badge>
+                    );
+                  })}
+                  {allSkills.length > 3 && (
+                    <span className="text-[10px] text-muted-foreground">+{allSkills.length - 3}</span>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+        )}
 
         {(() => {
           const hiddenMatches = getHiddenFieldMatches(resource, searchQuery);
