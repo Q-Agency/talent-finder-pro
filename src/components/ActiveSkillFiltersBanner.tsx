@@ -17,12 +17,12 @@ const levelLabels: Record<string, string> = {
 };
 
 const levelColors: Record<string, string> = {
-  senior: 'bg-red-500/20 text-red-700 dark:text-red-400 border-red-500/30',
-  mid: 'bg-blue-500/20 text-blue-700 dark:text-blue-400 border-blue-500/30',
-  junior: 'bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/30',
+  senior: 'bg-badge-senior text-white',
+  mid: 'bg-badge-mid text-white',
+  junior: 'bg-badge-junior text-white',
 };
 
-const levelColorsInactive = 'bg-muted/50 text-muted-foreground/50 border-muted';
+const levelColorsInactive = 'bg-muted text-muted-foreground';
 
 export function ActiveSkillFiltersBanner({
   skillFilters,
@@ -61,7 +61,7 @@ export function ActiveSkillFiltersBanner({
                   <button
                     key={level}
                     onClick={() => onToggleLevel(skill, level)}
-                    className={`w-5 h-5 rounded text-[10px] font-bold flex items-center justify-center border transition-colors ${
+                    className={`w-5 h-5 rounded text-[10px] font-bold flex items-center justify-center transition-colors ${
                       isActive ? levelColors[level] : levelColorsInactive
                     }`}
                     title={`${level.charAt(0).toUpperCase() + level.slice(1)} level`}
