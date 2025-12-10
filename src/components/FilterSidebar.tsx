@@ -553,7 +553,6 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, employment
           </div>
           {employmentBreakdown && resultCount > 0 && Object.keys(employmentBreakdown).length > 0 && (
             <div className="mt-3 pt-3 border-t border-border/30">
-              <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium mb-2">By Type</p>
               <div className="flex flex-wrap gap-1.5">
                 {Object.entries(employmentBreakdown)
                   .sort(([, a], [, b]) => b - a)
