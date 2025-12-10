@@ -14,8 +14,8 @@ import {
   PieChart, Pie, Cell, Legend
 } from 'recharts';
 import { 
-  Users, Award, Briefcase, TrendingUp, TrendingDown, Building2, 
-  ArrowLeft, Layers, Target, AlertTriangle, CheckCircle2, Loader2
+  Users, Award, Briefcase, TrendingUp, Building2, 
+  ArrowLeft, Layers, Target, CheckCircle2, Loader2
 } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
@@ -202,38 +202,6 @@ const Analytics = () => {
       .sort((a, b) => b.count - a.count);
   }, [resources]);
 
-  // Vertical breakdown
-  const verticalBreakdown = useMemo((): CategoryAnalysis[] => {
-    const vertMap = new Map<string, number>();
-    resources.forEach(resource => {
-      const vert = resource.vertical || 'Unknown';
-      vertMap.set(vert, (vertMap.get(vert) || 0) + 1);
-    });
-    return Array.from(vertMap.entries())
-      .map(([name, count]) => ({
-        name,
-        count,
-        percentage: (count / resources.length) * 100,
-      }))
-      .sort((a, b) => b.count - a.count);
-  }, [resources]);
-
-  // Department breakdown
-  const departmentBreakdown = useMemo((): CategoryAnalysis[] => {
-    const deptMap = new Map<string, number>();
-    resources.forEach(resource => {
-      const dept = resource.department || 'Unknown';
-      deptMap.set(dept, (deptMap.get(dept) || 0) + 1);
-    });
-    return Array.from(deptMap.entries())
-      .map(([name, count]) => ({
-        name,
-        count,
-        percentage: (count / resources.length) * 100,
-      }))
-      .sort((a, b) => b.count - a.count);
-  }, [resources]);
-
   // Skill categories summary
   const skillCategories = useMemo(() => {
     const catMap = new Map<string, { total: number; skills: string[] }>();
@@ -250,12 +218,7 @@ const Analytics = () => {
       .sort((a, b) => b.total - a.total);
   }, [skillAnalysis]);
 
-  // Scarce vs abundant skills
-  const scarcestSkills = useMemo(() => 
-    skillAnalysis.filter(s => s.total <= 2).slice(0, 15), 
-    [skillAnalysis]
-  );
-  
+  // Most abundant skills
   const mostAbundantSkills = useMemo(() => 
     skillAnalysis.slice(0, 15), 
     [skillAnalysis]
@@ -393,114 +356,49 @@ const Analytics = () => {
         </div>
 
         <Tabs defaultValue="skills" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
             <TabsTrigger value="skills">Skills</TabsTrigger>
             <TabsTrigger value="certificates">Certificates</TabsTrigger>
             <TabsTrigger value="industries">Industries</TabsTrigger>
             <TabsTrigger value="workforce">Workforce</TabsTrigger>
-            <TabsTrigger value="organization">Organization</TabsTrigger>
           </TabsList>
 
           {/* Skills Tab */}
           <TabsContent value="skills" className="space-y-6">
-            <div className="grid lg:grid-cols-2 gap-6">
-              {/* Skill Gap Analysis */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-green-500" />
-                    Most Abundant Skills
-                  </CardTitle>
-                  <CardDescription>Skills with the highest coverage across the team</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[400px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={mostAbundantSkills} layout="vertical" margin={{ left: 100 }}>
-                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                        <XAxis type="number" className="text-xs" />
-                        <YAxis 
-                          type="category" 
-                          dataKey="name" 
-                          className="text-xs"
-                          width={100}
-                          tick={{ fontSize: 11 }}
-                        />
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: 'hsl(var(--popover))',
-                            border: '1px solid hsl(var(--border))',
-                            borderRadius: '8px'
-                          }}
-                          labelStyle={{ color: 'hsl(var(--popover-foreground))' }}
-                        />
-                        <Bar dataKey="senior" stackId="a" fill="hsl(142, 76%, 36%)" name="Senior" />
-                        <Bar dataKey="mid" stackId="a" fill="hsl(221, 83%, 53%)" name="Mid" />
-                        <Bar dataKey="junior" stackId="a" fill="hsl(262, 83%, 58%)" name="Junior" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Scarce Skills */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-amber-500" />
-                    Scarce Skills (≤2 people)
-                  </CardTitle>
-                  <CardDescription>Skills that may need more coverage</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[400px]">
-                    <div className="space-y-3">
-                      {scarcestSkills.length === 0 ? (
-                        <p className="text-muted-foreground text-center py-8">No scarce skills found</p>
-                      ) : (
-                        scarcestSkills.map((skill, idx) => (
-                          <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                            <div>
-                              <p className="font-medium text-sm">{skill.name}</p>
-                              <p className="text-xs text-muted-foreground">{skill.category}</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline" className="text-xs">
-                                {skill.total} {skill.total === 1 ? 'person' : 'people'}
-                              </Badge>
-                              <div className="flex gap-1">
-                                {skill.senior > 0 && <Badge className="bg-green-500/20 text-green-700 dark:text-green-400 text-xs">S:{skill.senior}</Badge>}
-                                {skill.mid > 0 && <Badge className="bg-blue-500/20 text-blue-700 dark:text-blue-400 text-xs">M:{skill.mid}</Badge>}
-                                {skill.junior > 0 && <Badge className="bg-purple-500/20 text-purple-700 dark:text-purple-400 text-xs">J:{skill.junior}</Badge>}
-                              </div>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Skill Categories */}
             <Card>
               <CardHeader>
-                <CardTitle>Skill Categories Distribution</CardTitle>
-                <CardDescription>Breakdown of skills by category</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-green-500" />
+                  Most Abundant Skills
+                </CardTitle>
+                <CardDescription>Skills with the highest coverage across the team</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {skillCategories.map((cat, idx) => (
-                    <div key={idx} className="p-4 rounded-lg border bg-card">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-semibold text-sm">{cat.name}</h4>
-                        <Badge variant="secondary">{cat.skills.length} skills</Badge>
-                      </div>
-                      <p className="text-2xl font-bold text-primary">{cat.total}</p>
-                      <p className="text-xs text-muted-foreground">total skill instances</p>
-                    </div>
-                  ))}
+                <div className="h-[400px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={mostAbundantSkills} layout="vertical" margin={{ left: 100 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis type="number" className="text-xs" />
+                      <YAxis 
+                        type="category" 
+                        dataKey="name" 
+                        className="text-xs"
+                        width={100}
+                        tick={{ fontSize: 11 }}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--popover))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px'
+                        }}
+                        labelStyle={{ color: 'hsl(var(--popover-foreground))' }}
+                      />
+                      <Bar dataKey="senior" stackId="a" fill="hsl(142, 76%, 36%)" name="Senior" />
+                      <Bar dataKey="mid" stackId="a" fill="hsl(221, 83%, 53%)" name="Mid" />
+                      <Bar dataKey="junior" stackId="a" fill="hsl(262, 83%, 58%)" name="Junior" />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
@@ -508,66 +406,40 @@ const Analytics = () => {
 
           {/* Certificates Tab */}
           <TabsContent value="certificates" className="space-y-6">
-            <div className="grid lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Award className="h-5 w-5" />
-                    Certificate Distribution
-                  </CardTitle>
-                  <CardDescription>Number of resources holding each certificate</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[400px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={certificateAnalysis.slice(0, 15)} layout="vertical" margin={{ left: 120 }}>
-                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                        <XAxis type="number" className="text-xs" />
-                        <YAxis 
-                          type="category" 
-                          dataKey="name" 
-                          className="text-xs"
-                          width={120}
-                          tick={{ fontSize: 10 }}
-                        />
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: 'hsl(var(--popover))',
-                            border: '1px solid hsl(var(--border))',
-                            borderRadius: '8px'
-                          }}
-                        />
-                        <Bar dataKey="count" fill="hsl(var(--chart-2))" radius={[0, 4, 4, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>All Certificates</CardTitle>
-                  <CardDescription>Complete list with coverage percentage</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[400px]">
-                    <div className="space-y-3">
-                      {certificateAnalysis.map((cert, idx) => (
-                        <div key={idx} className="space-y-1">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium truncate max-w-[60%]">{cert.name}</span>
-                            <span className="text-sm text-muted-foreground">
-                              {cert.count} ({cert.percentage.toFixed(1)}%)
-                            </span>
-                          </div>
-                          <Progress value={cert.percentage} className="h-2" />
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="h-5 w-5" />
+                  Certificate Distribution
+                </CardTitle>
+                <CardDescription>Number of resources holding each certificate</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[400px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={certificateAnalysis.slice(0, 15)} layout="vertical" margin={{ left: 120 }}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis type="number" className="text-xs" />
+                      <YAxis 
+                        type="category" 
+                        dataKey="name" 
+                        className="text-xs"
+                        width={120}
+                        tick={{ fontSize: 10 }}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--popover))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px'
+                        }}
+                      />
+                      <Bar dataKey="count" fill="hsl(var(--chart-2))" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Industries Tab */}
@@ -748,71 +620,6 @@ const Analytics = () => {
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Organization Tab */}
-          <TabsContent value="organization" className="space-y-6">
-            <div className="grid lg:grid-cols-2 gap-6">
-              {/* Vertical Distribution */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Vertical Distribution</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={verticalBreakdown}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={100}
-                          dataKey="count"
-                          nameKey="name"
-                        >
-                          {verticalBreakdown.map((_, index) => (
-                            <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: 'hsl(var(--popover))',
-                            border: '1px solid hsl(var(--border))',
-                            borderRadius: '8px'
-                          }}
-                        />
-                        <Legend />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Department Distribution */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Department Distribution</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="h-[300px]">
-                    <div className="space-y-3">
-                      {departmentBreakdown.map((dept, idx) => (
-                        <div key={idx} className="space-y-1">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium truncate max-w-[60%]">{dept.name}</span>
-                            <span className="text-sm text-muted-foreground">
-                              {dept.count} ({dept.percentage.toFixed(1)}%)
-                            </span>
-                          </div>
-                          <Progress value={dept.percentage} className="h-2" />
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
                 </CardContent>
               </Card>
             </div>
