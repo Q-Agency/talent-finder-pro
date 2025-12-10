@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { FilterSidebar, Filters, SkillLevel } from '@/components/FilterSidebar';
 import { SearchHeader } from '@/components/SearchHeader';
 import { ResourceGrid } from '@/components/ResourceGrid';
@@ -9,10 +10,12 @@ import { ProfileMenu } from '@/components/ProfileMenu';
 import { RefreshDatasetButton } from '@/components/RefreshDatasetButton';
 import { ActiveFiltersBanner, SkillFilterMode } from '@/components/ActiveFiltersBanner';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
 import { searchResources, Resource } from '@/services/resourceApi';
 import { useToast } from '@/hooks/use-toast';
 import { Chatbot } from '@/components/Chatbot';
 import { useProperties } from '@/hooks/useProperties';
+import { BarChart3 } from 'lucide-react';
 
 const initialFilters: Filters = {
   employmentTypes: [],
@@ -263,6 +266,12 @@ const Index = () => {
           onSearchChange={setSearchQuery}
           profileMenu={<ProfileMenu isTestMode={isTestMode} onTestModeToggle={setIsTestMode} />}
         >
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/analytics">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Analytics
+            </Link>
+          </Button>
           <ThemeToggle />
           <SortSelect value={sortOption} onChange={setSortOption} />
           <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
