@@ -172,10 +172,15 @@ const Analytics = () => {
 
   // Seniority breakdown
   const seniorityBreakdown = useMemo((): CategoryAnalysis[] => {
+    const seniorityOrder: Record<string, number> = {
+      'Senior 2': 1, 'Senior 1': 2, 'Mid 2': 3, 'Mid 1': 4, 'Junior 2': 5, 'Junior 1': 6
+    };
     const senMap = new Map<string, number>();
     resources.forEach(resource => {
-      const level = resource.seniority_level || 'Unknown';
-      senMap.set(level, (senMap.get(level) || 0) + 1);
+      const level = resource.seniority_level?.trim();
+      if (level && level.toLowerCase() !== 'unknown') {
+        senMap.set(level, (senMap.get(level) || 0) + 1);
+      }
     });
     return Array.from(senMap.entries())
       .map(([name, count]) => ({
@@ -183,7 +188,7 @@ const Analytics = () => {
         count,
         percentage: (count / resources.length) * 100,
       }))
-      .sort((a, b) => b.count - a.count);
+      .sort((a, b) => (seniorityOrder[a.name] ?? 99) - (seniorityOrder[b.name] ?? 99));
   }, [resources]);
 
   // Role breakdown
