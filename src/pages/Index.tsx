@@ -229,14 +229,19 @@ const Index = () => {
           <RefreshDatasetButton isTestMode={isTestMode} onRefreshComplete={fetchResources} />
         </SearchHeader>
 
-        <ScrollArea className="flex-1 scrollbar-thin">
-          <main className="p-6">
+        {filters.skills.length > 0 && (
+          <div className="px-6 pt-4 pb-0 bg-background border-b border-border/50">
             <ActiveSkillFiltersBanner
               skillFilters={filters.skills}
               onRemoveSkill={handleRemoveSkillFilter}
               onToggleLevel={handleToggleSkillLevel}
               onClearAll={handleClearAllSkillFilters}
             />
+          </div>
+        )}
+
+        <ScrollArea className="flex-1 scrollbar-thin">
+          <main className="p-6">
             <ResourceGrid 
               resources={filteredResources} 
               isLoading={isLoading} 
