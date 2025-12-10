@@ -298,7 +298,7 @@ const Analytics = () => {
             <ThemeToggle />
             <ProfileMenu
               isTestMode={isTestMode} 
-              onTestModeChange={setIsTestMode} 
+              onTestModeToggle={setIsTestMode}
             />
           </div>
         </div>
