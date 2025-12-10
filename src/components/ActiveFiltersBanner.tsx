@@ -127,6 +127,21 @@ export function ActiveFiltersBanner({
                   );
                 })}
               </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="w-3.5 h-3.5 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-[220px]">
+                    <p className="text-xs">
+                      <strong>S</strong> = Senior level skills<br />
+                      <strong>M</strong> = Mid level skills<br />
+                      <strong>J</strong> = Junior level skills<br />
+                      <span className="text-muted-foreground mt-1 block">Toggle to filter by skill proficiency level</span>
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           )}
 
