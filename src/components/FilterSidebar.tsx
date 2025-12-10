@@ -523,31 +523,7 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, employment
       </div>
 
       <div className="p-4 border-b border-border/50 bg-card/80 backdrop-blur-sm">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="p-1.5 rounded-md bg-primary/10">
-              <Filter className="h-4 w-4 text-primary" />
-            </div>
-            <h2 className="font-semibold text-foreground">Filters</h2>
-            {totalFilters > 0 && (
-              <Badge className="h-5 px-1.5 text-xs font-medium bg-primary text-primary-foreground">
-                {totalFilters}
-              </Badge>
-            )}
-          </div>
-          {totalFilters > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearAllFilters}
-              className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-            >
-              <X className="h-3 w-3 mr-1" />
-              Clear
-            </Button>
-          )}
-        </div>
-        <div className={`mt-3 p-4 rounded-xl border shadow-sm transition-all duration-300 ${
+        <div className={`p-4 rounded-xl border shadow-sm transition-all duration-300 ${
           resultCount === 0 
             ? 'bg-muted/50 border-border/50' 
             : 'bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 border-primary/20'
