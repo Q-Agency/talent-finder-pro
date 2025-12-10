@@ -517,11 +517,11 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
             : 'bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 border-primary/20'
         }`}>
           <div className="flex items-center gap-3">
-            <div className={`flex items-center justify-center w-14 h-14 rounded-xl shadow-md transition-all duration-300 ${
+            <div className={`flex items-center justify-center w-14 h-14 rounded-xl shadow-md transition-colors duration-300 ${
               resultCount === 0 
                 ? 'bg-muted-foreground/20 text-muted-foreground' 
                 : 'bg-primary text-primary-foreground'
-            } ${isAnimating ? 'animate-pulse scale-110' : ''}`}>
+            } ${isAnimating ? 'animate-pop' : ''}`}>
               <span className="text-2xl font-bold">{resultCount}</span>
             </div>
             <div>
