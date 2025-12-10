@@ -418,32 +418,33 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
       const endCount = resultCount;
       const diff = Math.abs(endCount - startCount);
       
-      // Animate between any two values
       if (diff > 0) {
-        const duration = Math.min(400, Math.max(150, diff * 10)); // 150-400ms
-        const steps = Math.min(diff, 20); // Max 20 steps
-        const stepValue = (endCount - startCount) / steps;
-        const stepDuration = duration / steps;
+        const duration = Math.min(400, Math.max(150, diff * 10));
+        const startTime = performance.now();
         
-        let currentStep = 0;
-        const interval = setInterval(() => {
-          currentStep++;
-          if (currentStep >= steps) {
-            setDisplayCount(endCount);
-            clearInterval(interval);
-          } else {
-            setDisplayCount(Math.round(startCount + (stepValue * currentStep)));
+        // Ease-out cubic: decelerates at the end for natural feel
+        const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+        
+        const animate = (currentTime: number) => {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const easedProgress = easeOutCubic(progress);
+          
+          const currentValue = Math.round(startCount + (endCount - startCount) * easedProgress);
+          setDisplayCount(currentValue);
+          
+          if (progress < 1) {
+            requestAnimationFrame(animate);
           }
-        }, stepDuration);
+        };
+        
+        requestAnimationFrame(animate);
         
         setIsAnimating(true);
         const timer = setTimeout(() => setIsAnimating(false), 400);
         prevCountRef.current = resultCount;
         
-        return () => {
-          clearInterval(interval);
-          clearTimeout(timer);
-        };
+        return () => clearTimeout(timer);
       }
       
       prevCountRef.current = resultCount;
