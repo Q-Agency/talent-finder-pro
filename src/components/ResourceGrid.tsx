@@ -6,7 +6,7 @@ import { ResourceDetailModal } from './ResourceDetailModal';
 import { ResourceCardSkeleton, ResourceListItemSkeleton } from './ResourceSkeleton';
 import { Users } from 'lucide-react';
 import { ViewMode } from './ViewToggle';
-import { SkillFilter } from './FilterSidebar';
+import { SkillLevel } from './FilterSidebar';
 
 interface ResourceGridProps {
   resources: Resource[];
@@ -14,10 +14,11 @@ interface ResourceGridProps {
   viewMode: ViewMode;
   searchQuery?: string;
   onSkillClick?: (skill: string) => void;
-  activeSkillFilters?: SkillFilter[];
+  activeSkillFilters?: string[];
+  activeSkillLevels?: SkillLevel[];
 }
 
-export function ResourceGrid({ resources, isLoading, viewMode, searchQuery = '', onSkillClick, activeSkillFilters = [] }: ResourceGridProps) {
+export function ResourceGrid({ resources, isLoading, viewMode, searchQuery = '', onSkillClick, activeSkillFilters = [], activeSkillLevels = ['senior', 'mid', 'junior'] }: ResourceGridProps) {
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
 
   if (isLoading) {
@@ -57,6 +58,7 @@ export function ResourceGrid({ resources, isLoading, viewMode, searchQuery = '',
               searchQuery={searchQuery}
               onClick={() => setSelectedResource(resource)}
               activeSkillFilters={activeSkillFilters}
+              activeSkillLevels={activeSkillLevels}
             />
           ))}
         </div>
@@ -64,7 +66,7 @@ export function ResourceGrid({ resources, isLoading, viewMode, searchQuery = '',
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {resources.map((resource) => (
           <div key={resource.resource_id} onClick={() => setSelectedResource(resource)} className="cursor-pointer">
-              <ResourceCard resource={resource} searchQuery={searchQuery} activeSkillFilters={activeSkillFilters} />
+              <ResourceCard resource={resource} searchQuery={searchQuery} activeSkillFilters={activeSkillFilters} activeSkillLevels={activeSkillLevels} />
             </div>
           ))}
         </div>

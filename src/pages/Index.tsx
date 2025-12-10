@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { FilterSidebar, Filters, SkillFilter } from '@/components/FilterSidebar';
+import { FilterSidebar, Filters, SkillLevel } from '@/components/FilterSidebar';
 import { SearchHeader } from '@/components/SearchHeader';
 import { ResourceGrid } from '@/components/ResourceGrid';
 import { ViewToggle, ViewMode } from '@/components/ViewToggle';
@@ -9,7 +9,7 @@ import { ProfileMenu } from '@/components/ProfileMenu';
 import { RefreshDatasetButton } from '@/components/RefreshDatasetButton';
 import { ActiveFiltersBanner, SkillFilterMode } from '@/components/ActiveFiltersBanner';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { searchResources, Resource, ApiFilters } from '@/services/resourceApi';
+import { searchResources, Resource } from '@/services/resourceApi';
 import { useToast } from '@/hooks/use-toast';
 import { Chatbot } from '@/components/Chatbot';
 import { useProperties } from '@/hooks/useProperties';
@@ -33,6 +33,8 @@ const seniorityOrder: Record<string, number> = {
   'junior 1': 6,
 };
 
+const ALL_LEVELS: SkillLevel[] = ['senior', 'mid', 'junior'];
+
 const Index = () => {
   const [filters, setFilters] = useState<Filters>(initialFilters);
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,12 +47,27 @@ const Index = () => {
     const saved = localStorage.getItem('skillFilterMode');
     return (saved === 'and' || saved === 'or') ? saved : 'and';
   });
+  const [globalSkillLevels, setGlobalSkillLevels] = useState<SkillLevel[]>(() => {
+    const saved = localStorage.getItem('globalSkillLevels');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch {}
+    }
+    return ALL_LEVELS;
+  });
   const { toast } = useToast();
 
   // Persist filter mode preference
   useEffect(() => {
     localStorage.setItem('skillFilterMode', skillFilterMode);
   }, [skillFilterMode]);
+
+  // Persist global skill levels preference
+  useEffect(() => {
+    localStorage.setItem('globalSkillLevels', JSON.stringify(globalSkillLevels));
+  }, [globalSkillLevels]);
   
   // Fetch dynamic filter options
   const { properties, isLoading: isLoadingProperties } = useProperties(isTestMode);
@@ -69,11 +86,9 @@ const Index = () => {
   const fetchResources = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Extract just skill names for API (seniority filtering is client-side)
-      const skillNames = filters.skills.map(sf => sf.skill);
       const apiFilters = {
         ...filters,
-        skills: skillNames,
+        skills: filters.skills,
       };
       const response = await searchResources(apiFilters, '', isTestMode);
       if (response.success) {
@@ -102,11 +117,9 @@ const Index = () => {
     return () => clearTimeout(debounceTimer);
   }, [fetchResources]);
 
-  // Check if a resource has a skill at the specified seniority levels
-  const resourceHasSkillAtLevels = (resource: Resource, skillFilter: SkillFilter): boolean => {
-    const { skill, levels } = skillFilter;
-    
-    for (const level of levels) {
+  // Check if a resource has a skill at any of the global seniority levels
+  const resourceHasSkillAtLevels = (resource: Resource, skill: string): boolean => {
+    for (const level of globalSkillLevels) {
       if (level === 'senior' && resource.skills.senior.includes(skill)) return true;
       if (level === 'mid' && resource.skills.mid.includes(skill)) return true;
       if (level === 'junior' && resource.skills.junior.includes(skill)) return true;
@@ -119,15 +132,15 @@ const Index = () => {
     if (filters.skills.length < 2) return { and: 0, or: 0 };
     
     const andCount = resources.filter(resource => 
-      filters.skills.every(sf => resourceHasSkillAtLevels(resource, sf))
+      filters.skills.every(skill => resourceHasSkillAtLevels(resource, skill))
     ).length;
     
     const orCount = resources.filter(resource => 
-      filters.skills.some(sf => resourceHasSkillAtLevels(resource, sf))
+      filters.skills.some(skill => resourceHasSkillAtLevels(resource, skill))
     ).length;
     
     return { and: andCount, or: orCount };
-  }, [resources, filters.skills]);
+  }, [resources, filters.skills, globalSkillLevels]);
 
   // Client-side filtering and sorting
   const filteredResources = useMemo(() => {
@@ -136,12 +149,10 @@ const Index = () => {
     // Filter by skill seniority levels (client-side)
     if (filters.skills.length > 0) {
       result = result.filter((resource) => {
-        // AND: Resource must match ALL selected skill filters
-        // OR: Resource must match at least ONE selected skill filter
         const matchFn = skillFilterMode === 'and' 
           ? filters.skills.every.bind(filters.skills)
           : filters.skills.some.bind(filters.skills);
-        return matchFn(skillFilter => resourceHasSkillAtLevels(resource, skillFilter));
+        return matchFn(skill => resourceHasSkillAtLevels(resource, skill));
       });
     }
     
@@ -191,16 +202,13 @@ const Index = () => {
     });
     
     return result;
-  }, [resources, searchQuery, sortOption, filters.skills, skillFilterMode]);
+  }, [resources, searchQuery, sortOption, filters.skills, skillFilterMode, globalSkillLevels]);
 
   const handleSkillClick = (skill: string) => {
-    // Check if skill already exists in filters
-    const existingSkill = filters.skills.find(sf => sf.skill === skill);
-    if (!existingSkill) {
-      // Add skill with all levels selected
+    if (!filters.skills.includes(skill)) {
       setFilters(prev => ({
         ...prev,
-        skills: [...prev.skills, { skill, levels: ['senior', 'mid', 'junior'] }]
+        skills: [...prev.skills, skill]
       }));
     }
   };
@@ -245,6 +253,8 @@ const Index = () => {
               skillFilterMode={skillFilterMode}
               onSkillFilterModeChange={setSkillFilterMode}
               modeCounts={skillFilterCounts}
+              globalSkillLevels={globalSkillLevels}
+              onGlobalSkillLevelsChange={setGlobalSkillLevels}
             />
           </div>
         )}
@@ -258,6 +268,7 @@ const Index = () => {
               searchQuery={searchQuery}
               onSkillClick={handleSkillClick}
               activeSkillFilters={filters.skills}
+              activeSkillLevels={globalSkillLevels}
             />
           </main>
         </ScrollArea>

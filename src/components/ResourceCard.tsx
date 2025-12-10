@@ -4,12 +4,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Briefcase, Sparkles, Award, Search, Building2, TrendingUp, Check } from 'lucide-react';
 import { HighlightText } from './HighlightText';
-import { SkillFilter, SkillLevel } from './FilterSidebar';
+import { SkillLevel } from './FilterSidebar';
 
 interface ResourceCardProps {
   resource: Resource;
   searchQuery?: string;
-  activeSkillFilters?: SkillFilter[];
+  activeSkillFilters?: string[];
+  activeSkillLevels?: SkillLevel[];
 }
 
 const getHiddenFieldMatches = (resource: Resource, query: string) => {
@@ -68,13 +69,13 @@ const getSeniorityBadgeClass = (seniority: string) => {
 function isSkillMatchingFilter(
   skill: string, 
   level: SkillLevel, 
-  activeFilters: SkillFilter[]
+  activeFilters: string[],
+  activeLevels: SkillLevel[]
 ): boolean {
-  const filter = activeFilters.find(f => f.skill === skill);
-  return filter ? filter.levels.includes(level) : false;
+  return activeFilters.includes(skill) && activeLevels.includes(level);
 }
 
-export function ResourceCard({ resource, searchQuery = '', activeSkillFilters = [] }: ResourceCardProps) {
+export function ResourceCard({ resource, searchQuery = '', activeSkillFilters = [], activeSkillLevels = ['senior', 'mid', 'junior'] }: ResourceCardProps) {
   const allSkills = [
     ...(resource.skills?.senior || []),
     ...(resource.skills?.mid || []),
@@ -87,7 +88,7 @@ export function ResourceCard({ resource, searchQuery = '', activeSkillFilters = 
   };
 
   const renderSkillBadge = (skill: string, level: SkillLevel, baseClass: string) => {
-    const isMatching = isSkillMatchingFilter(skill, level, activeSkillFilters);
+    const isMatching = isSkillMatchingFilter(skill, level, activeSkillFilters, activeSkillLevels);
     
     return (
       <Badge 

@@ -1,5 +1,3 @@
-import { SkillFilter } from '@/components/FilterSidebar';
-
 const API_ENDPOINTS = {
   test: 'https://infinite-wasp-terminally.ngrok-free.app/webhook-test/api/resources/search',
   production: 'https://infinite-wasp-terminally.ngrok-free.app/webhook/api/resources/search',
