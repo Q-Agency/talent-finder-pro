@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { FilterSidebar, Filters } from '@/components/FilterSidebar';
+import { FilterSidebar, Filters, SkillFilter } from '@/components/FilterSidebar';
 import { SearchHeader } from '@/components/SearchHeader';
 import { ResourceGrid } from '@/components/ResourceGrid';
 import { ViewToggle, ViewMode } from '@/components/ViewToggle';
@@ -8,7 +8,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { ProfileMenu } from '@/components/ProfileMenu';
 import { RefreshDatasetButton } from '@/components/RefreshDatasetButton';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { searchResources, Resource } from '@/services/resourceApi';
+import { searchResources, Resource, ApiFilters } from '@/services/resourceApi';
 import { useToast } from '@/hooks/use-toast';
 import { Chatbot } from '@/components/Chatbot';
 import { useProperties } from '@/hooks/useProperties';
@@ -59,7 +59,13 @@ const Index = () => {
   const fetchResources = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await searchResources(filters, '', isTestMode);
+      // Extract just skill names for API (seniority filtering is client-side)
+      const skillNames = filters.skills.map(sf => sf.skill);
+      const apiFilters = {
+        ...filters,
+        skills: skillNames,
+      };
+      const response = await searchResources(apiFilters, '', isTestMode);
       if (response.success) {
         setResources(response.results);
       } else {
@@ -86,9 +92,31 @@ const Index = () => {
     return () => clearTimeout(debounceTimer);
   }, [fetchResources]);
 
+  // Check if a resource has a skill at the specified seniority levels
+  const resourceHasSkillAtLevels = (resource: Resource, skillFilter: SkillFilter): boolean => {
+    const { skill, levels } = skillFilter;
+    
+    for (const level of levels) {
+      if (level === 'senior' && resource.skills.senior.includes(skill)) return true;
+      if (level === 'mid' && resource.skills.mid.includes(skill)) return true;
+      if (level === 'junior' && resource.skills.junior.includes(skill)) return true;
+    }
+    return false;
+  };
+
   // Client-side filtering and sorting
   const filteredResources = useMemo(() => {
     let result = [...resources];
+    
+    // Filter by skill seniority levels (client-side)
+    if (filters.skills.length > 0) {
+      result = result.filter((resource) => {
+        // Resource must match ALL selected skill filters (AND logic)
+        return filters.skills.every(skillFilter => 
+          resourceHasSkillAtLevels(resource, skillFilter)
+        );
+      });
+    }
     
     // Filter by search query
     if (searchQuery.trim()) {
@@ -136,7 +164,19 @@ const Index = () => {
     });
     
     return result;
-  }, [resources, searchQuery, sortOption]);
+  }, [resources, searchQuery, sortOption, filters.skills]);
+
+  const handleSkillClick = (skill: string) => {
+    // Check if skill already exists in filters
+    const existingSkill = filters.skills.find(sf => sf.skill === skill);
+    if (!existingSkill) {
+      // Add skill with all levels selected
+      setFilters(prev => ({
+        ...prev,
+        skills: [...prev.skills, { skill, levels: ['senior', 'mid', 'junior'] }]
+      }));
+    }
+  };
 
   return (
     <div className="flex h-screen bg-background">
@@ -167,11 +207,7 @@ const Index = () => {
               isLoading={isLoading} 
               viewMode={viewMode} 
               searchQuery={searchQuery}
-              onSkillClick={(skill) => {
-                if (!filters.skills.includes(skill)) {
-                  setFilters(prev => ({ ...prev, skills: [...prev.skills, skill] }));
-                }
-              }}
+              onSkillClick={handleSkillClick}
             />
           </main>
         </ScrollArea>

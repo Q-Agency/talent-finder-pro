@@ -52,7 +52,7 @@ export function ResourceDetailModal({ resource, open, onOpenChange, onSkillClick
   const handleSkillClick = (skill: string) => {
     const { dismiss } = toast({
       title: `Filter by "${skill}"?`,
-      description: "This will add the skill to your active filters.",
+      description: "This will add the skill to your active filters with all seniority levels.",
       action: (
         <button
           className="bg-primary text-primary-foreground px-3 py-1.5 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
