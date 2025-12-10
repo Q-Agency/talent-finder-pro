@@ -485,8 +485,10 @@ const Analytics = () => {
 
           {/* Certificates Tab */}
           <TabsContent value="certificates" className="space-y-6">
+            <p className="text-sm text-muted-foreground">Showing certificates held by 2 or more resources</p>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {certificateAnalysis
+                .filter(cert => cert.count >= 2)
                 .filter(cert => cert.name && cert.name.toLowerCase() !== 'no certificates' && cert.name.trim() !== '')
                 .map((cert, idx) => (
                   <Card key={idx} className="hover:shadow-md transition-shadow">
