@@ -2,13 +2,15 @@ import { Resource } from '@/services/resourceApi';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { HighlightText } from './HighlightText';
-import { Search, Building2, TrendingUp, Info } from 'lucide-react';
+import { Search, Building2, TrendingUp, Info, Check } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { SkillFilter, SkillLevel } from './FilterSidebar';
 
 interface ResourceListItemProps {
   resource: Resource;
   searchQuery?: string;
   onClick: () => void;
+  activeSkillFilters?: SkillFilter[];
 }
 
 const getHiddenFieldMatches = (resource: Resource, query: string) => {
@@ -48,7 +50,17 @@ const getSeniorityBadgeClass = (seniority: string) => {
   return 'bg-badge-junior/20 text-badge-junior border border-badge-junior/30';
 };
 
-export function ResourceListItem({ resource, searchQuery = '', onClick }: ResourceListItemProps) {
+// Check if a skill at a given level is part of the active filter
+function isSkillMatchingFilter(
+  skill: string, 
+  level: SkillLevel, 
+  activeFilters: SkillFilter[]
+): boolean {
+  const filter = activeFilters.find(f => f.skill === skill);
+  return filter ? filter.levels.includes(level) : false;
+}
+
+export function ResourceListItem({ resource, searchQuery = '', onClick, activeSkillFilters = [] }: ResourceListItemProps) {
   const getInitials = (name?: string) => {
     if (!name) return '?';
     return name.split(' ').map(n => n[0]).join('');
@@ -108,10 +120,10 @@ export function ResourceListItem({ resource, searchQuery = '', onClick }: Resour
                 const midSkills = resource.skills.mid || [];
                 const juniorSkills = resource.skills.junior || [];
                 
-                const allSkills: { name: string; level: 'senior' | 'mid' | 'junior' }[] = [
-                  ...seniorSkills.map(s => ({ name: getSkillName(s), level: 'senior' as const })),
-                  ...midSkills.map(s => ({ name: getSkillName(s), level: 'mid' as const })),
-                  ...juniorSkills.map(s => ({ name: getSkillName(s), level: 'junior' as const }))
+                const allSkills: { name: string; fullName: string; level: SkillLevel }[] = [
+                  ...seniorSkills.map(s => ({ name: getSkillName(s), fullName: s, level: 'senior' as const })),
+                  ...midSkills.map(s => ({ name: getSkillName(s), fullName: s, level: 'mid' as const })),
+                  ...juniorSkills.map(s => ({ name: getSkillName(s), fullName: s, level: 'junior' as const }))
                 ];
                 
                 const displaySkills = allSkills.slice(0, 3);
@@ -123,13 +135,25 @@ export function ResourceListItem({ resource, searchQuery = '', onClick }: Resour
                   junior: 'bg-badge-junior/20 text-badge-junior border-badge-junior/30'
                 };
 
+                const renderSkillBadge = (skill: { name: string; fullName: string; level: SkillLevel }, idx: number) => {
+                  const isMatching = isSkillMatchingFilter(skill.fullName, skill.level, activeSkillFilters);
+                  return (
+                    <Badge 
+                      key={idx} 
+                      variant="outline" 
+                      className={`text-[10px] px-1.5 py-0 h-5 border ${levelStyles[skill.level]} ${
+                        isMatching ? 'ring-2 ring-primary ring-offset-1 ring-offset-background' : ''
+                      }`}
+                    >
+                      {isMatching && <Check className="h-2.5 w-2.5 mr-0.5 text-primary" />}
+                      {skill.name}
+                    </Badge>
+                  );
+                };
+
                 return (
                   <>
-                    {displaySkills.map((skill, idx) => (
-                      <Badge key={idx} variant="outline" className={`text-[10px] px-1.5 py-0 h-5 border ${levelStyles[skill.level]}`}>
-                        {skill.name}
-                      </Badge>
-                    ))}
+                    {displaySkills.map((skill, idx) => renderSkillBadge(skill, idx))}
                     {hiddenSkills.length > 0 && (
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -137,11 +161,7 @@ export function ResourceListItem({ resource, searchQuery = '', onClick }: Resour
                         </TooltipTrigger>
                         <TooltipContent side="top" className="max-w-[200px]">
                           <div className="flex flex-wrap gap-1">
-                            {hiddenSkills.map((skill, idx) => (
-                              <Badge key={idx} variant="outline" className={`text-[10px] px-1.5 py-0 h-5 border ${levelStyles[skill.level]}`}>
-                                {skill.name}
-                              </Badge>
-                            ))}
+                            {hiddenSkills.map((skill, idx) => renderSkillBadge(skill, idx + displaySkills.length))}
                           </div>
                         </TooltipContent>
                       </Tooltip>

@@ -208,6 +208,7 @@ const Index = () => {
               viewMode={viewMode} 
               searchQuery={searchQuery}
               onSkillClick={handleSkillClick}
+              activeSkillFilters={filters.skills}
             />
           </main>
         </ScrollArea>
