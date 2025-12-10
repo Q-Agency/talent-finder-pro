@@ -2,12 +2,17 @@ import { X } from 'lucide-react';
 import { SkillFilter } from '@/components/FilterSidebar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Toggle } from '@/components/ui/toggle';
+
+export type SkillFilterMode = 'and' | 'or';
 
 interface ActiveSkillFiltersBannerProps {
   skillFilters: SkillFilter[];
   onRemoveSkill: (skill: string) => void;
   onToggleLevel: (skill: string, level: 'senior' | 'mid' | 'junior') => void;
   onClearAll: () => void;
+  filterMode: SkillFilterMode;
+  onFilterModeChange: (mode: SkillFilterMode) => void;
 }
 
 const levelLabels: Record<string, string> = {
@@ -29,15 +34,43 @@ export function ActiveSkillFiltersBanner({
   onRemoveSkill,
   onToggleLevel,
   onClearAll,
+  filterMode,
+  onFilterModeChange,
 }: ActiveSkillFiltersBannerProps) {
   if (skillFilters.length === 0) return null;
 
   return (
     <div className="bg-card/50 border border-border/50 rounded-lg p-3 mb-2">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          Active Skill Filters
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            Active Skill Filters
+          </span>
+          {skillFilters.length > 1 && (
+            <div className="flex items-center gap-1 bg-background/80 border border-border rounded-md p-0.5">
+              <button
+                onClick={() => onFilterModeChange('and')}
+                className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
+                  filterMode === 'and'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                ALL
+              </button>
+              <button
+                onClick={() => onFilterModeChange('or')}
+                className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
+                  filterMode === 'or'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                ANY
+              </button>
+            </div>
+          )}
+        </div>
         <Button
           variant="ghost"
           size="sm"
