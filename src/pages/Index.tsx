@@ -142,6 +142,29 @@ const Index = () => {
     return { and: andCount, or: orCount };
   }, [resources, filters.skills, globalSkillLevels]);
 
+  // Calculate per-level counts for selected skills
+  const levelCounts = useMemo(() => {
+    if (filters.skills.length === 0) return { senior: 0, mid: 0, junior: 0 };
+    
+    const resourceHasSkillAtLevel = (resource: Resource, level: SkillLevel): boolean => {
+      const matchFn = skillFilterMode === 'and' 
+        ? filters.skills.every.bind(filters.skills)
+        : filters.skills.some.bind(filters.skills);
+      
+      return matchFn(skill => {
+        if (level === 'senior') return resource.skills.senior.includes(skill);
+        if (level === 'mid') return resource.skills.mid.includes(skill);
+        return resource.skills.junior.includes(skill);
+      });
+    };
+    
+    return {
+      senior: resources.filter(r => resourceHasSkillAtLevel(r, 'senior')).length,
+      mid: resources.filter(r => resourceHasSkillAtLevel(r, 'mid')).length,
+      junior: resources.filter(r => resourceHasSkillAtLevel(r, 'junior')).length,
+    };
+  }, [resources, filters.skills, skillFilterMode]);
+
   // Client-side filtering and sorting
   const filteredResources = useMemo(() => {
     let result = [...resources];
@@ -255,7 +278,7 @@ const Index = () => {
               modeCounts={skillFilterCounts}
               globalSkillLevels={globalSkillLevels}
               onGlobalSkillLevelsChange={setGlobalSkillLevels}
-              matchCount={filteredResources.length}
+              levelCounts={levelCounts}
             />
           </div>
         )}
