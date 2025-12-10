@@ -500,11 +500,20 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
             </Button>
           )}
         </div>
-        <div className="mt-3 p-2.5 rounded-lg bg-accent/30 border border-border/50">
-          <p className="text-2xl font-bold text-foreground">{resultCount}</p>
-          <p className="text-xs text-muted-foreground">
-            {resultCount === 1 ? 'resource' : 'resources'} found
-          </p>
+        <div className="mt-3 p-4 rounded-xl bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 border border-primary/20 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-primary text-primary-foreground shadow-md">
+              <span className="text-2xl font-bold">{resultCount}</span>
+            </div>
+            <div>
+              <p className="text-lg font-bold text-foreground leading-tight">
+                Resources Found
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {resultCount === 1 ? 'Match for your criteria' : 'Matching your criteria'}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
