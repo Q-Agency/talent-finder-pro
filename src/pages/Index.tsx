@@ -41,8 +41,16 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortOption, setSortOption] = useState<SortOption>('name-asc');
-  const [skillFilterMode, setSkillFilterMode] = useState<SkillFilterMode>('and');
+  const [skillFilterMode, setSkillFilterMode] = useState<SkillFilterMode>(() => {
+    const saved = localStorage.getItem('skillFilterMode');
+    return (saved === 'and' || saved === 'or') ? saved : 'and';
+  });
   const { toast } = useToast();
+
+  // Persist filter mode preference
+  useEffect(() => {
+    localStorage.setItem('skillFilterMode', skillFilterMode);
+  }, [skillFilterMode]);
   
   // Fetch dynamic filter options
   const { properties, isLoading: isLoadingProperties } = useProperties(isTestMode);
