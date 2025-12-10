@@ -13,6 +13,7 @@ interface ActiveFiltersBannerProps {
   modeCounts?: { and: number; or: number };
   globalSkillLevels: SkillLevel[];
   onGlobalSkillLevelsChange: (levels: SkillLevel[]) => void;
+  matchCount: number;
 }
 
 const levelLabels: Record<SkillLevel, string> = {
@@ -48,6 +49,7 @@ export function ActiveFiltersBanner({
   modeCounts,
   globalSkillLevels,
   onGlobalSkillLevelsChange,
+  matchCount,
 }: ActiveFiltersBannerProps) {
   const hasSkillFilters = filters.skills.length > 0;
   const hasOtherFilters = 
@@ -127,6 +129,9 @@ export function ActiveFiltersBanner({
                   );
                 })}
               </div>
+              <span className="text-xs font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                {matchCount} match{matchCount !== 1 ? 'es' : ''}
+              </span>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>

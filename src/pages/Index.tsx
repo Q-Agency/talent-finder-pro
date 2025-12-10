@@ -255,6 +255,7 @@ const Index = () => {
               modeCounts={skillFilterCounts}
               globalSkillLevels={globalSkillLevels}
               onGlobalSkillLevelsChange={setGlobalSkillLevels}
+              matchCount={filteredResources.length}
             />
           </div>
         )}
