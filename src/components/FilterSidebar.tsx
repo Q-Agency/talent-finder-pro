@@ -63,7 +63,6 @@ interface GroupedFilterSectionProps {
   items: string[];
   selectedSkills: SkillFilter[];
   onToggleSkill: (skill: string) => void;
-  onToggleSeniorityLevel: (skill: string, level: SkillLevel) => void;
   onToggleMultiple: (items: string[], select: boolean) => void;
   defaultOpen?: boolean;
 }
@@ -97,53 +96,12 @@ function parseSkillCategories(skills: string[]): Map<string, string[]> {
   return sortedCategories;
 }
 
-function SeniorityChip({ 
-  level, 
-  isActive, 
-  onClick 
-}: { 
-  level: SkillLevel; 
-  isActive: boolean; 
-  onClick: () => void;
-}) {
-  const labels: Record<SkillLevel, string> = {
-    senior: 'S',
-    mid: 'M',
-    junior: 'J',
-  };
-
-  const activeClasses: Record<SkillLevel, string> = {
-    senior: 'bg-badge-senior text-white',
-    mid: 'bg-badge-mid text-white',
-    junior: 'bg-badge-junior text-white',
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick();
-      }}
-      className={`w-5 h-5 rounded text-[10px] font-bold flex items-center justify-center transition-all ${
-        isActive 
-          ? activeClasses[level]
-          : 'bg-muted text-muted-foreground hover:bg-muted/80'
-      }`}
-      title={`${level.charAt(0).toUpperCase() + level.slice(1)} Level`}
-    >
-      {labels[level]}
-    </button>
-  );
-}
-
 function GroupedFilterSection({ 
   title, 
   icon, 
   items, 
   selectedSkills, 
   onToggleSkill,
-  onToggleSeniorityLevel,
   onToggleMultiple,
   defaultOpen = false 
 }: GroupedFilterSectionProps) {
@@ -318,20 +276,6 @@ function GroupedFilterSection({
                                 {skillName}
                               </span>
                             </label>
-                            
-                            {/* Seniority Level Chips */}
-                            {isSelected && skillFilter && (
-                              <div className="flex items-center gap-0.5 ml-2">
-                                {ALL_LEVELS.map((level) => (
-                                  <SeniorityChip
-                                    key={level}
-                                    level={level}
-                                    isActive={skillFilter.levels.includes(level)}
-                                    onClick={() => onToggleSeniorityLevel(skill, level)}
-                                  />
-                                ))}
-                              </div>
-                            )}
                           </div>
                         );
                       })}
@@ -491,27 +435,6 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
     }
   };
 
-  const toggleSeniorityLevel = (skill: string, level: SkillLevel) => {
-    const skillFilter = filters.skills.find(sf => sf.skill === skill);
-    if (!skillFilter) return;
-
-    const hasLevel = skillFilter.levels.includes(level);
-    
-    // Prevent deselecting the last level
-    if (hasLevel && skillFilter.levels.length === 1) {
-      return;
-    }
-
-    const newLevels = hasLevel
-      ? skillFilter.levels.filter(l => l !== level)
-      : [...skillFilter.levels, level];
-
-    const newSkills = filters.skills.map(sf =>
-      sf.skill === skill ? { ...sf, levels: newLevels } : sf
-    );
-    onFilterChange({ ...filters, skills: newSkills });
-  };
-
   const toggleMultipleSkills = (skillNames: string[], select: boolean) => {
     if (select) {
       // Add skills that aren't already selected
@@ -615,7 +538,6 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
               items={skills}
               selectedSkills={filters.skills}
               onToggleSkill={toggleSkill}
-              onToggleSeniorityLevel={toggleSeniorityLevel}
               onToggleMultiple={toggleMultipleSkills}
               defaultOpen={true}
             />
