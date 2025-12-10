@@ -9,12 +9,15 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { ProfileMenu } from '@/components/ProfileMenu';
 import { RefreshDatasetButton } from '@/components/RefreshDatasetButton';
 import { ActiveFiltersBanner, SkillFilterMode } from '@/components/ActiveFiltersBanner';
+import { DateRangeFilter } from '@/components/DateRangeFilter';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { searchResources, Resource } from '@/services/resourceApi';
 import { useToast } from '@/hooks/use-toast';
 import { Chatbot } from '@/components/Chatbot';
 import { useProperties } from '@/hooks/useProperties';
+import { useResourceAvailability } from '@/hooks/useResourceAvailability';
+import { sortByAvailability } from '@/services/availabilityService';
 import { Calendar } from 'lucide-react';
 
 const initialFilters: Filters = {
@@ -46,6 +49,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortOption, setSortOption] = useState<SortOption>('name-asc');
+  const [dateRange, setDateRange] = useState<{ start: Date; end: Date } | null>(null);
   const [skillFilterMode, setSkillFilterMode] = useState<SkillFilterMode>(() => {
     const saved = localStorage.getItem('skillFilterMode');
     return (saved === 'and' || saved === 'or') ? saved : 'and';
@@ -61,6 +65,14 @@ const Index = () => {
     return ALL_LEVELS;
   });
   const { toast } = useToast();
+  
+  // Calculate availability for all resources when date range is set
+  const resourceIds = useMemo(() => resources.map(r => r.resource_id), [resources]);
+  const { availability } = useResourceAvailability({
+    resourceIds,
+    dateRange,
+    enabled: dateRange !== null,
+  });
 
   // Persist filter mode preference
   useEffect(() => {
@@ -210,22 +222,32 @@ const Index = () => {
     }
     
     // Sort results
-    result.sort((a, b) => {
-      switch (sortOption) {
-        case 'name-asc':
-          return a.resource_name.localeCompare(b.resource_name);
-        case 'name-desc':
-          return b.resource_name.localeCompare(a.resource_name);
-        case 'seniority':
-          const aOrder = seniorityOrder[a.seniority_level.toLowerCase()] ?? 99;
-          const bOrder = seniorityOrder[b.seniority_level.toLowerCase()] ?? 99;
-          return aOrder - bOrder;
-        case 'employment':
-          return a.employment_type.localeCompare(b.employment_type);
-        default:
-          return 0;
-      }
-    });
+    // If date range is set and sort is default, prioritize by availability
+    if (dateRange && sortOption === 'name-asc' && availability.size > 0) {
+      const sortedIds = sortByAvailability(availability, result.map(r => r.resource_id));
+      result.sort((a, b) => {
+        const aIdx = sortedIds.indexOf(a.resource_id);
+        const bIdx = sortedIds.indexOf(b.resource_id);
+        return aIdx - bIdx;
+      });
+    } else {
+      result.sort((a, b) => {
+        switch (sortOption) {
+          case 'name-asc':
+            return a.resource_name.localeCompare(b.resource_name);
+          case 'name-desc':
+            return b.resource_name.localeCompare(a.resource_name);
+          case 'seniority':
+            const aOrder = seniorityOrder[a.seniority_level.toLowerCase()] ?? 99;
+            const bOrder = seniorityOrder[b.seniority_level.toLowerCase()] ?? 99;
+            return aOrder - bOrder;
+          case 'employment':
+            return a.employment_type.localeCompare(b.employment_type);
+          default:
+            return 0;
+        }
+      });
+    }
     
     return result;
   }, [resources, searchQuery, sortOption, filters.skills, skillFilterMode, globalSkillLevels]);
@@ -266,6 +288,7 @@ const Index = () => {
           onSearchChange={setSearchQuery}
           profileMenu={<ProfileMenu isTestMode={isTestMode} onTestModeToggle={setIsTestMode} />}
         >
+          <DateRangeFilter value={dateRange} onChange={setDateRange} />
           <Link to="/schedule">
             <Button variant="outline" size="sm" className="gap-2">
               <Calendar className="h-4 w-4" />
@@ -303,6 +326,7 @@ const Index = () => {
               onSkillClick={handleSkillClick}
               activeSkillFilters={filters.skills}
               activeSkillLevels={globalSkillLevels}
+              availability={dateRange ? availability : undefined}
             />
           </main>
         </ScrollArea>

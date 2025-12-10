@@ -5,12 +5,15 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Briefcase, Sparkles, Award, Search, Building2, TrendingUp, Check } from 'lucide-react';
 import { HighlightText } from './HighlightText';
 import { SkillLevel } from './FilterSidebar';
+import { AvailabilityBadge } from './AvailabilityBadge';
+import { AvailabilityResult } from '@/services/availabilityService';
 
 interface ResourceCardProps {
   resource: Resource;
   searchQuery?: string;
   activeSkillFilters?: string[];
   activeSkillLevels?: SkillLevel[];
+  availability?: AvailabilityResult;
 }
 
 const getHiddenFieldMatches = (resource: Resource, query: string) => {
@@ -75,7 +78,7 @@ function isSkillMatchingFilter(
   return activeFilters.includes(skill) && activeLevels.includes(level);
 }
 
-export function ResourceCard({ resource, searchQuery = '', activeSkillFilters = [], activeSkillLevels = ['senior', 'mid', 'junior'] }: ResourceCardProps) {
+export function ResourceCard({ resource, searchQuery = '', activeSkillFilters = [], activeSkillLevels = ['senior', 'mid', 'junior'], availability }: ResourceCardProps) {
   const allSkills = [
     ...(resource.skills?.senior || []),
     ...(resource.skills?.mid || []),
@@ -144,6 +147,9 @@ export function ResourceCard({ resource, searchQuery = '', activeSkillFilters = 
         </div>
 
         <div className="flex flex-wrap gap-1.5 mt-4">
+          {availability && (
+            <AvailabilityBadge availability={availability} />
+          )}
           <Badge className={`text-xs font-semibold px-2.5 py-0.5 ${getEmploymentBadgeClass(resource.employment_type || '')}`}>
             <Building2 className="h-3 w-3 mr-1" />
             {resource.employment_type || 'Unknown'}
