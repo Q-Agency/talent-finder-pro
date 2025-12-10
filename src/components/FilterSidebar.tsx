@@ -34,15 +34,10 @@ interface DynamicOptions {
   verticals: string[];
 }
 
-export interface EmploymentBreakdown {
-  [key: string]: number;
-}
-
 interface FilterSidebarProps {
   filters: Filters;
   onFilterChange: (filters: Filters) => void;
   resultCount: number;
-  employmentBreakdown?: EmploymentBreakdown;
   dynamicOptions?: DynamicOptions;
   isLoadingOptions?: boolean;
 }
@@ -412,7 +407,7 @@ function FilterSection({ title, icon, items, selected, onToggle, defaultOpen = t
   );
 }
 
-export function FilterSidebar({ filters, onFilterChange, resultCount, employmentBreakdown, dynamicOptions, isLoadingOptions }: FilterSidebarProps) {
+export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOptions, isLoadingOptions }: FilterSidebarProps) {
   const [isAnimating, setIsAnimating] = useState(false);
   const [displayCount, setDisplayCount] = useState(resultCount);
   const prevCountRef = useRef(resultCount);
@@ -551,24 +546,6 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, employment
               </p>
             </div>
           </div>
-          {employmentBreakdown && resultCount > 0 && Object.keys(employmentBreakdown).length > 0 && (
-            <div className="mt-3 pt-3 border-t border-border/30">
-              <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium mb-2">By Type</p>
-              <div className="flex flex-wrap gap-1.5">
-                {Object.entries(employmentBreakdown)
-                  .sort(([, a], [, b]) => b - a)
-                  .map(([type, count]) => (
-                    <span 
-                      key={type}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs bg-background/80 border border-border/50 text-muted-foreground"
-                    >
-                      <span className="font-medium text-foreground">{count}</span>
-                      <span>{type}</span>
-                    </span>
-                  ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
