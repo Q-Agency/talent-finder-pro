@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { FilterSidebar, Filters, SkillLevel } from '@/components/FilterSidebar';
 import { SearchHeader } from '@/components/SearchHeader';
 import { ResourceGrid } from '@/components/ResourceGrid';
@@ -9,10 +10,12 @@ import { ProfileMenu } from '@/components/ProfileMenu';
 import { RefreshDatasetButton } from '@/components/RefreshDatasetButton';
 import { ActiveFiltersBanner, SkillFilterMode } from '@/components/ActiveFiltersBanner';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
 import { searchResources, Resource } from '@/services/resourceApi';
 import { useToast } from '@/hooks/use-toast';
 import { Chatbot } from '@/components/Chatbot';
 import { useProperties } from '@/hooks/useProperties';
+import { Calendar } from 'lucide-react';
 
 const initialFilters: Filters = {
   employmentTypes: [],
@@ -263,6 +266,12 @@ const Index = () => {
           onSearchChange={setSearchQuery}
           profileMenu={<ProfileMenu isTestMode={isTestMode} onTestModeToggle={setIsTestMode} />}
         >
+          <Link to="/schedule">
+            <Button variant="outline" size="sm" className="gap-2">
+              <Calendar className="h-4 w-4" />
+              Schedule
+            </Button>
+          </Link>
           <ThemeToggle />
           <SortSelect value={sortOption} onChange={setSortOption} />
           <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
