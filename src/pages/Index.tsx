@@ -285,6 +285,32 @@ const Index = () => {
 
         <ScrollArea className="flex-1 scrollbar-thin">
           <main className="p-6">
+            {/* Resources Found Header */}
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-border/50">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary">
+                  <span className="text-xl font-bold">{isLoading ? '...' : filteredResources.length}</span>
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">
+                    Resources Found
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {isLoading ? 'Searching...' : (
+                      hasActiveFilters || searchQuery 
+                        ? `Matching your ${searchQuery ? 'search' : ''}${searchQuery && hasActiveFilters ? ' and ' : ''}${hasActiveFilters ? 'filters' : ''}`
+                        : 'Showing all available resources'
+                    )}
+                  </p>
+                </div>
+              </div>
+              {!isLoading && filteredResources.length !== resources.length && (
+                <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded">
+                  {resources.length} total in database
+                </span>
+              )}
+            </div>
+
             <ResourceGrid 
               resources={filteredResources} 
               isLoading={isLoading} 
