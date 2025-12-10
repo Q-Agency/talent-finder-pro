@@ -9,7 +9,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { X, Filter, ChevronDown, Briefcase, GraduationCap, Users, Wrench, Building2, Award, Loader2, Search, MapPin } from 'lucide-react';
+import { X, Filter, ChevronDown, Briefcase, GraduationCap, Users, Wrench, Building2, Award, Loader2, Search, MapPin, ChevronRight } from 'lucide-react';
 import { employmentTypes, seniorities } from '@/data/mockData';
 import { useState, useMemo } from 'react';
 import logo from '@/assets/logo.png';
@@ -50,7 +50,229 @@ interface FilterSectionProps {
   searchable?: boolean;
 }
 
-const SEARCH_THRESHOLD = 8; // Show search if more than this many items
+interface GroupedFilterSectionProps {
+  title: string;
+  icon: React.ReactNode;
+  items: string[];
+  selected: string[];
+  onToggle: (item: string) => void;
+  onToggleMultiple: (items: string[], select: boolean) => void;
+  defaultOpen?: boolean;
+}
+
+const SEARCH_THRESHOLD = 8;
+
+// Parse skills into categories based on "Category - SkillName" pattern
+function parseSkillCategories(skills: string[]): Map<string, string[]> {
+  const categories = new Map<string, string[]>();
+  
+  skills.forEach(skill => {
+    const parts = skill.split(' - ');
+    const category = parts.length > 1 ? parts[0].trim() : 'Other';
+    
+    if (!categories.has(category)) {
+      categories.set(category, []);
+    }
+    categories.get(category)!.push(skill);
+  });
+  
+  // Sort categories alphabetically, but put "Other" at the end
+  const sortedCategories = new Map(
+    [...categories.entries()].sort((a, b) => {
+      if (a[0] === 'Other') return 1;
+      if (b[0] === 'Other') return -1;
+      return a[0].localeCompare(b[0]);
+    })
+  );
+  
+  return sortedCategories;
+}
+
+function GroupedFilterSection({ 
+  title, 
+  icon, 
+  items, 
+  selected, 
+  onToggle, 
+  onToggleMultiple,
+  defaultOpen = false 
+}: GroupedFilterSectionProps) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  
+  const selectedCount = selected.length;
+  const showSearch = items.length > SEARCH_THRESHOLD;
+  
+  const categories = useMemo(() => parseSkillCategories(items), [items]);
+  
+  const filteredCategories = useMemo(() => {
+    if (!searchQuery.trim()) return categories;
+    
+    const query = searchQuery.toLowerCase();
+    const filtered = new Map<string, string[]>();
+    
+    categories.forEach((skills, category) => {
+      const matchingSkills = skills.filter(skill => 
+        skill.toLowerCase().includes(query) || category.toLowerCase().includes(query)
+      );
+      if (matchingSkills.length > 0) {
+        filtered.set(category, matchingSkills);
+      }
+    });
+    
+    return filtered;
+  }, [categories, searchQuery]);
+  
+  const toggleCategory = (category: string) => {
+    setExpandedCategories(prev => {
+      const next = new Set(prev);
+      if (next.has(category)) {
+        next.delete(category);
+      } else {
+        next.add(category);
+      }
+      return next;
+    });
+  };
+  
+  const getCategorySelectionState = (categorySkills: string[]) => {
+    const selectedInCategory = categorySkills.filter(s => selected.includes(s));
+    if (selectedInCategory.length === 0) return 'none';
+    if (selectedInCategory.length === categorySkills.length) return 'all';
+    return 'partial';
+  };
+  
+  const handleSelectAllCategory = (categorySkills: string[], currentState: string) => {
+    if (currentState === 'all') {
+      // Deselect all in category
+      onToggleMultiple(categorySkills, false);
+    } else {
+      // Select all in category
+      onToggleMultiple(categorySkills, true);
+    }
+  };
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <CollapsibleTrigger className="flex items-center justify-between w-full py-2 px-3 rounded-lg hover:bg-accent/50 transition-colors group">
+        <div className="flex items-center gap-2">
+          <span className="text-primary/70 group-hover:text-primary transition-colors">
+            {icon}
+          </span>
+          <span className="font-medium text-sm text-foreground">{title}</span>
+          {selectedCount > 0 && (
+            <Badge variant="secondary" className="h-5 px-1.5 text-xs font-medium bg-primary/10 text-primary">
+              {selectedCount}
+            </Badge>
+          )}
+        </div>
+        <ChevronDown 
+          className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
+        />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pt-1 pb-2">
+        {showSearch && (
+          <div className="px-3 pb-2">
+            <div className="relative">
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder={`Search ${title.toLowerCase()}...`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-7 pl-7 pr-7 text-xs bg-background border-border/50"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+        
+        <div className="space-y-1 ml-1">
+          {filteredCategories.size === 0 ? (
+            <p className="text-xs text-muted-foreground px-3 py-2">No matches found</p>
+          ) : (
+            Array.from(filteredCategories.entries()).map(([category, categorySkills]) => {
+              const isExpanded = expandedCategories.has(category) || searchQuery.trim() !== '';
+              const selectionState = getCategorySelectionState(categorySkills);
+              const selectedInCategory = categorySkills.filter(s => selected.includes(s)).length;
+              
+              return (
+                <div key={category} className="border border-border/30 rounded-md overflow-hidden">
+                  {/* Category Header */}
+                  <div 
+                    className="flex items-center gap-2 py-1.5 px-2 bg-accent/20 hover:bg-accent/40 cursor-pointer transition-colors"
+                    onClick={() => toggleCategory(category)}
+                  >
+                    <ChevronRight 
+                      className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}
+                    />
+                    <Checkbox
+                      checked={selectionState === 'all'}
+                      ref={(el) => {
+                        if (el) {
+                          (el as HTMLButtonElement).dataset.state = selectionState === 'partial' ? 'indeterminate' : (selectionState === 'all' ? 'checked' : 'unchecked');
+                        }
+                      }}
+                      className={`border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary ${selectionState === 'partial' ? 'bg-primary/50 border-primary' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSelectAllCategory(categorySkills, selectionState);
+                      }}
+                      onCheckedChange={() => {}}
+                    />
+                    <span className="text-xs font-semibold text-foreground flex-1">{category}</span>
+                    <Badge variant="outline" className="h-4 px-1 text-[10px] text-muted-foreground border-border/50">
+                      {selectedInCategory}/{categorySkills.length}
+                    </Badge>
+                  </div>
+                  
+                  {/* Category Skills */}
+                  {isExpanded && (
+                    <div className="py-1 bg-background/50">
+                      {categorySkills.map((skill) => {
+                        const isSelected = selected.includes(skill);
+                        const skillName = skill.includes(' - ') ? skill.split(' - ').slice(1).join(' - ') : skill;
+                        const inputId = `skill-${skill}`.replace(/\s+/g, '-');
+                        
+                        return (
+                          <label 
+                            key={skill}
+                            htmlFor={inputId}
+                            className={`flex items-center space-x-2 py-1 px-3 pl-8 cursor-pointer transition-colors ${
+                              isSelected ? 'bg-primary/5' : 'hover:bg-accent/30'
+                            }`}
+                          >
+                            <Checkbox
+                              id={inputId}
+                              checked={isSelected}
+                              onCheckedChange={() => onToggle(skill)}
+                              className="border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                            />
+                            <span className={`text-xs ${isSelected ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                              {skillName}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
 
 function FilterSection({ title, icon, items, selected, onToggle, defaultOpen = true, searchable = false }: FilterSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -62,13 +284,11 @@ function FilterSection({ title, icon, items, selected, onToggle, defaultOpen = t
   const { selectedItems, unselectedItems } = useMemo(() => {
     let itemsToProcess = items;
     
-    // Apply search filter if there's a query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       itemsToProcess = items.filter(item => item.toLowerCase().includes(query));
     }
     
-    // Separate selected and unselected
     const selectedItems = itemsToProcess.filter(item => selected.includes(item));
     const unselectedItems = itemsToProcess.filter(item => !selected.includes(item));
     
@@ -123,7 +343,6 @@ function FilterSection({ title, icon, items, selected, onToggle, defaultOpen = t
             <p className="text-xs text-muted-foreground px-3 py-2">No matches found</p>
           ) : (
             <>
-              {/* Selected items pinned at top */}
               {selectedItems.map((item) => {
                 const inputId = `${title}-${item}`.replace(/\s+/g, '-');
                 return (
@@ -145,12 +364,10 @@ function FilterSection({ title, icon, items, selected, onToggle, defaultOpen = t
                 );
               })}
               
-              {/* Divider if there are both selected and unselected items */}
               {selectedItems.length > 0 && unselectedItems.length > 0 && (
                 <div className="border-t border-border/30 my-1.5 mx-3" />
               )}
               
-              {/* Unselected items */}
               {unselectedItems.map((item) => {
                 const inputId = `${title}-${item}`.replace(/\s+/g, '-');
                 return (
@@ -185,6 +402,22 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
     const newItems = currentItems.includes(item)
       ? currentItems.filter((i) => i !== item)
       : [...currentItems, item];
+    onFilterChange({ ...filters, [category]: newItems });
+  };
+
+  const toggleMultipleFilters = (category: keyof Filters, items: string[], select: boolean) => {
+    const currentItems = filters[category];
+    let newItems: string[];
+    
+    if (select) {
+      // Add items that aren't already selected
+      const itemsToAdd = items.filter(item => !currentItems.includes(item));
+      newItems = [...currentItems, ...itemsToAdd];
+    } else {
+      // Remove all specified items
+      newItems = currentItems.filter(item => !items.includes(item));
+    }
+    
     onFilterChange({ ...filters, [category]: newItems });
   };
 
@@ -290,14 +523,14 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
                 searchable
               />
 
-              <FilterSection
+              <GroupedFilterSection
                 title="Skills"
                 icon={<Wrench className="h-4 w-4" />}
                 items={skills}
                 selected={filters.skills}
                 onToggle={(item) => toggleFilter('skills', item)}
+                onToggleMultiple={(items, select) => toggleMultipleFilters('skills', items, select)}
                 defaultOpen={false}
-                searchable
               />
 
               <FilterSection
