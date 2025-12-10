@@ -544,14 +544,6 @@ const Analytics = () => {
                             <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                           ))}
                         </Pie>
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: 'hsl(var(--popover))',
-                            border: '1px solid hsl(var(--border))',
-                            borderRadius: '8px',
-                            color: 'hsl(var(--popover-foreground))'
-                          }}
-                        />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -607,19 +599,13 @@ const Analytics = () => {
                           outerRadius={100}
                           dataKey="count"
                           nameKey="name"
+                          label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                          labelLine={false}
                         >
                           {employmentBreakdown.map((_, index) => (
                             <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                           ))}
                         </Pie>
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: 'hsl(var(--popover))',
-                            border: '1px solid hsl(var(--border))',
-                            borderRadius: '8px',
-                            color: 'hsl(var(--popover-foreground))'
-                          }}
-                        />
                         <Legend />
                       </PieChart>
                     </ResponsiveContainer>
