@@ -409,12 +409,43 @@ function FilterSection({ title, icon, items, selected, onToggle, defaultOpen = t
 
 export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOptions, isLoadingOptions }: FilterSidebarProps) {
   const [isAnimating, setIsAnimating] = useState(false);
+  const [displayCount, setDisplayCount] = useState(resultCount);
   const prevCountRef = useRef(resultCount);
 
   useEffect(() => {
     if (prevCountRef.current !== resultCount) {
+      const startCount = prevCountRef.current;
+      const endCount = resultCount;
+      const diff = endCount - startCount;
+      
+      // Only animate count-up if going from lower to higher
+      if (diff > 0 && startCount === 0) {
+        // Animate from 0 to target
+        const duration = Math.min(600, diff * 20); // Cap at 600ms
+        const steps = Math.min(diff, 30); // Max 30 steps
+        const stepValue = diff / steps;
+        const stepDuration = duration / steps;
+        
+        let currentStep = 0;
+        const interval = setInterval(() => {
+          currentStep++;
+          if (currentStep >= steps) {
+            setDisplayCount(endCount);
+            clearInterval(interval);
+          } else {
+            setDisplayCount(Math.round(startCount + (stepValue * currentStep)));
+          }
+        }, stepDuration);
+        
+        prevCountRef.current = resultCount;
+        return () => clearInterval(interval);
+      } else {
+        // Instant update for other cases
+        setDisplayCount(resultCount);
+      }
+      
       setIsAnimating(true);
-      const timer = setTimeout(() => setIsAnimating(false), 600);
+      const timer = setTimeout(() => setIsAnimating(false), 400);
       prevCountRef.current = resultCount;
       return () => clearTimeout(timer);
     }
@@ -522,7 +553,7 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
                 ? 'bg-muted-foreground/20 text-muted-foreground' 
                 : 'bg-primary text-primary-foreground'
             } ${isAnimating ? 'animate-pop' : ''}`}>
-              <span className="text-2xl font-bold">{resultCount}</span>
+              <span className="text-2xl font-bold">{displayCount}</span>
             </div>
             <div>
               <p className={`text-lg font-bold leading-tight transition-colors ${
