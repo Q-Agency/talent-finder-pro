@@ -108,13 +108,14 @@ export function ResourceListItem({ resource, searchQuery = '', onClick }: Resour
                 const midSkills = resource.skills.mid || [];
                 const juniorSkills = resource.skills.junior || [];
                 
-                const displaySkills: { name: string; level: 'senior' | 'mid' | 'junior' }[] = [];
-                seniorSkills.slice(0, 2).forEach(s => displaySkills.push({ name: getSkillName(s), level: 'senior' }));
-                if (displaySkills.length < 3) midSkills.slice(0, 3 - displaySkills.length).forEach(s => displaySkills.push({ name: getSkillName(s), level: 'mid' }));
-                if (displaySkills.length < 3) juniorSkills.slice(0, 3 - displaySkills.length).forEach(s => displaySkills.push({ name: getSkillName(s), level: 'junior' }));
+                const allSkills: { name: string; level: 'senior' | 'mid' | 'junior' }[] = [
+                  ...seniorSkills.map(s => ({ name: getSkillName(s), level: 'senior' as const })),
+                  ...midSkills.map(s => ({ name: getSkillName(s), level: 'mid' as const })),
+                  ...juniorSkills.map(s => ({ name: getSkillName(s), level: 'junior' as const }))
+                ];
                 
-                const totalSkills = seniorSkills.length + midSkills.length + juniorSkills.length;
-                const remaining = totalSkills - displaySkills.length;
+                const displaySkills = allSkills.slice(0, 3);
+                const hiddenSkills = allSkills.slice(3);
 
                 const levelStyles = {
                   senior: 'bg-badge-senior/20 text-badge-senior border-badge-senior/30',
@@ -129,8 +130,21 @@ export function ResourceListItem({ resource, searchQuery = '', onClick }: Resour
                         {skill.name}
                       </Badge>
                     ))}
-                    {remaining > 0 && (
-                      <span className="text-[10px] text-muted-foreground">+{remaining}</span>
+                    {hiddenSkills.length > 0 && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="text-[10px] text-muted-foreground cursor-help hover:text-foreground">+{hiddenSkills.length}</span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-[200px]">
+                          <div className="flex flex-wrap gap-1">
+                            {hiddenSkills.map((skill, idx) => (
+                              <Badge key={idx} variant="outline" className={`text-[10px] px-1.5 py-0 h-5 border ${levelStyles[skill.level]}`}>
+                                {skill.name}
+                              </Badge>
+                            ))}
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
                     )}
                   </>
                 );
