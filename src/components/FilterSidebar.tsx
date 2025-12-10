@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/collapsible';
 import { X, Filter, ChevronDown, Briefcase, GraduationCap, Users, Wrench, Building2, Award, Loader2, Search, MapPin, ChevronRight } from 'lucide-react';
 import { employmentTypes, seniorities } from '@/data/mockData';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import logo from '@/assets/logo.png';
 
 export type SkillLevel = 'senior' | 'mid' | 'junior';
@@ -408,6 +408,17 @@ function FilterSection({ title, icon, items, selected, onToggle, defaultOpen = t
 }
 
 export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOptions, isLoadingOptions }: FilterSidebarProps) {
+  const [isAnimating, setIsAnimating] = useState(false);
+  const prevCountRef = useRef(resultCount);
+
+  useEffect(() => {
+    if (prevCountRef.current !== resultCount) {
+      setIsAnimating(true);
+      const timer = setTimeout(() => setIsAnimating(false), 600);
+      prevCountRef.current = resultCount;
+      return () => clearTimeout(timer);
+    }
+  }, [resultCount]);
   const toggleFilter = (category: keyof Omit<Filters, 'skills'>, item: string) => {
     const currentItems = filters[category] as string[];
     const newItems = currentItems.includes(item)
@@ -500,17 +511,31 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
             </Button>
           )}
         </div>
-        <div className="mt-3 p-4 rounded-xl bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 border border-primary/20 shadow-sm">
+        <div className={`mt-3 p-4 rounded-xl border shadow-sm transition-all duration-300 ${
+          resultCount === 0 
+            ? 'bg-muted/50 border-border/50' 
+            : 'bg-gradient-to-br from-primary/15 via-primary/10 to-primary/5 border-primary/20'
+        }`}>
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-primary text-primary-foreground shadow-md">
+            <div className={`flex items-center justify-center w-14 h-14 rounded-xl shadow-md transition-all duration-300 ${
+              resultCount === 0 
+                ? 'bg-muted-foreground/20 text-muted-foreground' 
+                : 'bg-primary text-primary-foreground'
+            } ${isAnimating ? 'animate-pulse scale-110' : ''}`}>
               <span className="text-2xl font-bold">{resultCount}</span>
             </div>
             <div>
-              <p className="text-lg font-bold text-foreground leading-tight">
-                Resources Found
+              <p className={`text-lg font-bold leading-tight transition-colors ${
+                resultCount === 0 ? 'text-muted-foreground' : 'text-foreground'
+              }`}>
+                {resultCount === 0 ? 'No Resources' : 'Resources Found'}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {resultCount === 1 ? 'Match for your criteria' : 'Matching your criteria'}
+                {resultCount === 0 
+                  ? 'Try adjusting your filters' 
+                  : resultCount === 1 
+                    ? 'Match for your criteria' 
+                    : 'Matching your criteria'}
               </p>
             </div>
           </div>
