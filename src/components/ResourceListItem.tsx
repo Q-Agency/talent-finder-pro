@@ -88,9 +88,6 @@ export function ResourceListItem({ resource, searchQuery = '', onClick }: Resour
           </Badge>
         </div>
 
-        <span className="text-xs text-muted-foreground hidden lg:block truncate max-w-[120px]">
-          <HighlightText text={resource.technical_domain || ''} query={searchQuery} />
-        </span>
 
         {resource.skills && (
           <div className="hidden xl:flex items-center gap-1 flex-wrap max-w-[200px]">
