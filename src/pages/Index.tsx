@@ -68,7 +68,7 @@ const Index = () => {
   
   // Calculate availability for all resources when date range is set
   const resourceIds = useMemo(() => resources.map(r => r.resource_id), [resources]);
-  const { availability } = useResourceAvailability({
+  const { availability, assignments } = useResourceAvailability({
     resourceIds,
     dateRange,
     enabled: dateRange !== null,
@@ -327,6 +327,8 @@ const Index = () => {
               activeSkillFilters={filters.skills}
               activeSkillLevels={globalSkillLevels}
               availability={dateRange ? availability : undefined}
+              assignments={assignments}
+              dateRange={dateRange}
             />
           </main>
         </ScrollArea>

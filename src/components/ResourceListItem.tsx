@@ -6,7 +6,8 @@ import { Search, Building2, TrendingUp, Info, Check } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { SkillLevel } from './FilterSidebar';
 import { AvailabilityBadge } from './AvailabilityBadge';
-import { AvailabilityResult } from '@/services/availabilityService';
+import { MiniTimeline } from './MiniTimeline';
+import { AvailabilityResult, Assignment } from '@/services/availabilityService';
 
 interface ResourceListItemProps {
   resource: Resource;
@@ -15,6 +16,8 @@ interface ResourceListItemProps {
   activeSkillFilters?: string[];
   activeSkillLevels?: SkillLevel[];
   availability?: AvailabilityResult;
+  assignments?: Assignment[];
+  dateRange?: { start: Date; end: Date } | null;
 }
 
 const getHiddenFieldMatches = (resource: Resource, query: string) => {
@@ -64,7 +67,7 @@ function isSkillMatchingFilter(
   return activeFilters.includes(skill) && activeLevels.includes(level);
 }
 
-export function ResourceListItem({ resource, searchQuery = '', onClick, activeSkillFilters = [], activeSkillLevels = ['senior', 'mid', 'junior'], availability }: ResourceListItemProps) {
+export function ResourceListItem({ resource, searchQuery = '', onClick, activeSkillFilters = [], activeSkillLevels = ['senior', 'mid', 'junior'], availability, assignments = [], dateRange }: ResourceListItemProps) {
   const getInitials = (name?: string) => {
     if (!name) return '?';
     return name.split(' ').map(n => n[0]).join('');
@@ -116,6 +119,18 @@ export function ResourceListItem({ resource, searchQuery = '', onClick, activeSk
             {resource.seniority_level || 'Unknown'}
           </Badge>
         </div>
+
+        {dateRange && (
+          <div className="hidden lg:block w-32">
+            <MiniTimeline
+              resourceId={resource.resource_id}
+              assignments={assignments}
+              rangeStart={dateRange.start}
+              rangeEnd={dateRange.end}
+              compact
+            />
+          </div>
+        )}
 
 
         {resource.skills && (
