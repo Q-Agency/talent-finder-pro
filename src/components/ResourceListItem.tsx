@@ -69,7 +69,7 @@ export function ResourceListItem({ resource, searchQuery = '', onClick, activeSk
 
   return (
     <div 
-      className="flex items-center gap-4 p-3 bg-card border border-border/50 rounded-lg hover:border-primary/20 hover:bg-accent/50 transition-all duration-200 cursor-pointer"
+      className="flex items-center gap-4 p-3 bg-card border border-border/50 rounded-lg shadow-sm dark:shadow-none hover:border-primary/20 hover:bg-accent/50 hover:shadow-md dark:hover:shadow-none transition-all duration-200 cursor-pointer"
       onClick={onClick}
     >
       <Avatar className="h-9 w-9 ring-2 ring-background shadow-sm shrink-0">
