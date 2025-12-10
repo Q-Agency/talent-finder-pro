@@ -7,7 +7,6 @@ import { ResourceCardSkeleton, ResourceListItemSkeleton } from './ResourceSkelet
 import { Users } from 'lucide-react';
 import { ViewMode } from './ViewToggle';
 import { SkillLevel } from './FilterSidebar';
-import { AvailabilityResult, Assignment } from '@/services/availabilityService';
 
 interface ResourceGridProps {
   resources: Resource[];
@@ -17,13 +16,9 @@ interface ResourceGridProps {
   onSkillClick?: (skill: string) => void;
   activeSkillFilters?: string[];
   activeSkillLevels?: SkillLevel[];
-  availability?: Map<string, AvailabilityResult>;
-  assignments?: Assignment[];
-  dateRange?: { start: Date; end: Date } | null;
-  highlightedResourceId?: string;
 }
 
-export function ResourceGrid({ resources, isLoading, viewMode, searchQuery = '', onSkillClick, activeSkillFilters = [], activeSkillLevels = ['senior', 'mid', 'junior'], availability, assignments = [], dateRange, highlightedResourceId }: ResourceGridProps) {
+export function ResourceGrid({ resources, isLoading, viewMode, searchQuery = '', onSkillClick, activeSkillFilters = [], activeSkillLevels = ['senior', 'mid', 'junior'] }: ResourceGridProps) {
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
 
   if (isLoading) {
@@ -57,42 +52,21 @@ export function ResourceGrid({ resources, isLoading, viewMode, searchQuery = '',
       {viewMode === 'list' ? (
         <div className="flex flex-col gap-1.5">
           {resources.map((resource) => (
-            <div
-              key={resource.resource_id}
-              id={`resource-${resource.resource_id}`}
-              className={highlightedResourceId === resource.resource_id ? 'animate-pulse ring-2 ring-primary rounded-lg' : ''}
-            >
-              <ResourceListItem 
-                resource={resource} 
-                searchQuery={searchQuery}
-                onClick={() => setSelectedResource(resource)}
-                activeSkillFilters={activeSkillFilters}
-                activeSkillLevels={activeSkillLevels}
-                availability={availability?.get(resource.resource_id)}
-                assignments={assignments}
-                dateRange={dateRange}
-              />
-            </div>
+          <ResourceListItem 
+              key={resource.resource_id} 
+              resource={resource} 
+              searchQuery={searchQuery}
+              onClick={() => setSelectedResource(resource)}
+              activeSkillFilters={activeSkillFilters}
+              activeSkillLevels={activeSkillLevels}
+            />
           ))}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {resources.map((resource) => (
-            <div 
-              key={resource.resource_id} 
-              id={`resource-${resource.resource_id}`}
-              onClick={() => setSelectedResource(resource)} 
-              className={`cursor-pointer ${highlightedResourceId === resource.resource_id ? 'animate-pulse ring-2 ring-primary rounded-lg' : ''}`}
-            >
-              <ResourceCard 
-                resource={resource} 
-                searchQuery={searchQuery} 
-                activeSkillFilters={activeSkillFilters} 
-                activeSkillLevels={activeSkillLevels}
-                availability={availability?.get(resource.resource_id)}
-                assignments={assignments}
-                dateRange={dateRange}
-              />
+          <div key={resource.resource_id} onClick={() => setSelectedResource(resource)} className="cursor-pointer">
+              <ResourceCard resource={resource} searchQuery={searchQuery} activeSkillFilters={activeSkillFilters} activeSkillLevels={activeSkillLevels} />
             </div>
           ))}
         </div>
