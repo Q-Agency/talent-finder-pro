@@ -13,6 +13,7 @@ interface ActiveSkillFiltersBannerProps {
   onClearAll: () => void;
   filterMode: SkillFilterMode;
   onFilterModeChange: (mode: SkillFilterMode) => void;
+  modeCounts?: { and: number; or: number };
 }
 
 const levelLabels: Record<string, string> = {
@@ -36,6 +37,7 @@ export function ActiveSkillFiltersBanner({
   onClearAll,
   filterMode,
   onFilterModeChange,
+  modeCounts,
 }: ActiveSkillFiltersBannerProps) {
   if (skillFilters.length === 0) return null;
 
@@ -50,23 +52,33 @@ export function ActiveSkillFiltersBanner({
             <div className="flex items-center gap-1 bg-background/80 border border-border rounded-md p-0.5">
               <button
                 onClick={() => onFilterModeChange('and')}
-                className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
+                className={`px-2 py-0.5 text-xs font-medium rounded transition-colors flex items-center gap-1.5 ${
                   filterMode === 'and'
                     ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 ALL
+                {modeCounts && (
+                  <span className={`text-[10px] ${filterMode === 'and' ? 'opacity-80' : 'opacity-60'}`}>
+                    ({modeCounts.and})
+                  </span>
+                )}
               </button>
               <button
                 onClick={() => onFilterModeChange('or')}
-                className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
+                className={`px-2 py-0.5 text-xs font-medium rounded transition-colors flex items-center gap-1.5 ${
                   filterMode === 'or'
                     ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 ANY
+                {modeCounts && (
+                  <span className={`text-[10px] ${filterMode === 'or' ? 'opacity-80' : 'opacity-60'}`}>
+                    ({modeCounts.or})
+                  </span>
+                )}
               </button>
             </div>
           )}
