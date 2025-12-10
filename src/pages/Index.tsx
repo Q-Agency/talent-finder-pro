@@ -50,6 +50,7 @@ const Index = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortOption, setSortOption] = useState<SortOption>('name-asc');
   const [dateRange, setDateRange] = useState<{ start: Date; end: Date } | null>(null);
+  const [minAvailability, setMinAvailability] = useState(0);
   const [skillFilterMode, setSkillFilterMode] = useState<SkillFilterMode>(() => {
     const saved = localStorage.getItem('skillFilterMode');
     return (saved === 'and' || saved === 'or') ? saved : 'and';
@@ -220,6 +221,14 @@ const Index = () => {
         );
       });
     }
+
+    // Filter by minimum availability
+    if (dateRange && minAvailability > 0 && availability.size > 0) {
+      result = result.filter((resource) => {
+        const avail = availability.get(resource.resource_id);
+        return avail ? avail.percentage >= minAvailability : true;
+      });
+    }
     
     // Sort results
     // If date range is set and sort is default, prioritize by availability
@@ -250,7 +259,7 @@ const Index = () => {
     }
     
     return result;
-  }, [resources, searchQuery, sortOption, filters.skills, skillFilterMode, globalSkillLevels]);
+  }, [resources, searchQuery, sortOption, filters.skills, skillFilterMode, globalSkillLevels, dateRange, minAvailability, availability]);
 
 
   const handleSkillClick = (skill: string) => {
@@ -288,7 +297,12 @@ const Index = () => {
           onSearchChange={setSearchQuery}
           profileMenu={<ProfileMenu isTestMode={isTestMode} onTestModeToggle={setIsTestMode} />}
         >
-          <DateRangeFilter value={dateRange} onChange={setDateRange} />
+          <DateRangeFilter 
+            value={dateRange} 
+            onChange={setDateRange} 
+            minAvailability={minAvailability}
+            onMinAvailabilityChange={setMinAvailability}
+          />
           <Link to="/schedule">
             <Button variant="outline" size="sm" className="gap-2">
               <Calendar className="h-4 w-4" />
