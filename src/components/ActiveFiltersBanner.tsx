@@ -13,7 +13,7 @@ interface ActiveFiltersBannerProps {
   modeCounts?: { and: number; or: number };
   globalSkillLevels: SkillLevel[];
   onGlobalSkillLevelsChange: (levels: SkillLevel[]) => void;
-  matchCount: number;
+  levelCounts: { senior: number; mid: number; junior: number };
 }
 
 const levelLabels: Record<SkillLevel, string> = {
@@ -49,7 +49,7 @@ export function ActiveFiltersBanner({
   modeCounts,
   globalSkillLevels,
   onGlobalSkillLevelsChange,
-  matchCount,
+  levelCounts,
 }: ActiveFiltersBannerProps) {
   const hasSkillFilters = filters.skills.length > 0;
   const hasOtherFilters = 
@@ -112,26 +112,27 @@ export function ActiveFiltersBanner({
           {hasSkillFilters && (
             <div className="flex items-center gap-1.5">
               <span className="text-xs text-muted-foreground">Skill Levels:</span>
-              <div className="flex gap-0.5">
+              <div className="flex gap-1">
                 {(['senior', 'mid', 'junior'] as const).map((level) => {
                   const isActive = globalSkillLevels.includes(level);
+                  const count = levelCounts[level];
                   return (
                     <button
                       key={level}
                       onClick={() => handleToggleGlobalLevel(level)}
-                      className={`w-5 h-5 rounded text-[10px] font-bold flex items-center justify-center transition-colors ${
+                      className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold transition-colors ${
                         isActive ? levelColors[level] : levelColorsInactive
                       }`}
-                      title={`${level.charAt(0).toUpperCase() + level.slice(1)} level`}
+                      title={`${level.charAt(0).toUpperCase() + level.slice(1)} level - ${count} resource${count !== 1 ? 's' : ''}`}
                     >
                       {levelLabels[level]}
+                      <span className={`text-[9px] ${isActive ? 'opacity-80' : 'opacity-60'}`}>
+                        ({count})
+                      </span>
                     </button>
                   );
                 })}
               </div>
-              <span className="text-xs font-medium text-primary bg-primary/10 px-1.5 py-0.5 rounded">
-                {matchCount} match{matchCount !== 1 ? 'es' : ''}
-              </span>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -142,7 +143,7 @@ export function ActiveFiltersBanner({
                       <strong>S</strong> = Senior level skills<br />
                       <strong>M</strong> = Mid level skills<br />
                       <strong>J</strong> = Junior level skills<br />
-                      <span className="text-muted-foreground mt-1 block">Toggle to filter by skill proficiency level</span>
+                      <span className="text-muted-foreground mt-1 block">Numbers show resources with selected skills at each level</span>
                     </p>
                   </TooltipContent>
                 </Tooltip>
