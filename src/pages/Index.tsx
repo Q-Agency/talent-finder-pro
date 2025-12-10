@@ -7,6 +7,7 @@ import { SortSelect, SortOption } from '@/components/SortSelect';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { ProfileMenu } from '@/components/ProfileMenu';
 import { RefreshDatasetButton } from '@/components/RefreshDatasetButton';
+import { ActiveSkillFiltersBanner } from '@/components/ActiveSkillFiltersBanner';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { searchResources, Resource, ApiFilters } from '@/services/resourceApi';
 import { useToast } from '@/hooks/use-toast';
@@ -178,6 +179,34 @@ const Index = () => {
     }
   };
 
+  const handleRemoveSkillFilter = (skill: string) => {
+    setFilters(prev => ({
+      ...prev,
+      skills: prev.skills.filter(sf => sf.skill !== skill)
+    }));
+  };
+
+  const handleToggleSkillLevel = (skill: string, level: 'senior' | 'mid' | 'junior') => {
+    setFilters(prev => ({
+      ...prev,
+      skills: prev.skills.map(sf => {
+        if (sf.skill !== skill) return sf;
+        const hasLevel = sf.levels.includes(level);
+        if (hasLevel && sf.levels.length === 1) return sf; // Prevent removing last level
+        return {
+          ...sf,
+          levels: hasLevel
+            ? sf.levels.filter(l => l !== level)
+            : [...sf.levels, level]
+        };
+      })
+    }));
+  };
+
+  const handleClearAllSkillFilters = () => {
+    setFilters(prev => ({ ...prev, skills: [] }));
+  };
+
   return (
     <div className="flex h-screen bg-background">
       <FilterSidebar
@@ -202,6 +231,12 @@ const Index = () => {
 
         <ScrollArea className="flex-1 scrollbar-thin">
           <main className="p-6">
+            <ActiveSkillFiltersBanner
+              skillFilters={filters.skills}
+              onRemoveSkill={handleRemoveSkillFilter}
+              onToggleLevel={handleToggleSkillLevel}
+              onClearAll={handleClearAllSkillFilters}
+            />
             <ResourceGrid 
               resources={filteredResources} 
               isLoading={isLoading} 
