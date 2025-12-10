@@ -485,40 +485,26 @@ const Analytics = () => {
 
           {/* Certificates Tab */}
           <TabsContent value="certificates" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Award className="h-5 w-5" />
-                  Certificate Distribution
-                </CardTitle>
-                <CardDescription>Number of resources holding each certificate</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[400px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={certificateAnalysis.slice(0, 15)} layout="vertical" margin={{ left: 120 }}>
-                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                      <XAxis type="number" className="text-xs" />
-                      <YAxis 
-                        type="category" 
-                        dataKey="name" 
-                        className="text-xs"
-                        width={120}
-                        tick={{ fontSize: 10 }}
-                      />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: 'hsl(var(--popover))',
-                          border: '1px solid hsl(var(--border))',
-                          borderRadius: '8px'
-                        }}
-                      />
-                      <Bar dataKey="count" fill="hsl(var(--chart-2))" radius={[0, 4, 4, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {certificateAnalysis
+                .filter(cert => cert.name && cert.name.toLowerCase() !== 'no certificates' && cert.name.trim() !== '')
+                .map((cert, idx) => (
+                  <Card key={idx} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="p-2 rounded-lg bg-chart-2/10 shrink-0">
+                          <Award className="h-4 w-4 text-chart-2" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-sm truncate" title={cert.name}>{cert.name}</p>
+                          <p className="text-2xl font-bold text-chart-2 mt-1">{cert.count}</p>
+                          <p className="text-xs text-muted-foreground">resources</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+            </div>
           </TabsContent>
 
           {/* Industries Tab */}
