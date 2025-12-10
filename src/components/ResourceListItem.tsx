@@ -2,7 +2,7 @@ import { Resource } from '@/services/resourceApi';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { HighlightText } from './HighlightText';
-import { Search, Building2, TrendingUp } from 'lucide-react';
+import { Search, Building2, TrendingUp, Info } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ResourceListItemProps {
@@ -100,40 +100,64 @@ export function ResourceListItem({ resource, searchQuery = '', onClick }: Resour
 
 
         {resource.skills && (
-          <div className="hidden xl:flex items-center gap-1 flex-wrap max-w-[250px]">
-            {(() => {
-              const getSkillName = (skill: string) => skill.includes(' - ') ? skill.split(' - ')[1] : skill;
-              const seniorSkills = resource.skills.senior || [];
-              const midSkills = resource.skills.mid || [];
-              const juniorSkills = resource.skills.junior || [];
-              
-              const displaySkills: { name: string; level: 'senior' | 'mid' | 'junior' }[] = [];
-              seniorSkills.slice(0, 2).forEach(s => displaySkills.push({ name: getSkillName(s), level: 'senior' }));
-              if (displaySkills.length < 3) midSkills.slice(0, 3 - displaySkills.length).forEach(s => displaySkills.push({ name: getSkillName(s), level: 'mid' }));
-              if (displaySkills.length < 3) juniorSkills.slice(0, 3 - displaySkills.length).forEach(s => displaySkills.push({ name: getSkillName(s), level: 'junior' }));
-              
-              const totalSkills = seniorSkills.length + midSkills.length + juniorSkills.length;
-              const remaining = totalSkills - displaySkills.length;
+          <div className="hidden xl:flex items-center gap-1.5 max-w-[280px]">
+            <div className="flex items-center gap-1 flex-wrap">
+              {(() => {
+                const getSkillName = (skill: string) => skill.includes(' - ') ? skill.split(' - ')[1] : skill;
+                const seniorSkills = resource.skills.senior || [];
+                const midSkills = resource.skills.mid || [];
+                const juniorSkills = resource.skills.junior || [];
+                
+                const displaySkills: { name: string; level: 'senior' | 'mid' | 'junior' }[] = [];
+                seniorSkills.slice(0, 2).forEach(s => displaySkills.push({ name: getSkillName(s), level: 'senior' }));
+                if (displaySkills.length < 3) midSkills.slice(0, 3 - displaySkills.length).forEach(s => displaySkills.push({ name: getSkillName(s), level: 'mid' }));
+                if (displaySkills.length < 3) juniorSkills.slice(0, 3 - displaySkills.length).forEach(s => displaySkills.push({ name: getSkillName(s), level: 'junior' }));
+                
+                const totalSkills = seniorSkills.length + midSkills.length + juniorSkills.length;
+                const remaining = totalSkills - displaySkills.length;
 
-              const levelStyles = {
-                senior: 'bg-badge-senior/20 text-badge-senior border-badge-senior/30',
-                mid: 'bg-badge-mid/20 text-badge-mid border-badge-mid/30',
-                junior: 'bg-badge-junior/20 text-badge-junior border-badge-junior/30'
-              };
+                const levelStyles = {
+                  senior: 'bg-badge-senior/20 text-badge-senior border-badge-senior/30',
+                  mid: 'bg-badge-mid/20 text-badge-mid border-badge-mid/30',
+                  junior: 'bg-badge-junior/20 text-badge-junior border-badge-junior/30'
+                };
 
-              return (
-                <>
-                  {displaySkills.map((skill, idx) => (
-                    <Badge key={idx} variant="outline" className={`text-[10px] px-1.5 py-0 h-5 border ${levelStyles[skill.level]}`}>
-                      {skill.name}
-                    </Badge>
-                  ))}
-                  {remaining > 0 && (
-                    <span className="text-[10px] text-muted-foreground">+{remaining}</span>
-                  )}
-                </>
-              );
-            })()}
+                return (
+                  <>
+                    {displaySkills.map((skill, idx) => (
+                      <Badge key={idx} variant="outline" className={`text-[10px] px-1.5 py-0 h-5 border ${levelStyles[skill.level]}`}>
+                        {skill.name}
+                      </Badge>
+                    ))}
+                    {remaining > 0 && (
+                      <span className="text-[10px] text-muted-foreground">+{remaining}</span>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-3 w-3 text-muted-foreground/50 hover:text-muted-foreground cursor-help shrink-0" />
+              </TooltipTrigger>
+              <TooltipContent side="top" className="text-xs">
+                <div className="flex flex-col gap-1">
+                  <span className="font-medium mb-1">Skill Levels</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-badge-senior" />
+                    <span>Senior</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-badge-mid" />
+                    <span>Mid</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-badge-junior" />
+                    <span>Junior</span>
+                  </div>
+                </div>
+              </TooltipContent>
+            </Tooltip>
           </div>
         )}
 
