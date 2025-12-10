@@ -106,6 +106,21 @@ const Index = () => {
     return false;
   };
 
+  // Calculate counts for both AND and OR modes (for preview in toggle)
+  const skillFilterCounts = useMemo(() => {
+    if (filters.skills.length < 2) return { and: 0, or: 0 };
+    
+    const andCount = resources.filter(resource => 
+      filters.skills.every(sf => resourceHasSkillAtLevels(resource, sf))
+    ).length;
+    
+    const orCount = resources.filter(resource => 
+      filters.skills.some(sf => resourceHasSkillAtLevels(resource, sf))
+    ).length;
+    
+    return { and: andCount, or: orCount };
+  }, [resources, filters.skills]);
+
   // Client-side filtering and sorting
   const filteredResources = useMemo(() => {
     let result = [...resources];
@@ -241,6 +256,7 @@ const Index = () => {
               onClearAll={handleClearAllSkillFilters}
               filterMode={skillFilterMode}
               onFilterModeChange={setSkillFilterMode}
+              modeCounts={skillFilterCounts}
             />
           </div>
         )}
