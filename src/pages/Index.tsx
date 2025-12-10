@@ -7,7 +7,7 @@ import { SortSelect, SortOption } from '@/components/SortSelect';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { ProfileMenu } from '@/components/ProfileMenu';
 import { RefreshDatasetButton } from '@/components/RefreshDatasetButton';
-import { ActiveSkillFiltersBanner } from '@/components/ActiveSkillFiltersBanner';
+import { ActiveSkillFiltersBanner, SkillFilterMode } from '@/components/ActiveSkillFiltersBanner';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { searchResources, Resource, ApiFilters } from '@/services/resourceApi';
 import { useToast } from '@/hooks/use-toast';
@@ -41,6 +41,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortOption, setSortOption] = useState<SortOption>('name-asc');
+  const [skillFilterMode, setSkillFilterMode] = useState<SkillFilterMode>('and');
   const { toast } = useToast();
   
   // Fetch dynamic filter options
@@ -112,10 +113,12 @@ const Index = () => {
     // Filter by skill seniority levels (client-side)
     if (filters.skills.length > 0) {
       result = result.filter((resource) => {
-        // Resource must match ALL selected skill filters (AND logic)
-        return filters.skills.every(skillFilter => 
-          resourceHasSkillAtLevels(resource, skillFilter)
-        );
+        // AND: Resource must match ALL selected skill filters
+        // OR: Resource must match at least ONE selected skill filter
+        const matchFn = skillFilterMode === 'and' 
+          ? filters.skills.every.bind(filters.skills)
+          : filters.skills.some.bind(filters.skills);
+        return matchFn(skillFilter => resourceHasSkillAtLevels(resource, skillFilter));
       });
     }
     
@@ -165,7 +168,7 @@ const Index = () => {
     });
     
     return result;
-  }, [resources, searchQuery, sortOption, filters.skills]);
+  }, [resources, searchQuery, sortOption, filters.skills, skillFilterMode]);
 
   const handleSkillClick = (skill: string) => {
     // Check if skill already exists in filters
@@ -231,11 +234,13 @@ const Index = () => {
 
         {filters.skills.length > 0 && (
           <div className="px-6 pt-4 pb-0 bg-background border-b border-border/50">
-            <ActiveSkillFiltersBanner
+          <ActiveSkillFiltersBanner
               skillFilters={filters.skills}
               onRemoveSkill={handleRemoveSkillFilter}
               onToggleLevel={handleToggleSkillLevel}
               onClearAll={handleClearAllSkillFilters}
+              filterMode={skillFilterMode}
+              onFilterModeChange={setSkillFilterMode}
             />
           </div>
         )}
