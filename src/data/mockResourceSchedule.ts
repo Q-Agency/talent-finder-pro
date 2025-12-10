@@ -9,70 +9,107 @@ const getDate = (daysOffset: number): Date => {
   return date;
 };
 
-/**
- * Mock assignments that map to resource IDs from the API
- * Resource IDs should match the `resource_id` field from the real API
- * 
- * To connect to real data later:
- * 1. Replace this file's export with an API call
- * 2. Or fetch from Ganttic API and transform to this shape
- */
-export const mockResourceAssignments: Assignment[] = [
-  // Simulating assignments for various resource IDs
-  // These IDs will need to match your actual API resource IDs
-  
-  // Resource fully booked for next 2 weeks
-  { id: 'a1', resourceId: 'res-001', projectName: 'E-commerce Platform', startDate: getDate(-5), endDate: getDate(10), status: 'confirmed' },
-  { id: 'a2', resourceId: 'res-001', projectName: 'API Integration', startDate: getDate(12), endDate: getDate(25), status: 'tentative' },
-  
-  // Resource with gap next week
-  { id: 'a3', resourceId: 'res-002', projectName: 'Mobile App Redesign', startDate: getDate(-10), endDate: getDate(3), status: 'confirmed' },
-  { id: 'a4', resourceId: 'res-002', projectName: 'Brand Guidelines', startDate: getDate(15), endDate: getDate(28), status: 'confirmed' },
-  
-  // Resource currently free, has assignment in future
-  { id: 'a5', resourceId: 'res-003', projectName: 'Q4 Planning', startDate: getDate(7), endDate: getDate(14), status: 'confirmed' },
-  
-  // Resource with short assignment this week
-  { id: 'a6', resourceId: 'res-004', projectName: 'Database Migration', startDate: getDate(0), endDate: getDate(4), status: 'confirmed' },
-  { id: 'a7', resourceId: 'res-004', projectName: 'Security Audit', startDate: getDate(20), endDate: getDate(30), status: 'tentative' },
-  
-  // Resource fully available (no assignments)
-  // res-005 has no entries = 100% available
-  
-  // Resource with overlapping tentative assignments
-  { id: 'a8', resourceId: 'res-006', projectName: 'Cloud Migration', startDate: getDate(-3), endDate: getDate(8), status: 'confirmed' },
-  { id: 'a9', resourceId: 'res-006', projectName: 'Infrastructure Review', startDate: getDate(6), endDate: getDate(12), status: 'tentative' },
-  
-  // Resource with back-to-back projects (no gaps)
-  { id: 'a10', resourceId: 'res-007', projectName: 'Frontend Build', startDate: getDate(-7), endDate: getDate(5), status: 'confirmed' },
-  { id: 'a11', resourceId: 'res-007', projectName: 'Testing Phase', startDate: getDate(6), endDate: getDate(15), status: 'confirmed' },
-  { id: 'a12', resourceId: 'res-007', projectName: 'Deployment', startDate: getDate(16), endDate: getDate(20), status: 'confirmed' },
-  
-  // Resource mostly free with small assignment
-  { id: 'a13', resourceId: 'res-008', projectName: 'Training Session', startDate: getDate(10), endDate: getDate(11), status: 'confirmed' },
-  
-  // Add some assignments for numeric IDs (common in APIs)
-  { id: 'a14', resourceId: '1', projectName: 'Project Alpha', startDate: getDate(-2), endDate: getDate(7), status: 'confirmed' },
-  { id: 'a15', resourceId: '2', projectName: 'Project Beta', startDate: getDate(0), endDate: getDate(14), status: 'confirmed' },
-  { id: 'a16', resourceId: '3', projectName: 'Project Gamma', startDate: getDate(5), endDate: getDate(18), status: 'tentative' },
-  { id: 'a17', resourceId: '4', projectName: 'Project Delta', startDate: getDate(-5), endDate: getDate(2), status: 'confirmed' },
-  { id: 'a18', resourceId: '4', projectName: 'Project Epsilon', startDate: getDate(10), endDate: getDate(22), status: 'tentative' },
+// Project templates for generating realistic assignments
+const projectTemplates = [
+  'E-commerce Platform', 'API Integration', 'Mobile App Redesign', 'Brand Guidelines',
+  'Q4 Planning', 'Database Migration', 'Security Audit', 'Cloud Migration',
+  'Infrastructure Review', 'Frontend Build', 'Testing Phase', 'Deployment',
+  'Training Session', 'Client Workshop', 'Data Analytics', 'Performance Optimization',
+  'UX Research', 'Backend Refactor', 'DevOps Setup', 'Documentation Sprint'
 ];
 
-/**
- * Get assignments for a specific resource
- * This function can be replaced with an API call later
- */
-export function getAssignmentsForResource(resourceId: string): Assignment[] {
-  return mockResourceAssignments.filter(a => a.resourceId === resourceId);
+// Seeded random for consistent results per resource ID
+function seededRandom(seed: string): () => number {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    const char = seed.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return () => {
+    hash = (hash * 1103515245 + 12345) & 0x7fffffff;
+    return hash / 0x7fffffff;
+  };
 }
 
 /**
- * Get all assignments
- * Replace this with API fetch when connecting to real data
+ * Generate mock assignments for a resource based on their ID
+ * Uses seeded randomness so the same resource always gets the same schedule
+ */
+function generateAssignmentsForResource(resourceId: string): Assignment[] {
+  const random = seededRandom(resourceId);
+  const assignments: Assignment[] = [];
+  
+  // Decide resource availability pattern (0-3 assignments)
+  const numAssignments = Math.floor(random() * 4);
+  
+  if (numAssignments === 0) return []; // Fully available
+  
+  // Generate assignments
+  let lastEndDay = -15; // Start from 2 weeks ago
+  
+  for (let i = 0; i < numAssignments; i++) {
+    const gapDays = Math.floor(random() * 10); // 0-9 day gap
+    const startDay = lastEndDay + gapDays + 1;
+    const duration = Math.floor(random() * 14) + 3; // 3-16 days
+    const endDay = startDay + duration;
+    
+    // Only include if within relevant range (-30 to +60 days)
+    if (endDay >= -30 && startDay <= 60) {
+      const projectIdx = Math.floor(random() * projectTemplates.length);
+      const statusRoll = random();
+      
+      assignments.push({
+        id: `${resourceId}-${i}`,
+        resourceId,
+        projectName: projectTemplates[projectIdx],
+        startDate: getDate(startDay),
+        endDate: getDate(endDay),
+        status: statusRoll < 0.7 ? 'confirmed' : 'tentative',
+      });
+    }
+    
+    lastEndDay = endDay;
+  }
+  
+  return assignments;
+}
+
+// Cache for generated assignments
+const assignmentCache = new Map<string, Assignment[]>();
+
+/**
+ * Get assignments for a specific resource
+ * Generates on-demand and caches for consistency
+ */
+export function getAssignmentsForResource(resourceId: string): Assignment[] {
+  if (!assignmentCache.has(resourceId)) {
+    assignmentCache.set(resourceId, generateAssignmentsForResource(resourceId));
+  }
+  return assignmentCache.get(resourceId)!;
+}
+
+/**
+ * Get all assignments for a list of resource IDs
+ * This is the main function to use - pass in your actual resource IDs
+ */
+export function getAssignmentsForResources(resourceIds: string[]): Assignment[] {
+  return resourceIds.flatMap(id => getAssignmentsForResource(id));
+}
+
+/**
+ * Get all cached assignments
+ * For backwards compatibility - but prefer getAssignmentsForResources
  */
 export function getAllAssignments(): Assignment[] {
-  return mockResourceAssignments;
+  return Array.from(assignmentCache.values()).flat();
+}
+
+/**
+ * Clear the cache (useful for testing or forcing regeneration)
+ */
+export function clearAssignmentCache(): void {
+  assignmentCache.clear();
 }
 
 // Project colors for visual consistency
@@ -90,9 +127,11 @@ export const projectColors: Record<string, string> = {
   'Testing Phase': '#84cc16',
   'Deployment': '#06b6d4',
   'Training Session': '#fbbf24',
-  'Project Alpha': '#f43f5e',
-  'Project Beta': '#10b981',
-  'Project Gamma': '#0ea5e9',
-  'Project Delta': '#d946ef',
-  'Project Epsilon': '#fb923c',
+  'Client Workshop': '#f43f5e',
+  'Data Analytics': '#10b981',
+  'Performance Optimization': '#0ea5e9',
+  'UX Research': '#d946ef',
+  'Backend Refactor': '#fb923c',
+  'DevOps Setup': '#64748b',
+  'Documentation Sprint': '#78716c',
 };

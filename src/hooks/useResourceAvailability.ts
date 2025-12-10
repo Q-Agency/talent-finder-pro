@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { calculateBulkAvailability, AvailabilityResult, Assignment } from '@/services/availabilityService';
-import { getAllAssignments } from '@/data/mockResourceSchedule';
+import { getAssignmentsForResources } from '@/data/mockResourceSchedule';
 
 interface UseResourceAvailabilityOptions {
   resourceIds: string[];
@@ -18,7 +18,7 @@ interface UseResourceAvailabilityReturn {
  * Hook to calculate availability for multiple resources
  * 
  * To connect to real data later:
- * 1. Replace getAllAssignments() with an API call (useQuery)
+ * 1. Replace getAssignmentsForResources() with an API call (useQuery)
  * 2. Add loading state from the API call
  */
 export function useResourceAvailability({
@@ -26,8 +26,11 @@ export function useResourceAvailability({
   dateRange,
   enabled = true,
 }: UseResourceAvailabilityOptions): UseResourceAvailabilityReturn {
-  // Get mock assignments (replace with API data later)
-  const assignments = useMemo(() => getAllAssignments(), []);
+  // Generate mock assignments for the actual resource IDs (replace with API data later)
+  const assignments = useMemo(
+    () => getAssignmentsForResources(resourceIds),
+    [resourceIds]
+  );
 
   const availability = useMemo(() => {
     if (!enabled || !dateRange || resourceIds.length === 0) {
