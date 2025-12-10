@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { calculateBulkAvailability, AvailabilityResult } from '@/services/availabilityService';
+import { calculateBulkAvailability, AvailabilityResult, Assignment } from '@/services/availabilityService';
 import { getAllAssignments } from '@/data/mockResourceSchedule';
 
 interface UseResourceAvailabilityOptions {
@@ -10,6 +10,7 @@ interface UseResourceAvailabilityOptions {
 
 interface UseResourceAvailabilityReturn {
   availability: Map<string, AvailabilityResult>;
+  assignments: Assignment[];
   isCalculating: boolean;
 }
 
@@ -25,13 +26,13 @@ export function useResourceAvailability({
   dateRange,
   enabled = true,
 }: UseResourceAvailabilityOptions): UseResourceAvailabilityReturn {
+  // Get mock assignments (replace with API data later)
+  const assignments = useMemo(() => getAllAssignments(), []);
+
   const availability = useMemo(() => {
     if (!enabled || !dateRange || resourceIds.length === 0) {
       return new Map<string, AvailabilityResult>();
     }
-
-    // Get mock assignments (replace with API data later)
-    const assignments = getAllAssignments();
 
     return calculateBulkAvailability(
       resourceIds,
@@ -39,10 +40,11 @@ export function useResourceAvailability({
       dateRange.start,
       dateRange.end
     );
-  }, [resourceIds, dateRange, enabled]);
+  }, [resourceIds, dateRange, enabled, assignments]);
 
   return {
     availability,
+    assignments,
     isCalculating: false, // Will be true when using async API
   };
 }

@@ -6,7 +6,8 @@ import { Briefcase, Sparkles, Award, Search, Building2, TrendingUp, Check } from
 import { HighlightText } from './HighlightText';
 import { SkillLevel } from './FilterSidebar';
 import { AvailabilityBadge } from './AvailabilityBadge';
-import { AvailabilityResult } from '@/services/availabilityService';
+import { MiniTimeline } from './MiniTimeline';
+import { AvailabilityResult, Assignment } from '@/services/availabilityService';
 
 interface ResourceCardProps {
   resource: Resource;
@@ -14,6 +15,8 @@ interface ResourceCardProps {
   activeSkillFilters?: string[];
   activeSkillLevels?: SkillLevel[];
   availability?: AvailabilityResult;
+  assignments?: Assignment[];
+  dateRange?: { start: Date; end: Date } | null;
 }
 
 const getHiddenFieldMatches = (resource: Resource, query: string) => {
@@ -78,7 +81,7 @@ function isSkillMatchingFilter(
   return activeFilters.includes(skill) && activeLevels.includes(level);
 }
 
-export function ResourceCard({ resource, searchQuery = '', activeSkillFilters = [], activeSkillLevels = ['senior', 'mid', 'junior'], availability }: ResourceCardProps) {
+export function ResourceCard({ resource, searchQuery = '', activeSkillFilters = [], activeSkillLevels = ['senior', 'mid', 'junior'], availability, assignments = [], dateRange }: ResourceCardProps) {
   const allSkills = [
     ...(resource.skills?.senior || []),
     ...(resource.skills?.mid || []),
@@ -159,6 +162,17 @@ export function ResourceCard({ resource, searchQuery = '', activeSkillFilters = 
             {resource.seniority_level || 'Unknown'}
           </Badge>
         </div>
+
+        {dateRange && (
+          <div className="mt-3">
+            <MiniTimeline
+              resourceId={resource.resource_id}
+              assignments={assignments}
+              rangeStart={dateRange.start}
+              rangeEnd={dateRange.end}
+            />
+          </div>
+        )}
 
         {allSkills.length > 0 && (
           <div className="mt-4 space-y-2">
