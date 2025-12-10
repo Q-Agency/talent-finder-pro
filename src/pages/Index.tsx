@@ -10,6 +10,7 @@ import { ProfileMenu } from '@/components/ProfileMenu';
 import { RefreshDatasetButton } from '@/components/RefreshDatasetButton';
 import { ActiveFiltersBanner, SkillFilterMode } from '@/components/ActiveFiltersBanner';
 import { DateRangeFilter } from '@/components/DateRangeFilter';
+import { RecommendationsPanel } from '@/components/RecommendationsPanel';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { searchResources, Resource } from '@/services/resourceApi';
@@ -281,6 +282,9 @@ const Index = () => {
     filters.certificates.length > 0 ||
     filters.verticals.length > 0;
 
+  // Track selected resource for recommendations panel click - will scroll and flash
+  const [highlightedResource, setHighlightedResource] = useState<Resource | null>(null);
+
   return (
     <div className="flex h-screen bg-background">
       <FilterSidebar
@@ -331,7 +335,21 @@ const Index = () => {
         )}
 
         <ScrollArea className="flex-1 scrollbar-thin">
-          <main className="p-6">
+          <main className="p-6 space-y-4">
+            <RecommendationsPanel
+              resources={filteredResources}
+              availability={availability}
+              selectedSkills={filters.skills}
+              dateRange={dateRange}
+              onResourceClick={(resource) => {
+                setHighlightedResource(resource);
+                // Scroll to resource after a brief delay
+                setTimeout(() => {
+                  const element = document.getElementById(`resource-${resource.resource_id}`);
+                  element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+              }}
+            />
             <ResourceGrid 
               resources={filteredResources} 
               isLoading={isLoading} 
@@ -343,6 +361,7 @@ const Index = () => {
               availability={dateRange ? availability : undefined}
               assignments={assignments}
               dateRange={dateRange}
+              highlightedResourceId={highlightedResource?.resource_id}
             />
           </main>
         </ScrollArea>
