@@ -1,8 +1,8 @@
-import { X } from 'lucide-react';
+import { X, Info } from 'lucide-react';
 import { SkillFilter } from '@/components/FilterSidebar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Toggle } from '@/components/ui/toggle';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export type SkillFilterMode = 'and' | 'or';
 
@@ -49,37 +49,52 @@ export function ActiveSkillFiltersBanner({
             Active Skill Filters
           </span>
           {skillFilters.length > 1 && (
-            <div className="flex items-center gap-1 bg-background/80 border border-border rounded-md p-0.5">
-              <button
-                onClick={() => onFilterModeChange('and')}
-                className={`px-2 py-0.5 text-xs font-medium rounded transition-colors flex items-center gap-1.5 ${
-                  filterMode === 'and'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                ALL
-                {modeCounts && (
-                  <span className={`text-[10px] ${filterMode === 'and' ? 'opacity-80' : 'opacity-60'}`}>
-                    ({modeCounts.and})
-                  </span>
-                )}
-              </button>
-              <button
-                onClick={() => onFilterModeChange('or')}
-                className={`px-2 py-0.5 text-xs font-medium rounded transition-colors flex items-center gap-1.5 ${
-                  filterMode === 'or'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                ANY
-                {modeCounts && (
-                  <span className={`text-[10px] ${filterMode === 'or' ? 'opacity-80' : 'opacity-60'}`}>
-                    ({modeCounts.or})
-                  </span>
-                )}
-              </button>
+            <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1 bg-background/80 border border-border rounded-md p-0.5">
+                <button
+                  onClick={() => onFilterModeChange('and')}
+                  className={`px-2 py-0.5 text-xs font-medium rounded transition-colors flex items-center gap-1.5 ${
+                    filterMode === 'and'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  ALL
+                  {modeCounts && (
+                    <span className={`text-[10px] ${filterMode === 'and' ? 'opacity-80' : 'opacity-60'}`}>
+                      ({modeCounts.and})
+                    </span>
+                  )}
+                </button>
+                <button
+                  onClick={() => onFilterModeChange('or')}
+                  className={`px-2 py-0.5 text-xs font-medium rounded transition-colors flex items-center gap-1.5 ${
+                    filterMode === 'or'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  ANY
+                  {modeCounts && (
+                    <span className={`text-[10px] ${filterMode === 'or' ? 'opacity-80' : 'opacity-60'}`}>
+                      ({modeCounts.or})
+                    </span>
+                  )}
+                </button>
+              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="w-3.5 h-3.5 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-[200px]">
+                    <p className="text-xs">
+                      <strong>ALL:</strong> Resources must have every selected skill<br />
+                      <strong>ANY:</strong> Resources need at least one selected skill
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           )}
         </div>
