@@ -2,12 +2,14 @@ import { Resource } from '@/services/resourceApi';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Briefcase, Sparkles, Award, Search, Building2, TrendingUp } from 'lucide-react';
+import { Briefcase, Sparkles, Award, Search, Building2, TrendingUp, Check } from 'lucide-react';
 import { HighlightText } from './HighlightText';
+import { SkillFilter, SkillLevel } from './FilterSidebar';
 
 interface ResourceCardProps {
   resource: Resource;
   searchQuery?: string;
+  activeSkillFilters?: SkillFilter[];
 }
 
 const getHiddenFieldMatches = (resource: Resource, query: string) => {
@@ -62,7 +64,17 @@ const getSeniorityBadgeClass = (seniority: string) => {
   return 'bg-badge-junior/20 text-badge-junior border border-badge-junior/30';
 };
 
-export function ResourceCard({ resource, searchQuery = '' }: ResourceCardProps) {
+// Check if a skill at a given level is part of the active filter
+function isSkillMatchingFilter(
+  skill: string, 
+  level: SkillLevel, 
+  activeFilters: SkillFilter[]
+): boolean {
+  const filter = activeFilters.find(f => f.skill === skill);
+  return filter ? filter.levels.includes(level) : false;
+}
+
+export function ResourceCard({ resource, searchQuery = '', activeSkillFilters = [] }: ResourceCardProps) {
   const allSkills = [
     ...(resource.skills?.senior || []),
     ...(resource.skills?.mid || []),
@@ -72,6 +84,25 @@ export function ResourceCard({ resource, searchQuery = '' }: ResourceCardProps) 
   const getInitials = (name?: string) => {
     if (!name) return '?';
     return name.split(' ').map(n => n[0]).join('');
+  };
+
+  const renderSkillBadge = (skill: string, level: SkillLevel, baseClass: string) => {
+    const isMatching = isSkillMatchingFilter(skill, level, activeSkillFilters);
+    
+    return (
+      <Badge 
+        key={skill} 
+        variant="outline" 
+        className={`text-xs font-normal relative ${baseClass} ${
+          isMatching ? 'ring-2 ring-primary ring-offset-1 ring-offset-background' : ''
+        }`}
+      >
+        {isMatching && (
+          <Check className="h-3 w-3 mr-1 text-primary" />
+        )}
+        {skill}
+      </Badge>
+    );
   };
 
   return (
@@ -128,11 +159,9 @@ export function ResourceCard({ resource, searchQuery = '' }: ResourceCardProps) 
               <div>
                 <p className="text-xs font-medium text-badge-senior mb-1">Senior</p>
                 <div className="flex flex-wrap gap-1">
-                  {resource.skills.senior.map((skill) => (
-                    <Badge key={skill} variant="outline" className="text-xs font-normal bg-badge-senior/10 text-badge-senior border-badge-senior/20">
-                      {skill}
-                    </Badge>
-                  ))}
+                  {resource.skills.senior.map((skill) => 
+                    renderSkillBadge(skill, 'senior', 'bg-badge-senior/10 text-badge-senior border-badge-senior/20')
+                  )}
                 </div>
               </div>
             )}
@@ -140,11 +169,9 @@ export function ResourceCard({ resource, searchQuery = '' }: ResourceCardProps) 
               <div>
                 <p className="text-xs font-medium text-badge-mid mb-1">Mid</p>
                 <div className="flex flex-wrap gap-1">
-                  {resource.skills.mid.map((skill) => (
-                    <Badge key={skill} variant="outline" className="text-xs font-normal bg-badge-mid/10 text-badge-mid border-badge-mid/20">
-                      {skill}
-                    </Badge>
-                  ))}
+                  {resource.skills.mid.map((skill) => 
+                    renderSkillBadge(skill, 'mid', 'bg-badge-mid/10 text-badge-mid border-badge-mid/20')
+                  )}
                 </div>
               </div>
             )}
@@ -152,11 +179,9 @@ export function ResourceCard({ resource, searchQuery = '' }: ResourceCardProps) 
               <div>
                 <p className="text-xs font-medium text-badge-junior mb-1">Junior</p>
                 <div className="flex flex-wrap gap-1">
-                  {resource.skills.junior.map((skill) => (
-                    <Badge key={skill} variant="outline" className="text-xs font-normal bg-badge-junior/10 text-badge-junior border-badge-junior/20">
-                      {skill}
-                    </Badge>
-                  ))}
+                  {resource.skills.junior.map((skill) => 
+                    renderSkillBadge(skill, 'junior', 'bg-badge-junior/10 text-badge-junior border-badge-junior/20')
+                  )}
                 </div>
               </div>
             )}
