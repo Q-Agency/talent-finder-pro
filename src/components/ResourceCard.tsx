@@ -40,13 +40,13 @@ const getHiddenFieldMatches = (resource: Resource, query: string) => {
 const getEmploymentBadgeClass = (type: string) => {
   const normalizedType = type.toLowerCase();
   if (normalizedType === 'employee') {
-    return 'bg-badge-employee/10 text-badge-employee border-badge-employee/20';
+    return 'bg-badge-employee/20 text-badge-employee border border-badge-employee/30';
   }
   if (normalizedType === 'contractor') {
-    return 'bg-badge-contractor/10 text-badge-contractor border-badge-contractor/20';
+    return 'bg-badge-contractor/20 text-badge-contractor border border-badge-contractor/30';
   }
   if (normalizedType === 'student') {
-    return 'bg-badge-student/10 text-badge-student border-badge-student/20';
+    return 'bg-badge-student/20 text-badge-student border border-badge-student/30';
   }
   return '';
 };
@@ -54,12 +54,12 @@ const getEmploymentBadgeClass = (type: string) => {
 const getSeniorityBadgeClass = (seniority: string) => {
   const lower = seniority.toLowerCase();
   if (lower.includes('senior')) {
-    return 'bg-badge-senior/10 text-badge-senior border-badge-senior/20';
+    return 'bg-badge-senior/20 text-badge-senior border border-badge-senior/30';
   }
   if (lower.includes('mid')) {
-    return 'bg-badge-mid/10 text-badge-mid border-badge-mid/20';
+    return 'bg-badge-mid/20 text-badge-mid border border-badge-mid/30';
   }
-  return 'bg-badge-junior/10 text-badge-junior border-badge-junior/20';
+  return 'bg-badge-junior/20 text-badge-junior border border-badge-junior/30';
 };
 
 export function ResourceCard({ resource, searchQuery = '' }: ResourceCardProps) {
@@ -112,10 +112,10 @@ export function ResourceCard({ resource, searchQuery = '' }: ResourceCardProps) 
         </div>
 
         <div className="flex flex-wrap gap-1.5 mt-4">
-          <Badge variant="outline" className={`text-xs font-medium ${getEmploymentBadgeClass(resource.employment_type || '')}`}>
+          <Badge className={`text-xs font-semibold px-2.5 py-0.5 ${getEmploymentBadgeClass(resource.employment_type || '')}`}>
             {resource.employment_type || 'Unknown'}
           </Badge>
-          <Badge variant="outline" className={`text-xs font-medium ${getSeniorityBadgeClass(resource.seniority_level || '')}`}>
+          <Badge className={`text-xs font-semibold px-2.5 py-0.5 ${getSeniorityBadgeClass(resource.seniority_level || '')}`}>
             {resource.seniority_level || 'Unknown'}
           </Badge>
         </div>
