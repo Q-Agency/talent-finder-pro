@@ -16,16 +16,11 @@ import logo from '@/assets/logo.png';
 
 export type SkillLevel = 'senior' | 'mid' | 'junior';
 
-export interface SkillFilter {
-  skill: string;
-  levels: SkillLevel[];
-}
-
 export interface Filters {
   employmentTypes: string[];
   seniorities: string[];
   roleTitles: string[];
-  skills: SkillFilter[];
+  skills: string[];
   industries: string[];
   certificates: string[];
   verticals: string[];
@@ -61,7 +56,7 @@ interface GroupedFilterSectionProps {
   title: string;
   icon: React.ReactNode;
   items: string[];
-  selectedSkills: SkillFilter[];
+  selectedSkills: string[];
   onToggleSkill: (skill: string) => void;
   onToggleMultiple: (items: string[], select: boolean) => void;
   defaultOpen?: boolean;
@@ -132,8 +127,8 @@ function GroupedFilterSection({
     return filtered;
   }, [categories, searchQuery]);
 
-  const getSkillFilter = (skillName: string): SkillFilter | undefined => {
-    return selectedSkills.find(sf => sf.skill === skillName);
+  const isSkillSelected = (skillName: string): boolean => {
+    return selectedSkills.includes(skillName);
   };
   
   const toggleCategory = (category: string) => {
@@ -149,7 +144,7 @@ function GroupedFilterSection({
   };
   
   const getCategorySelectionState = (categorySkills: string[]) => {
-    const selectedInCategory = categorySkills.filter(s => selectedSkills.some(sf => sf.skill === s));
+    const selectedInCategory = categorySkills.filter(s => selectedSkills.includes(s));
     if (selectedInCategory.length === 0) return 'none';
     if (selectedInCategory.length === categorySkills.length) return 'all';
     return 'partial';
@@ -214,7 +209,7 @@ function GroupedFilterSection({
             Array.from(filteredCategories.entries()).map(([category, categorySkills]) => {
               const isExpanded = expandedCategories.has(category) || searchQuery.trim() !== '';
               const selectionState = getCategorySelectionState(categorySkills);
-              const selectedInCategory = categorySkills.filter(s => selectedSkills.some(sf => sf.skill === s)).length;
+              const selectedInCategory = categorySkills.filter(s => selectedSkills.includes(s)).length;
               
               return (
                 <div key={category} className="border border-border/30 rounded-md overflow-hidden">
@@ -249,9 +244,8 @@ function GroupedFilterSection({
                   {/* Category Skills */}
                   {isExpanded && (
                     <div className="py-1 bg-background/50">
-                      {categorySkills.map((skill) => {
-                        const skillFilter = getSkillFilter(skill);
-                        const isSelected = !!skillFilter;
+                    {categorySkills.map((skill) => {
+                        const isSelected = isSkillSelected(skill);
                         const skillName = skill.includes(' - ') ? skill.split(' - ').slice(1).join(' - ') : skill;
                         const inputId = `skill-${skill}`.replace(/\s+/g, '-');
                         
@@ -423,30 +417,20 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
   };
 
   const toggleSkill = (skill: string) => {
-    const existingIndex = filters.skills.findIndex(sf => sf.skill === skill);
-    if (existingIndex >= 0) {
-      // Remove skill
-      const newSkills = filters.skills.filter((_, i) => i !== existingIndex);
-      onFilterChange({ ...filters, skills: newSkills });
+    const isSelected = filters.skills.includes(skill);
+    if (isSelected) {
+      onFilterChange({ ...filters, skills: filters.skills.filter(s => s !== skill) });
     } else {
-      // Add skill with all levels selected
-      const newSkills = [...filters.skills, { skill, levels: [...ALL_LEVELS] }];
-      onFilterChange({ ...filters, skills: newSkills });
+      onFilterChange({ ...filters, skills: [...filters.skills, skill] });
     }
   };
 
   const toggleMultipleSkills = (skillNames: string[], select: boolean) => {
     if (select) {
-      // Add skills that aren't already selected
-      const existingSkillNames = filters.skills.map(sf => sf.skill);
-      const skillsToAdd = skillNames
-        .filter(skill => !existingSkillNames.includes(skill))
-        .map(skill => ({ skill, levels: [...ALL_LEVELS] }));
+      const skillsToAdd = skillNames.filter(skill => !filters.skills.includes(skill));
       onFilterChange({ ...filters, skills: [...filters.skills, ...skillsToAdd] });
     } else {
-      // Remove all specified skills
-      const newSkills = filters.skills.filter(sf => !skillNames.includes(sf.skill));
-      onFilterChange({ ...filters, skills: newSkills });
+      onFilterChange({ ...filters, skills: filters.skills.filter(s => !skillNames.includes(s)) });
     }
   };
 

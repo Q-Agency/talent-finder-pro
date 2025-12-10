@@ -1,5 +1,5 @@
 import { X, Info, Briefcase, TrendingUp, UserCircle, Building2, Award, MapPin } from 'lucide-react';
-import { SkillFilter, Filters } from '@/components/FilterSidebar';
+import { Filters, SkillLevel } from '@/components/FilterSidebar';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -11,15 +11,17 @@ interface ActiveFiltersBannerProps {
   skillFilterMode: SkillFilterMode;
   onSkillFilterModeChange: (mode: SkillFilterMode) => void;
   modeCounts?: { and: number; or: number };
+  globalSkillLevels: SkillLevel[];
+  onGlobalSkillLevelsChange: (levels: SkillLevel[]) => void;
 }
 
-const levelLabels: Record<string, string> = {
+const levelLabels: Record<SkillLevel, string> = {
   senior: 'S',
   mid: 'M',
   junior: 'J',
 };
 
-const levelColors: Record<string, string> = {
+const levelColors: Record<SkillLevel, string> = {
   senior: 'bg-badge-senior text-white',
   mid: 'bg-badge-mid text-white',
   junior: 'bg-badge-junior text-white',
@@ -44,6 +46,8 @@ export function ActiveFiltersBanner({
   skillFilterMode,
   onSkillFilterModeChange,
   modeCounts,
+  globalSkillLevels,
+  onGlobalSkillLevelsChange,
 }: ActiveFiltersBannerProps) {
   const hasSkillFilters = filters.skills.length > 0;
   const hasOtherFilters = 
@@ -59,25 +63,20 @@ export function ActiveFiltersBanner({
   const handleRemoveSkill = (skill: string) => {
     onFilterChange({
       ...filters,
-      skills: filters.skills.filter(sf => sf.skill !== skill)
+      skills: filters.skills.filter(s => s !== skill)
     });
   };
 
-  const handleToggleLevel = (skill: string, level: 'senior' | 'mid' | 'junior') => {
-    onFilterChange({
-      ...filters,
-      skills: filters.skills.map(sf => {
-        if (sf.skill !== skill) return sf;
-        const hasLevel = sf.levels.includes(level);
-        if (hasLevel && sf.levels.length === 1) return sf;
-        return {
-          ...sf,
-          levels: hasLevel
-            ? sf.levels.filter(l => l !== level)
-            : [...sf.levels, level]
-        };
-      })
-    });
+  const handleToggleGlobalLevel = (level: SkillLevel) => {
+    const hasLevel = globalSkillLevels.includes(level);
+    // Don't allow removing the last level
+    if (hasLevel && globalSkillLevels.length === 1) return;
+    
+    if (hasLevel) {
+      onGlobalSkillLevelsChange(globalSkillLevels.filter(l => l !== level));
+    } else {
+      onGlobalSkillLevelsChange([...globalSkillLevels, level]);
+    }
   };
 
   const handleRemoveFilter = (category: FilterCategory, value: string) => {
@@ -106,6 +105,32 @@ export function ActiveFiltersBanner({
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
             Active Filters
           </span>
+          
+          {/* Global skill levels toggle - only show when skills are selected */}
+          {hasSkillFilters && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-muted-foreground">Skill Levels:</span>
+              <div className="flex gap-0.5">
+                {(['senior', 'mid', 'junior'] as const).map((level) => {
+                  const isActive = globalSkillLevels.includes(level);
+                  return (
+                    <button
+                      key={level}
+                      onClick={() => handleToggleGlobalLevel(level)}
+                      className={`w-5 h-5 rounded text-[10px] font-bold flex items-center justify-center transition-colors ${
+                        isActive ? levelColors[level] : levelColorsInactive
+                      }`}
+                      title={`${level.charAt(0).toUpperCase() + level.slice(1)} level`}
+                    >
+                      {levelLabels[level]}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* AND/OR mode toggle */}
           {filters.skills.length > 1 && (
             <div className="flex items-center gap-1.5">
               <div className="flex items-center gap-1 bg-background/80 border border-border rounded-md p-0.5">
@@ -167,30 +192,13 @@ export function ActiveFiltersBanner({
       </div>
       
       <div className="flex flex-wrap gap-2">
-        {/* Skill filters with seniority toggles */}
-        {filters.skills.map(({ skill, levels }) => (
+        {/* Skill filters as simple chips */}
+        {filters.skills.map((skill) => (
           <div
             key={skill}
             className="flex items-center gap-1 bg-background/80 border border-border rounded-md px-2 py-1"
           >
-            <span className="text-sm font-medium mr-1">{skill}</span>
-            <div className="flex gap-0.5">
-              {(['senior', 'mid', 'junior'] as const).map((level) => {
-                const isActive = levels.includes(level);
-                return (
-                  <button
-                    key={level}
-                    onClick={() => handleToggleLevel(skill, level)}
-                    className={`w-5 h-5 rounded text-[10px] font-bold flex items-center justify-center transition-colors ${
-                      isActive ? levelColors[level] : levelColorsInactive
-                    }`}
-                    title={`${level.charAt(0).toUpperCase() + level.slice(1)} level`}
-                  >
-                    {levelLabels[level]}
-                  </button>
-                );
-              })}
-            </div>
+            <span className="text-sm font-medium">{skill}</span>
             <button
               onClick={() => handleRemoveSkill(skill)}
               className="ml-1 text-muted-foreground hover:text-foreground transition-colors"

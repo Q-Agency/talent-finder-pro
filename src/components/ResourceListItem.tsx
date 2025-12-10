@@ -4,13 +4,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { HighlightText } from './HighlightText';
 import { Search, Building2, TrendingUp, Info, Check } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { SkillFilter, SkillLevel } from './FilterSidebar';
+import { SkillLevel } from './FilterSidebar';
 
 interface ResourceListItemProps {
   resource: Resource;
   searchQuery?: string;
   onClick: () => void;
-  activeSkillFilters?: SkillFilter[];
+  activeSkillFilters?: string[];
+  activeSkillLevels?: SkillLevel[];
 }
 
 const getHiddenFieldMatches = (resource: Resource, query: string) => {
@@ -54,13 +55,13 @@ const getSeniorityBadgeClass = (seniority: string) => {
 function isSkillMatchingFilter(
   skill: string, 
   level: SkillLevel, 
-  activeFilters: SkillFilter[]
+  activeFilters: string[],
+  activeLevels: SkillLevel[]
 ): boolean {
-  const filter = activeFilters.find(f => f.skill === skill);
-  return filter ? filter.levels.includes(level) : false;
+  return activeFilters.includes(skill) && activeLevels.includes(level);
 }
 
-export function ResourceListItem({ resource, searchQuery = '', onClick, activeSkillFilters = [] }: ResourceListItemProps) {
+export function ResourceListItem({ resource, searchQuery = '', onClick, activeSkillFilters = [], activeSkillLevels = ['senior', 'mid', 'junior'] }: ResourceListItemProps) {
   const getInitials = (name?: string) => {
     if (!name) return '?';
     return name.split(' ').map(n => n[0]).join('');
@@ -136,7 +137,7 @@ export function ResourceListItem({ resource, searchQuery = '', onClick, activeSk
                 };
 
                 const renderSkillBadge = (skill: { name: string; fullName: string; level: SkillLevel }, idx: number) => {
-                  const isMatching = isSkillMatchingFilter(skill.fullName, skill.level, activeSkillFilters);
+                  const isMatching = isSkillMatchingFilter(skill.fullName, skill.level, activeSkillFilters, activeSkillLevels);
                   return (
                     <Badge 
                       key={idx} 
