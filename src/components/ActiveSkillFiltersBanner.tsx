@@ -33,7 +33,7 @@ export function ActiveSkillFiltersBanner({
   if (skillFilters.length === 0) return null;
 
   return (
-    <div className="bg-card/50 border border-border/50 rounded-lg p-3 mb-4">
+    <div className="bg-card/50 border border-border/50 rounded-lg p-3 mb-2">
       <div className="flex items-center justify-between mb-2">
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
           Active Skill Filters
