@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { HighlightText } from './HighlightText';
 import { Search, Building2, TrendingUp } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ResourceListItemProps {
   resource: Resource;
@@ -68,14 +69,23 @@ export function ResourceListItem({ resource, searchQuery = '', onClick }: Resour
       </Avatar>
 
       <div className="flex-1 min-w-0 flex items-center gap-6">
-        <div className="min-w-[180px]">
-          <h3 className="font-medium text-foreground text-sm truncate">
-            <HighlightText text={resource.resource_name || 'Unknown'} query={searchQuery} />
-          </h3>
-          <p className="text-xs text-muted-foreground truncate">
-            <HighlightText text={resource.role_category || ''} query={searchQuery} />
-          </p>
-        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="min-w-[180px]">
+              <h3 className="font-medium text-foreground text-sm truncate">
+                <HighlightText text={resource.resource_name || 'Unknown'} query={searchQuery} />
+              </h3>
+              <p className="text-xs text-muted-foreground truncate">
+                <HighlightText text={resource.role_category || ''} query={searchQuery} />
+              </p>
+            </div>
+          </TooltipTrigger>
+          {resource.technical_domain && (
+            <TooltipContent>
+              <p>{resource.technical_domain}</p>
+            </TooltipContent>
+          )}
+        </Tooltip>
 
         <div className="flex items-center gap-2">
           <Badge className={`text-xs font-semibold px-2.5 py-0.5 ${getEmploymentBadgeClass(resource.employment_type || '')}`}>
