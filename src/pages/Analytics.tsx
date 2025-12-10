@@ -402,6 +402,85 @@ const Analytics = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Skill Competency Heatmap */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Layers className="h-5 w-5 text-chart-4" />
+                  Skill Competency Heatmap
+                </CardTitle>
+                <CardDescription>Distribution of skills across seniority levels - darker colors indicate higher counts</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-6 mb-4">
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="w-4 h-4 rounded bg-green-500/20 border border-green-500/30" />
+                    <span className="text-muted-foreground">Senior</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="w-4 h-4 rounded bg-blue-500/20 border border-blue-500/30" />
+                    <span className="text-muted-foreground">Mid</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="w-4 h-4 rounded bg-purple-500/20 border border-purple-500/30" />
+                    <span className="text-muted-foreground">Junior</span>
+                  </div>
+                </div>
+                <ScrollArea className="h-[500px]">
+                  <div className="space-y-1">
+                    {/* Header */}
+                    <div className="grid grid-cols-[200px_1fr_1fr_1fr] gap-1 pb-2 border-b sticky top-0 bg-card z-10">
+                      <div className="text-xs font-semibold text-muted-foreground px-2">Skill</div>
+                      <div className="text-xs font-semibold text-center text-green-600 dark:text-green-400">Senior</div>
+                      <div className="text-xs font-semibold text-center text-blue-600 dark:text-blue-400">Mid</div>
+                      <div className="text-xs font-semibold text-center text-purple-600 dark:text-purple-400">Junior</div>
+                    </div>
+                    {/* Rows */}
+                    {skillAnalysis.slice(0, 30).map((skill, idx) => {
+                      const maxCount = Math.max(skill.senior, skill.mid, skill.junior, 1);
+                      const getOpacity = (count: number) => Math.max(0.1, count / maxCount);
+                      
+                      return (
+                        <div key={idx} className="grid grid-cols-[200px_1fr_1fr_1fr] gap-1 items-center py-1 hover:bg-muted/50 rounded transition-colors">
+                          <div className="text-sm truncate px-2" title={`${skill.category} - ${skill.name}`}>
+                            <span className="font-medium">{skill.name}</span>
+                            <span className="text-xs text-muted-foreground ml-1">({skill.category})</span>
+                          </div>
+                          <div 
+                            className="h-8 rounded flex items-center justify-center text-xs font-semibold transition-all"
+                            style={{ 
+                              backgroundColor: `rgba(34, 197, 94, ${getOpacity(skill.senior)})`,
+                              color: skill.senior > 0 ? (getOpacity(skill.senior) > 0.5 ? 'white' : 'hsl(142, 76%, 36%)') : 'hsl(var(--muted-foreground))'
+                            }}
+                          >
+                            {skill.senior || '-'}
+                          </div>
+                          <div 
+                            className="h-8 rounded flex items-center justify-center text-xs font-semibold transition-all"
+                            style={{ 
+                              backgroundColor: `rgba(59, 130, 246, ${getOpacity(skill.mid)})`,
+                              color: skill.mid > 0 ? (getOpacity(skill.mid) > 0.5 ? 'white' : 'hsl(221, 83%, 53%)') : 'hsl(var(--muted-foreground))'
+                            }}
+                          >
+                            {skill.mid || '-'}
+                          </div>
+                          <div 
+                            className="h-8 rounded flex items-center justify-center text-xs font-semibold transition-all"
+                            style={{ 
+                              backgroundColor: `rgba(168, 85, 247, ${getOpacity(skill.junior)})`,
+                              color: skill.junior > 0 ? (getOpacity(skill.junior) > 0.5 ? 'white' : 'hsl(262, 83%, 58%)') : 'hsl(var(--muted-foreground))'
+                            }}
+                          >
+                            {skill.junior || '-'}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Certificates Tab */}
