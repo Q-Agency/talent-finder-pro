@@ -490,6 +490,23 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
 
       <ScrollArea className="flex-1 scrollbar-thin">
         <div className="p-3 space-y-1">
+          {isLoadingOptions ? (
+            <div className="flex items-center justify-center py-4 text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              <span className="text-sm">Loading options...</span>
+            </div>
+          ) : (
+            <GroupedFilterSection
+              title="Skills"
+              icon={<Wrench className="h-4 w-4" />}
+              items={skills}
+              selected={filters.skills}
+              onToggle={(item) => toggleFilter('skills', item)}
+              onToggleMultiple={(items, select) => toggleMultipleFilters('skills', items, select)}
+              defaultOpen={true}
+            />
+          )}
+
           <FilterSection
             title="Employment Type"
             icon={<Briefcase className="h-4 w-4" />}
@@ -506,12 +523,7 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
             onToggle={(item) => toggleFilter('seniorities', item)}
           />
 
-          {isLoadingOptions ? (
-            <div className="flex items-center justify-center py-4 text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              <span className="text-sm">Loading options...</span>
-            </div>
-          ) : (
+          {!isLoadingOptions && (
             <>
               <FilterSection
                 title="Role Title"
@@ -521,16 +533,6 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
                 onToggle={(item) => toggleFilter('roleTitles', item)}
                 defaultOpen={false}
                 searchable
-              />
-
-              <GroupedFilterSection
-                title="Skills"
-                icon={<Wrench className="h-4 w-4" />}
-                items={skills}
-                selected={filters.skills}
-                onToggle={(item) => toggleFilter('skills', item)}
-                onToggleMultiple={(items, select) => toggleMultipleFilters('skills', items, select)}
-                defaultOpen={false}
               />
 
               <FilterSection
