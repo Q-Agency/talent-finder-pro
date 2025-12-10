@@ -1,4 +1,4 @@
-import { Filters } from '@/components/FilterSidebar';
+import { SkillFilter } from '@/components/FilterSidebar';
 
 const API_ENDPOINTS = {
   test: 'https://infinite-wasp-terminally.ngrok-free.app/webhook-test/api/resources/search',
@@ -46,6 +46,17 @@ export interface SearchResponse {
   };
 }
 
+// API filters interface - skills are string[] for the API (seniority filtering is client-side)
+export interface ApiFilters {
+  employmentTypes: string[];
+  seniorities: string[];
+  roleTitles: string[];
+  skills: string[];
+  industries: string[];
+  certificates: string[];
+  verticals: string[];
+}
+
 interface SearchRequestBody {
   filters: {
     role?: string[];
@@ -69,7 +80,7 @@ interface SearchRequestBody {
 }
 
 export async function searchResources(
-  filters: Filters,
+  filters: ApiFilters,
   searchQuery: string,
   isTestMode: boolean
 ): Promise<SearchResponse> {

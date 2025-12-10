@@ -14,11 +14,18 @@ import { employmentTypes, seniorities } from '@/data/mockData';
 import { useState, useMemo } from 'react';
 import logo from '@/assets/logo.png';
 
+export type SkillLevel = 'senior' | 'mid' | 'junior';
+
+export interface SkillFilter {
+  skill: string;
+  levels: SkillLevel[];
+}
+
 export interface Filters {
   employmentTypes: string[];
   seniorities: string[];
   roleTitles: string[];
-  skills: string[];
+  skills: SkillFilter[];
   industries: string[];
   certificates: string[];
   verticals: string[];
@@ -54,13 +61,15 @@ interface GroupedFilterSectionProps {
   title: string;
   icon: React.ReactNode;
   items: string[];
-  selected: string[];
-  onToggle: (item: string) => void;
+  selectedSkills: SkillFilter[];
+  onToggleSkill: (skill: string) => void;
+  onToggleSeniorityLevel: (skill: string, level: SkillLevel) => void;
   onToggleMultiple: (items: string[], select: boolean) => void;
   defaultOpen?: boolean;
 }
 
 const SEARCH_THRESHOLD = 8;
+const ALL_LEVELS: SkillLevel[] = ['senior', 'mid', 'junior'];
 
 // Parse skills into categories based on "Category - SkillName" pattern
 function parseSkillCategories(skills: string[]): Map<string, string[]> {
@@ -88,12 +97,53 @@ function parseSkillCategories(skills: string[]): Map<string, string[]> {
   return sortedCategories;
 }
 
+function SeniorityChip({ 
+  level, 
+  isActive, 
+  onClick 
+}: { 
+  level: SkillLevel; 
+  isActive: boolean; 
+  onClick: () => void;
+}) {
+  const labels: Record<SkillLevel, string> = {
+    senior: 'S',
+    mid: 'M',
+    junior: 'J',
+  };
+
+  const activeClasses: Record<SkillLevel, string> = {
+    senior: 'bg-badge-senior text-white',
+    mid: 'bg-badge-mid text-white',
+    junior: 'bg-badge-junior text-white',
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      className={`w-5 h-5 rounded text-[10px] font-bold flex items-center justify-center transition-all ${
+        isActive 
+          ? activeClasses[level]
+          : 'bg-muted text-muted-foreground hover:bg-muted/80'
+      }`}
+      title={`${level.charAt(0).toUpperCase() + level.slice(1)} Level`}
+    >
+      {labels[level]}
+    </button>
+  );
+}
+
 function GroupedFilterSection({ 
   title, 
   icon, 
   items, 
-  selected, 
-  onToggle, 
+  selectedSkills, 
+  onToggleSkill,
+  onToggleSeniorityLevel,
   onToggleMultiple,
   defaultOpen = false 
 }: GroupedFilterSectionProps) {
@@ -101,7 +151,7 @@ function GroupedFilterSection({
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
   
-  const selectedCount = selected.length;
+  const selectedCount = selectedSkills.length;
   const showSearch = items.length > SEARCH_THRESHOLD;
   
   const categories = useMemo(() => parseSkillCategories(items), [items]);
@@ -123,6 +173,10 @@ function GroupedFilterSection({
     
     return filtered;
   }, [categories, searchQuery]);
+
+  const getSkillFilter = (skillName: string): SkillFilter | undefined => {
+    return selectedSkills.find(sf => sf.skill === skillName);
+  };
   
   const toggleCategory = (category: string) => {
     setExpandedCategories(prev => {
@@ -137,7 +191,7 @@ function GroupedFilterSection({
   };
   
   const getCategorySelectionState = (categorySkills: string[]) => {
-    const selectedInCategory = categorySkills.filter(s => selected.includes(s));
+    const selectedInCategory = categorySkills.filter(s => selectedSkills.some(sf => sf.skill === s));
     if (selectedInCategory.length === 0) return 'none';
     if (selectedInCategory.length === categorySkills.length) return 'all';
     return 'partial';
@@ -202,7 +256,7 @@ function GroupedFilterSection({
             Array.from(filteredCategories.entries()).map(([category, categorySkills]) => {
               const isExpanded = expandedCategories.has(category) || searchQuery.trim() !== '';
               const selectionState = getCategorySelectionState(categorySkills);
-              const selectedInCategory = categorySkills.filter(s => selected.includes(s)).length;
+              const selectedInCategory = categorySkills.filter(s => selectedSkills.some(sf => sf.skill === s)).length;
               
               return (
                 <div key={category} className="border border-border/30 rounded-md overflow-hidden">
@@ -238,28 +292,47 @@ function GroupedFilterSection({
                   {isExpanded && (
                     <div className="py-1 bg-background/50">
                       {categorySkills.map((skill) => {
-                        const isSelected = selected.includes(skill);
+                        const skillFilter = getSkillFilter(skill);
+                        const isSelected = !!skillFilter;
                         const skillName = skill.includes(' - ') ? skill.split(' - ').slice(1).join(' - ') : skill;
                         const inputId = `skill-${skill}`.replace(/\s+/g, '-');
                         
                         return (
-                          <label 
+                          <div 
                             key={skill}
-                            htmlFor={inputId}
-                            className={`flex items-center space-x-2 py-1 px-3 pl-8 cursor-pointer transition-colors ${
+                            className={`flex items-center py-1.5 px-3 pl-8 transition-colors ${
                               isSelected ? 'bg-primary/5' : 'hover:bg-accent/30'
                             }`}
                           >
-                            <Checkbox
-                              id={inputId}
-                              checked={isSelected}
-                              onCheckedChange={() => onToggle(skill)}
-                              className="border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                            />
-                            <span className={`text-xs ${isSelected ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-                              {skillName}
-                            </span>
-                          </label>
+                            <label 
+                              htmlFor={inputId}
+                              className="flex items-center space-x-2 cursor-pointer flex-1 min-w-0"
+                            >
+                              <Checkbox
+                                id={inputId}
+                                checked={isSelected}
+                                onCheckedChange={() => onToggleSkill(skill)}
+                                className="border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                              />
+                              <span className={`text-xs truncate ${isSelected ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                                {skillName}
+                              </span>
+                            </label>
+                            
+                            {/* Seniority Level Chips */}
+                            {isSelected && skillFilter && (
+                              <div className="flex items-center gap-0.5 ml-2">
+                                {ALL_LEVELS.map((level) => (
+                                  <SeniorityChip
+                                    key={level}
+                                    level={level}
+                                    isActive={skillFilter.levels.includes(level)}
+                                    onClick={() => onToggleSeniorityLevel(skill, level)}
+                                  />
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         );
                       })}
                     </div>
@@ -397,28 +470,61 @@ function FilterSection({ title, icon, items, selected, onToggle, defaultOpen = t
 }
 
 export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOptions, isLoadingOptions }: FilterSidebarProps) {
-  const toggleFilter = (category: keyof Filters, item: string) => {
-    const currentItems = filters[category];
+  const toggleFilter = (category: keyof Omit<Filters, 'skills'>, item: string) => {
+    const currentItems = filters[category] as string[];
     const newItems = currentItems.includes(item)
       ? currentItems.filter((i) => i !== item)
       : [...currentItems, item];
     onFilterChange({ ...filters, [category]: newItems });
   };
 
-  const toggleMultipleFilters = (category: keyof Filters, items: string[], select: boolean) => {
-    const currentItems = filters[category];
-    let newItems: string[];
-    
-    if (select) {
-      // Add items that aren't already selected
-      const itemsToAdd = items.filter(item => !currentItems.includes(item));
-      newItems = [...currentItems, ...itemsToAdd];
+  const toggleSkill = (skill: string) => {
+    const existingIndex = filters.skills.findIndex(sf => sf.skill === skill);
+    if (existingIndex >= 0) {
+      // Remove skill
+      const newSkills = filters.skills.filter((_, i) => i !== existingIndex);
+      onFilterChange({ ...filters, skills: newSkills });
     } else {
-      // Remove all specified items
-      newItems = currentItems.filter(item => !items.includes(item));
+      // Add skill with all levels selected
+      const newSkills = [...filters.skills, { skill, levels: [...ALL_LEVELS] }];
+      onFilterChange({ ...filters, skills: newSkills });
     }
+  };
+
+  const toggleSeniorityLevel = (skill: string, level: SkillLevel) => {
+    const skillFilter = filters.skills.find(sf => sf.skill === skill);
+    if (!skillFilter) return;
+
+    const hasLevel = skillFilter.levels.includes(level);
     
-    onFilterChange({ ...filters, [category]: newItems });
+    // Prevent deselecting the last level
+    if (hasLevel && skillFilter.levels.length === 1) {
+      return;
+    }
+
+    const newLevels = hasLevel
+      ? skillFilter.levels.filter(l => l !== level)
+      : [...skillFilter.levels, level];
+
+    const newSkills = filters.skills.map(sf =>
+      sf.skill === skill ? { ...sf, levels: newLevels } : sf
+    );
+    onFilterChange({ ...filters, skills: newSkills });
+  };
+
+  const toggleMultipleSkills = (skillNames: string[], select: boolean) => {
+    if (select) {
+      // Add skills that aren't already selected
+      const existingSkillNames = filters.skills.map(sf => sf.skill);
+      const skillsToAdd = skillNames
+        .filter(skill => !existingSkillNames.includes(skill))
+        .map(skill => ({ skill, levels: [...ALL_LEVELS] }));
+      onFilterChange({ ...filters, skills: [...filters.skills, ...skillsToAdd] });
+    } else {
+      // Remove all specified skills
+      const newSkills = filters.skills.filter(sf => !skillNames.includes(sf.skill));
+      onFilterChange({ ...filters, skills: newSkills });
+    }
   };
 
   const clearAllFilters = () => {
@@ -433,7 +539,14 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
     });
   };
 
-  const totalFilters = Object.values(filters).flat().length;
+  const totalFilters = 
+    filters.employmentTypes.length +
+    filters.seniorities.length +
+    filters.roleTitles.length +
+    filters.skills.length +
+    filters.industries.length +
+    filters.certificates.length +
+    filters.verticals.length;
 
   // Use dynamic options if available, otherwise empty arrays
   const roleTitles = dynamicOptions?.roleTitles ?? [];
@@ -443,7 +556,7 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
   const verticals = dynamicOptions?.verticals ?? [];
 
   return (
-    <aside className="w-72 bg-gradient-to-b from-card to-card/95 border-r border-border flex flex-col h-full">
+    <aside className="w-80 bg-gradient-to-b from-card to-card/95 border-r border-border flex flex-col h-full">
       {/* Logo Header */}
       <div className="p-4 border-b border-border/50">
         <div className="flex items-center gap-3">
@@ -500,9 +613,10 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
               title="Skills"
               icon={<Wrench className="h-4 w-4" />}
               items={skills}
-              selected={filters.skills}
-              onToggle={(item) => toggleFilter('skills', item)}
-              onToggleMultiple={(items, select) => toggleMultipleFilters('skills', items, select)}
+              selectedSkills={filters.skills}
+              onToggleSkill={toggleSkill}
+              onToggleSeniorityLevel={toggleSeniorityLevel}
+              onToggleMultiple={toggleMultipleSkills}
               defaultOpen={true}
             />
           )}
