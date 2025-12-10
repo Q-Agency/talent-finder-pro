@@ -2,7 +2,7 @@ import { Resource } from '@/services/resourceApi';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Briefcase, Sparkles, Award, Search } from 'lucide-react';
+import { Briefcase, Sparkles, Award, Search, Building2, TrendingUp } from 'lucide-react';
 import { HighlightText } from './HighlightText';
 
 interface ResourceCardProps {
@@ -113,9 +113,11 @@ export function ResourceCard({ resource, searchQuery = '' }: ResourceCardProps) 
 
         <div className="flex flex-wrap gap-1.5 mt-4">
           <Badge className={`text-xs font-semibold px-2.5 py-0.5 ${getEmploymentBadgeClass(resource.employment_type || '')}`}>
+            <Building2 className="h-3 w-3 mr-1" />
             {resource.employment_type || 'Unknown'}
           </Badge>
           <Badge className={`text-xs font-semibold px-2.5 py-0.5 ${getSeniorityBadgeClass(resource.seniority_level || '')}`}>
+            <TrendingUp className="h-3 w-3 mr-1" />
             {resource.seniority_level || 'Unknown'}
           </Badge>
         </div>
