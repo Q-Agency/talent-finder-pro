@@ -121,15 +121,43 @@ export function ResourceCard({ resource, searchQuery = '' }: ResourceCardProps) 
         </div>
 
         {allSkills.length > 0 && (
-          <div className="mt-4">
-            <p className="text-xs font-medium text-muted-foreground mb-2">Skills</p>
-            <div className="flex flex-wrap gap-1">
-              {allSkills.map((skill) => (
-                <Badge key={skill} variant="secondary" className="text-xs font-normal">
-                  {skill}
-                </Badge>
-              ))}
-            </div>
+          <div className="mt-4 space-y-2">
+            {resource.skills?.senior && resource.skills.senior.length > 0 && (
+              <div>
+                <p className="text-xs font-medium text-badge-senior mb-1">Senior</p>
+                <div className="flex flex-wrap gap-1">
+                  {resource.skills.senior.map((skill) => (
+                    <Badge key={skill} variant="outline" className="text-xs font-normal bg-badge-senior/10 text-badge-senior border-badge-senior/20">
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            {resource.skills?.mid && resource.skills.mid.length > 0 && (
+              <div>
+                <p className="text-xs font-medium text-badge-mid mb-1">Mid</p>
+                <div className="flex flex-wrap gap-1">
+                  {resource.skills.mid.map((skill) => (
+                    <Badge key={skill} variant="outline" className="text-xs font-normal bg-badge-mid/10 text-badge-mid border-badge-mid/20">
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            {resource.skills?.junior && resource.skills.junior.length > 0 && (
+              <div>
+                <p className="text-xs font-medium text-badge-junior mb-1">Junior</p>
+                <div className="flex flex-wrap gap-1">
+                  {resource.skills.junior.map((skill) => (
+                    <Badge key={skill} variant="outline" className="text-xs font-normal bg-badge-junior/10 text-badge-junior border-badge-junior/20">
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
