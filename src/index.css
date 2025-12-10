@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
+    --background: 220 15% 93%;
     --foreground: 220 20% 10%;
 
     --card: 0 0% 100%;
@@ -18,20 +18,20 @@
     --primary: 174 62% 38%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 20% 96%;
+    --secondary: 220 14% 96%;
     --secondary-foreground: 220 20% 20%;
 
-    --muted: 210 15% 94%;
-    --muted-foreground: 220 10% 46%;
+    --muted: 220 14% 89%;
+    --muted-foreground: 220 10% 40%;
 
-    --accent: 174 50% 94%;
+    --accent: 174 50% 92%;
     --accent-foreground: 174 62% 25%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 20% 90%;
-    --input: 214 20% 90%;
+    --border: 220 15% 82%;
+    --input: 220 15% 85%;
     --ring: 174 62% 38%;
 
     --radius: 0.75rem;
@@ -49,9 +49,9 @@
     --sidebar-foreground: 220 20% 10%;
     --sidebar-primary: 174 62% 38%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 174 50% 94%;
+    --sidebar-accent: 174 50% 90%;
     --sidebar-accent-foreground: 174 62% 25%;
-    --sidebar-border: 214 20% 90%;
+    --sidebar-border: 220 15% 82%;
     --sidebar-ring: 174 62% 38%;
 
     /* Chart colors */
