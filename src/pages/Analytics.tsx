@@ -40,11 +40,11 @@ const CHART_COLORS = [
   'hsl(var(--chart-3))',
   'hsl(var(--chart-4))',
   'hsl(var(--chart-5))',
-  'hsl(142, 76%, 36%)',
-  'hsl(221, 83%, 53%)',
-  'hsl(262, 83%, 58%)',
-  'hsl(25, 95%, 53%)',
-  'hsl(346, 77%, 50%)',
+  'hsl(var(--chart-6))',
+  'hsl(var(--chart-7))',
+  'hsl(var(--chart-8))',
+  'hsl(var(--chart-9))',
+  'hsl(var(--chart-10))',
 ];
 
 const Analytics = () => {
