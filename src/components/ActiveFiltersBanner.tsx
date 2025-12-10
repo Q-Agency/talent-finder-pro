@@ -104,6 +104,10 @@ export function ActiveFiltersBanner({
     <div className="bg-card/50 border border-border/50 rounded-lg p-3 mb-2">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            Active Filters
+          </span>
+          
           {/* Global skill levels toggle - only show when skills are selected */}
           {hasSkillFilters && (
             <div className="flex items-center gap-1.5">

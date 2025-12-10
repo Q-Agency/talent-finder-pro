@@ -34,10 +34,15 @@ interface DynamicOptions {
   verticals: string[];
 }
 
+export interface EmploymentBreakdown {
+  [key: string]: number;
+}
+
 interface FilterSidebarProps {
   filters: Filters;
   onFilterChange: (filters: Filters) => void;
   resultCount: number;
+  employmentBreakdown?: EmploymentBreakdown;
   dynamicOptions?: DynamicOptions;
   isLoadingOptions?: boolean;
 }
@@ -292,15 +297,21 @@ function FilterSection({ title, icon, items, selected, onToggle, defaultOpen = t
   
   const showSearch = searchable && items.length > SEARCH_THRESHOLD;
   
-  const filteredItems = useMemo(() => {
+  const { selectedItems, unselectedItems } = useMemo(() => {
+    let itemsToProcess = items;
+    
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      return items.filter(item => item.toLowerCase().includes(query));
+      itemsToProcess = items.filter(item => item.toLowerCase().includes(query));
     }
-    return items;
-  }, [items, searchQuery]);
+    
+    const selectedItems = itemsToProcess.filter(item => selected.includes(item));
+    const unselectedItems = itemsToProcess.filter(item => !selected.includes(item));
+    
+    return { selectedItems, unselectedItems };
+  }, [items, searchQuery, selected]);
   
-  const hasNoResults = filteredItems.length === 0;
+  const hasNoResults = selectedItems.length === 0 && unselectedItems.length === 0;
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -347,29 +358,53 @@ function FilterSection({ title, icon, items, selected, onToggle, defaultOpen = t
           {hasNoResults ? (
             <p className="text-xs text-muted-foreground px-3 py-2">No matches found</p>
           ) : (
-            filteredItems.map((item) => {
-              const isSelected = selected.includes(item);
-              const inputId = `${title}-${item}`.replace(/\s+/g, '-');
-              return (
-                <label 
-                  key={item}
-                  htmlFor={inputId}
-                  className={`flex items-center space-x-2.5 py-1.5 px-3 rounded-md cursor-pointer transition-colors ${
-                    isSelected ? 'bg-primary/5' : 'hover:bg-accent/30'
-                  }`}
-                >
-                  <Checkbox
-                    id={inputId}
-                    checked={isSelected}
-                    onCheckedChange={() => onToggle(item)}
-                    className="border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                  />
-                  <span className={`text-sm ${isSelected ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-                    {item}
-                  </span>
-                </label>
-              );
-            })
+            <>
+              {selectedItems.map((item) => {
+                const inputId = `${title}-${item}`.replace(/\s+/g, '-');
+                return (
+                  <label 
+                    key={item}
+                    htmlFor={inputId}
+                    className="flex items-center space-x-2.5 py-1.5 px-3 rounded-md cursor-pointer transition-colors bg-primary/5"
+                  >
+                    <Checkbox
+                      id={inputId}
+                      checked={true}
+                      onCheckedChange={() => onToggle(item)}
+                      className="border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                    />
+                    <span className="text-sm text-foreground font-medium">
+                      {item}
+                    </span>
+                  </label>
+                );
+              })}
+              
+              {selectedItems.length > 0 && unselectedItems.length > 0 && (
+                <div className="border-t border-border/30 my-1.5 mx-3" />
+              )}
+              
+              {unselectedItems.map((item) => {
+                const inputId = `${title}-${item}`.replace(/\s+/g, '-');
+                return (
+                  <label 
+                    key={item}
+                    htmlFor={inputId}
+                    className="flex items-center space-x-2.5 py-1.5 px-3 rounded-md cursor-pointer transition-colors hover:bg-accent/30"
+                  >
+                    <Checkbox
+                      id={inputId}
+                      checked={false}
+                      onCheckedChange={() => onToggle(item)}
+                      className="border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                    />
+                    <span className="text-sm text-muted-foreground">
+                      {item}
+                    </span>
+                  </label>
+                );
+              })}
+            </>
           )}
         </div>
       </CollapsibleContent>
@@ -377,7 +412,7 @@ function FilterSection({ title, icon, items, selected, onToggle, defaultOpen = t
   );
 }
 
-export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOptions, isLoadingOptions }: FilterSidebarProps) {
+export function FilterSidebar({ filters, onFilterChange, resultCount, employmentBreakdown, dynamicOptions, isLoadingOptions }: FilterSidebarProps) {
   const [isAnimating, setIsAnimating] = useState(false);
   const [displayCount, setDisplayCount] = useState(resultCount);
   const prevCountRef = useRef(resultCount);
@@ -516,6 +551,24 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
               </p>
             </div>
           </div>
+          {employmentBreakdown && resultCount > 0 && Object.keys(employmentBreakdown).length > 0 && (
+            <div className="mt-3 pt-3 border-t border-border/30">
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium mb-2">By Type</p>
+              <div className="flex flex-wrap gap-1.5">
+                {Object.entries(employmentBreakdown)
+                  .sort(([, a], [, b]) => b - a)
+                  .map(([type, count]) => (
+                    <span 
+                      key={type}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs bg-background/80 border border-border/50 text-muted-foreground"
+                    >
+                      <span className="font-medium text-foreground">{count}</span>
+                      <span>{type}</span>
+                    </span>
+                  ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
