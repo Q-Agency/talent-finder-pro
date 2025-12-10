@@ -416,14 +416,13 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
     if (prevCountRef.current !== resultCount) {
       const startCount = prevCountRef.current;
       const endCount = resultCount;
-      const diff = endCount - startCount;
+      const diff = Math.abs(endCount - startCount);
       
-      // Only animate count-up if going from lower to higher
-      if (diff > 0 && startCount === 0) {
-        // Animate from 0 to target
-        const duration = Math.min(600, diff * 20); // Cap at 600ms
-        const steps = Math.min(diff, 30); // Max 30 steps
-        const stepValue = diff / steps;
+      // Animate between any two values
+      if (diff > 0) {
+        const duration = Math.min(400, Math.max(150, diff * 10)); // 150-400ms
+        const steps = Math.min(diff, 20); // Max 20 steps
+        const stepValue = (endCount - startCount) / steps;
         const stepDuration = duration / steps;
         
         let currentStep = 0;
@@ -437,17 +436,17 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
           }
         }, stepDuration);
         
+        setIsAnimating(true);
+        const timer = setTimeout(() => setIsAnimating(false), 400);
         prevCountRef.current = resultCount;
-        return () => clearInterval(interval);
-      } else {
-        // Instant update for other cases
-        setDisplayCount(resultCount);
+        
+        return () => {
+          clearInterval(interval);
+          clearTimeout(timer);
+        };
       }
       
-      setIsAnimating(true);
-      const timer = setTimeout(() => setIsAnimating(false), 400);
       prevCountRef.current = resultCount;
-      return () => clearTimeout(timer);
     }
   }, [resultCount]);
   const toggleFilter = (category: keyof Omit<Filters, 'skills'>, item: string) => {
