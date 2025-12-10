@@ -653,8 +653,16 @@ const Analytics = () => {
                             border: '1px solid hsl(var(--border))',
                             borderRadius: '8px'
                           }}
+                          formatter={(value: number, name: string, props: any) => [
+                            `${value} (${props.payload.percentage.toFixed(1)}%)`,
+                            'Count'
+                          ]}
                         />
-                        <Bar dataKey="count" fill="hsl(var(--chart-3))" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="count" radius={[4, 4, 0, 0]} label={{ position: 'top', fontSize: 10, formatter: (value: number) => `${((value / resources.length) * 100).toFixed(0)}%` }}>
+                          {seniorityBreakdown.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                          ))}
+                        </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
