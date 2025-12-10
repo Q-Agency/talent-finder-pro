@@ -297,21 +297,15 @@ function FilterSection({ title, icon, items, selected, onToggle, defaultOpen = t
   
   const showSearch = searchable && items.length > SEARCH_THRESHOLD;
   
-  const { selectedItems, unselectedItems } = useMemo(() => {
-    let itemsToProcess = items;
-    
+  const filteredItems = useMemo(() => {
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      itemsToProcess = items.filter(item => item.toLowerCase().includes(query));
+      return items.filter(item => item.toLowerCase().includes(query));
     }
-    
-    const selectedItems = itemsToProcess.filter(item => selected.includes(item));
-    const unselectedItems = itemsToProcess.filter(item => !selected.includes(item));
-    
-    return { selectedItems, unselectedItems };
-  }, [items, searchQuery, selected]);
+    return items;
+  }, [items, searchQuery]);
   
-  const hasNoResults = selectedItems.length === 0 && unselectedItems.length === 0;
+  const hasNoResults = filteredItems.length === 0;
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -358,53 +352,29 @@ function FilterSection({ title, icon, items, selected, onToggle, defaultOpen = t
           {hasNoResults ? (
             <p className="text-xs text-muted-foreground px-3 py-2">No matches found</p>
           ) : (
-            <>
-              {selectedItems.map((item) => {
-                const inputId = `${title}-${item}`.replace(/\s+/g, '-');
-                return (
-                  <label 
-                    key={item}
-                    htmlFor={inputId}
-                    className="flex items-center space-x-2.5 py-1.5 px-3 rounded-md cursor-pointer transition-colors bg-primary/5"
-                  >
-                    <Checkbox
-                      id={inputId}
-                      checked={true}
-                      onCheckedChange={() => onToggle(item)}
-                      className="border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                    />
-                    <span className="text-sm text-foreground font-medium">
-                      {item}
-                    </span>
-                  </label>
-                );
-              })}
-              
-              {selectedItems.length > 0 && unselectedItems.length > 0 && (
-                <div className="border-t border-border/30 my-1.5 mx-3" />
-              )}
-              
-              {unselectedItems.map((item) => {
-                const inputId = `${title}-${item}`.replace(/\s+/g, '-');
-                return (
-                  <label 
-                    key={item}
-                    htmlFor={inputId}
-                    className="flex items-center space-x-2.5 py-1.5 px-3 rounded-md cursor-pointer transition-colors hover:bg-accent/30"
-                  >
-                    <Checkbox
-                      id={inputId}
-                      checked={false}
-                      onCheckedChange={() => onToggle(item)}
-                      className="border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                    />
-                    <span className="text-sm text-muted-foreground">
-                      {item}
-                    </span>
-                  </label>
-                );
-              })}
-            </>
+            filteredItems.map((item) => {
+              const isSelected = selected.includes(item);
+              const inputId = `${title}-${item}`.replace(/\s+/g, '-');
+              return (
+                <label 
+                  key={item}
+                  htmlFor={inputId}
+                  className={`flex items-center space-x-2.5 py-1.5 px-3 rounded-md cursor-pointer transition-colors ${
+                    isSelected ? 'bg-primary/5' : 'hover:bg-accent/30'
+                  }`}
+                >
+                  <Checkbox
+                    id={inputId}
+                    checked={isSelected}
+                    onCheckedChange={() => onToggle(item)}
+                    className="border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                  />
+                  <span className={`text-sm ${isSelected ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
+                    {item}
+                  </span>
+                </label>
+              );
+            })
           )}
         </div>
       </CollapsibleContent>
