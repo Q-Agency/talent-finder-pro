@@ -543,14 +543,14 @@ export function FilterSidebar({ filters, onFilterChange, resultCount, dynamicOpt
                 searchable
               />
 
-              <FilterSection
+              <GroupedFilterSection
                 title="Certificates"
                 icon={<Award className="h-4 w-4" />}
                 items={certificates}
                 selected={filters.certificates}
                 onToggle={(item) => toggleFilter('certificates', item)}
+                onToggleMultiple={(items, select) => toggleMultipleFilters('certificates', items, select)}
                 defaultOpen={false}
-                searchable
               />
 
               <FilterSection
