@@ -7,7 +7,7 @@ import { SortSelect, SortOption } from '@/components/SortSelect';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { ProfileMenu } from '@/components/ProfileMenu';
 import { RefreshDatasetButton } from '@/components/RefreshDatasetButton';
-import { ActiveSkillFiltersBanner, SkillFilterMode } from '@/components/ActiveSkillFiltersBanner';
+import { ActiveFiltersBanner, SkillFilterMode } from '@/components/ActiveFiltersBanner';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { searchResources, Resource, ApiFilters } from '@/services/resourceApi';
 import { useToast } from '@/hooks/use-toast';
@@ -205,33 +205,15 @@ const Index = () => {
     }
   };
 
-  const handleRemoveSkillFilter = (skill: string) => {
-    setFilters(prev => ({
-      ...prev,
-      skills: prev.skills.filter(sf => sf.skill !== skill)
-    }));
-  };
-
-  const handleToggleSkillLevel = (skill: string, level: 'senior' | 'mid' | 'junior') => {
-    setFilters(prev => ({
-      ...prev,
-      skills: prev.skills.map(sf => {
-        if (sf.skill !== skill) return sf;
-        const hasLevel = sf.levels.includes(level);
-        if (hasLevel && sf.levels.length === 1) return sf; // Prevent removing last level
-        return {
-          ...sf,
-          levels: hasLevel
-            ? sf.levels.filter(l => l !== level)
-            : [...sf.levels, level]
-        };
-      })
-    }));
-  };
-
-  const handleClearAllSkillFilters = () => {
-    setFilters(prev => ({ ...prev, skills: [] }));
-  };
+  // Check if any filters are active (for showing the banner)
+  const hasActiveFilters = 
+    filters.skills.length > 0 ||
+    filters.employmentTypes.length > 0 ||
+    filters.seniorities.length > 0 ||
+    filters.roleTitles.length > 0 ||
+    filters.industries.length > 0 ||
+    filters.certificates.length > 0 ||
+    filters.verticals.length > 0;
 
   return (
     <div className="flex h-screen bg-background">
@@ -255,15 +237,13 @@ const Index = () => {
           <RefreshDatasetButton isTestMode={isTestMode} onRefreshComplete={fetchResources} />
         </SearchHeader>
 
-        {filters.skills.length > 0 && (
+        {hasActiveFilters && (
           <div className="px-6 pt-4 pb-0 bg-background border-b border-border/50">
-          <ActiveSkillFiltersBanner
-              skillFilters={filters.skills}
-              onRemoveSkill={handleRemoveSkillFilter}
-              onToggleLevel={handleToggleSkillLevel}
-              onClearAll={handleClearAllSkillFilters}
-              filterMode={skillFilterMode}
-              onFilterModeChange={setSkillFilterMode}
+            <ActiveFiltersBanner
+              filters={filters}
+              onFilterChange={setFilters}
+              skillFilterMode={skillFilterMode}
+              onSkillFilterModeChange={setSkillFilterMode}
               modeCounts={skillFilterCounts}
             />
           </div>
