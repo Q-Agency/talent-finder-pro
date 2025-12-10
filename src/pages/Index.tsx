@@ -227,6 +227,16 @@ const Index = () => {
     return result;
   }, [resources, searchQuery, sortOption, filters.skills, skillFilterMode, globalSkillLevels]);
 
+  // Compute employment type breakdown
+  const employmentBreakdown = useMemo(() => {
+    const breakdown: Record<string, number> = {};
+    filteredResources.forEach(resource => {
+      const type = resource.employment_type || 'Unknown';
+      breakdown[type] = (breakdown[type] || 0) + 1;
+    });
+    return breakdown;
+  }, [filteredResources]);
+
   const handleSkillClick = (skill: string) => {
     if (!filters.skills.includes(skill)) {
       setFilters(prev => ({
@@ -252,6 +262,7 @@ const Index = () => {
         filters={filters}
         onFilterChange={setFilters}
         resultCount={filteredResources.length}
+        employmentBreakdown={employmentBreakdown}
         dynamicOptions={dynamicOptions}
         isLoadingOptions={isLoadingProperties}
       />
