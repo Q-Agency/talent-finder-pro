@@ -489,7 +489,7 @@ const Analytics = () => {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {certificateAnalysis
                 .filter(cert => cert.count >= 2)
-                .filter(cert => cert.name && cert.name.toLowerCase() !== 'no certificates' && cert.name.trim() !== '')
+                .filter(cert => cert.name && !cert.name.toLowerCase().includes('no certificates') && cert.name.trim() !== '')
                 .map((cert, idx) => (
                   <Card key={idx} className="hover:shadow-md transition-shadow">
                     <CardContent className="p-4">
