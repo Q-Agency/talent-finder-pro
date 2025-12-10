@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { format, addDays, startOfDay } from 'date-fns';
-import { Calendar as CalendarIcon, X } from 'lucide-react';
+import { Calendar as CalendarIcon, X, Percent } from 'lucide-react';
 import { DateRange } from 'react-day-picker';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
+import { Slider } from '@/components/ui/slider';
 import {
   Popover,
   PopoverContent,
@@ -15,10 +16,18 @@ import { Badge } from '@/components/ui/badge';
 interface DateRangeFilterProps {
   value: { start: Date; end: Date } | null;
   onChange: (range: { start: Date; end: Date } | null) => void;
+  minAvailability: number;
+  onMinAvailabilityChange: (value: number) => void;
   className?: string;
 }
 
-export function DateRangeFilter({ value, onChange, className }: DateRangeFilterProps) {
+export function DateRangeFilter({ 
+  value, 
+  onChange, 
+  minAvailability, 
+  onMinAvailabilityChange,
+  className 
+}: DateRangeFilterProps) {
   const [open, setOpen] = useState(false);
 
   const handleSelect = (range: DateRange | undefined) => {
@@ -36,6 +45,7 @@ export function DateRangeFilter({ value, onChange, className }: DateRangeFilterP
   const handleClear = (e: React.MouseEvent) => {
     e.stopPropagation();
     onChange(null);
+    onMinAvailabilityChange(0);
   };
 
   const handleQuickSelect = (days: number) => {
@@ -112,14 +122,29 @@ export function DateRangeFilter({ value, onChange, className }: DateRangeFilterP
       </Popover>
 
       {value && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
-          onClick={handleClear}
-        >
-          <X className="h-4 w-4" />
-        </Button>
+        <>
+          <div className="flex items-center gap-2 px-2 py-1 rounded-md border border-border bg-muted/30">
+            <Percent className="h-3.5 w-3.5 text-muted-foreground" />
+            <Slider
+              value={[minAvailability]}
+              onValueChange={([val]) => onMinAvailabilityChange(val)}
+              max={100}
+              step={5}
+              className="w-24"
+            />
+            <span className="text-xs font-medium w-8 text-right">
+              {minAvailability > 0 ? `≥${minAvailability}%` : 'Any'}
+            </span>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={handleClear}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </>
       )}
     </div>
   );
