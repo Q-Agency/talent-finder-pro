@@ -107,7 +107,7 @@ export function ResourceCard({ resource, searchQuery = '', activeSkillFilters = 
   };
 
   return (
-    <Card className="group shadow-md dark:shadow-none hover:shadow-lg dark:hover:shadow-none transition-all duration-200 animate-fade-in border-border/50 hover:border-primary/20">
+    <Card className="group shadow-md dark:shadow-none hover:shadow-xl hover:-translate-y-1 dark:hover:shadow-none transition-all duration-200 animate-fade-in border-border/50 hover:border-primary/20">
       <CardContent className="p-5">
         <div className="flex items-start gap-4">
           <Avatar className="h-14 w-14 ring-2 ring-background shadow-sm">
