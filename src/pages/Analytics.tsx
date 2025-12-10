@@ -395,7 +395,8 @@ const Analytics = () => {
                         contentStyle={{ 
                           backgroundColor: 'hsl(var(--popover))',
                           border: '1px solid hsl(var(--border))',
-                          borderRadius: '8px'
+                          borderRadius: '8px',
+                          color: 'hsl(var(--popover-foreground))'
                         }}
                         labelStyle={{ color: 'hsl(var(--popover-foreground))' }}
                       />
@@ -615,7 +616,8 @@ const Analytics = () => {
                           contentStyle={{ 
                             backgroundColor: 'hsl(var(--popover))',
                             border: '1px solid hsl(var(--border))',
-                            borderRadius: '8px'
+                            borderRadius: '8px',
+                            color: 'hsl(var(--popover-foreground))'
                           }}
                         />
                         <Legend />
@@ -652,7 +654,8 @@ const Analytics = () => {
                           contentStyle={{ 
                             backgroundColor: 'hsl(var(--popover))',
                             border: '1px solid hsl(var(--border))',
-                            borderRadius: '8px'
+                            borderRadius: '8px',
+                            color: 'hsl(var(--popover-foreground))'
                           }}
                           formatter={(value: number, name: string, props: any) => [
                             `${value} (${props.payload.percentage.toFixed(1)}%)`,
@@ -694,7 +697,8 @@ const Analytics = () => {
                           contentStyle={{ 
                             backgroundColor: 'hsl(var(--popover))',
                             border: '1px solid hsl(var(--border))',
-                            borderRadius: '8px'
+                            borderRadius: '8px',
+                            color: 'hsl(var(--popover-foreground))'
                           }}
                         />
                         <Bar dataKey="count" fill="hsl(var(--chart-4))" radius={[4, 4, 0, 0]} />
