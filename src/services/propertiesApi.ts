@@ -23,11 +23,19 @@ export interface PropertiesResponse {
   verticals: VerticalItem[];
 }
 
-const TEST_URL = 'https://infinite-wasp-terminally.ngrok-free.app/webhook-test/resourcing_get_properties';
-const PROD_URL = 'https://infinite-wasp-terminally.ngrok-free.app/webhook/resourcing_get_properties';
+const BASE_URLS = {
+  public: 'https://infinite-wasp-terminally.ngrok-free.app',
+  local: 'http://192.168.20.70:5678',
+};
 
-export async function fetchProperties(isTestMode: boolean): Promise<PropertiesResponse> {
-  const url = isTestMode ? TEST_URL : PROD_URL;
+const getPropertiesUrl = (isTestMode: boolean, isLocalNetwork: boolean) => {
+  const baseUrl = isLocalNetwork ? BASE_URLS.local : BASE_URLS.public;
+  const path = isTestMode ? '/webhook-test/resourcing_get_properties' : '/webhook/resourcing_get_properties';
+  return `${baseUrl}${path}`;
+};
+
+export async function fetchProperties(isTestMode: boolean, isLocalNetwork: boolean = false): Promise<PropertiesResponse> {
+  const url = getPropertiesUrl(isTestMode, isLocalNetwork);
   
   const response = await fetch(url, {
     method: 'GET',

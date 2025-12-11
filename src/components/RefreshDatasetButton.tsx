@@ -17,10 +17,11 @@ const LAST_SYNC_KEY = 'ganttic_last_sync';
 
 interface RefreshDatasetButtonProps {
   isTestMode: boolean;
+  isLocalNetwork?: boolean;
   onRefreshComplete?: () => void;
 }
 
-export function RefreshDatasetButton({ isTestMode, onRefreshComplete }: RefreshDatasetButtonProps) {
+export function RefreshDatasetButton({ isTestMode, isLocalNetwork = false, onRefreshComplete }: RefreshDatasetButtonProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [lastSync, setLastSync] = useState<Date | null>(null);
@@ -36,7 +37,7 @@ export function RefreshDatasetButton({ isTestMode, onRefreshComplete }: RefreshD
     setShowConfirm(false);
     setIsRefreshing(true);
     try {
-      await refreshDataset(isTestMode);
+      await refreshDataset(isTestMode, isLocalNetwork);
       const now = new Date();
       localStorage.setItem(LAST_SYNC_KEY, now.toISOString());
       setLastSync(now);

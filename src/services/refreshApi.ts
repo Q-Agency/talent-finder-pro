@@ -1,8 +1,16 @@
-const TEST_URL = 'https://infinite-wasp-terminally.ngrok-free.app/webhook-test/resources_refresh_dataset';
-const PROD_URL = 'https://infinite-wasp-terminally.ngrok-free.app/webhook/resources_refresh_dataset';
+const BASE_URLS = {
+  public: 'https://infinite-wasp-terminally.ngrok-free.app',
+  local: 'http://192.168.20.70:5678',
+};
 
-export async function refreshDataset(isTestMode: boolean): Promise<{ success: boolean; message?: string }> {
-  const url = isTestMode ? TEST_URL : PROD_URL;
+const getRefreshUrl = (isTestMode: boolean, isLocalNetwork: boolean) => {
+  const baseUrl = isLocalNetwork ? BASE_URLS.local : BASE_URLS.public;
+  const path = isTestMode ? '/webhook-test/resources_refresh_dataset' : '/webhook/resources_refresh_dataset';
+  return `${baseUrl}${path}`;
+};
+
+export async function refreshDataset(isTestMode: boolean, isLocalNetwork: boolean = false): Promise<{ success: boolean; message?: string }> {
+  const url = getRefreshUrl(isTestMode, isLocalNetwork);
   
   // Use AbortController with 60 second timeout since refresh takes 10-20 seconds
   const controller = new AbortController();

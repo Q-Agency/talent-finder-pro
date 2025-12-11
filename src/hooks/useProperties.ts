@@ -7,23 +7,20 @@ interface UsePropertiesResult {
   error: string | null;
 }
 
-// Cache to store fetched properties per mode
-const propertiesCache: { test: PropertiesResponse | null; prod: PropertiesResponse | null } = {
-  test: null,
-  prod: null,
-};
+// Cache key format: "test-local", "test-public", "prod-local", "prod-public"
+const propertiesCache: Record<string, PropertiesResponse | null> = {};
 
-export function useProperties(isTestMode: boolean): UsePropertiesResult {
+export function useProperties(isTestMode: boolean, isLocalNetwork: boolean = false): UsePropertiesResult {
+  const cacheKey = `${isTestMode ? 'test' : 'prod'}-${isLocalNetwork ? 'local' : 'public'}`;
+  
   const [properties, setProperties] = useState<PropertiesResponse | null>(
-    isTestMode ? propertiesCache.test : propertiesCache.prod
+    propertiesCache[cacheKey] || null
   );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const fetchedRef = useRef<{ test: boolean; prod: boolean }>({ test: false, prod: false });
+  const fetchedRef = useRef<Record<string, boolean>>({});
 
   useEffect(() => {
-    const cacheKey = isTestMode ? 'test' : 'prod';
-    
     // Only fetch if not already cached
     if (propertiesCache[cacheKey]) {
       setProperties(propertiesCache[cacheKey]);
@@ -42,7 +39,7 @@ export function useProperties(isTestMode: boolean): UsePropertiesResult {
       setError(null);
       
       try {
-        const result = await fetchProperties(isTestMode);
+        const result = await fetchProperties(isTestMode, isLocalNetwork);
         propertiesCache[cacheKey] = result;
         setProperties(result);
       } catch (err) {
@@ -55,7 +52,7 @@ export function useProperties(isTestMode: boolean): UsePropertiesResult {
     };
     
     loadProperties();
-  }, [isTestMode]);
+  }, [isTestMode, isLocalNetwork, cacheKey]);
 
   return { properties, isLoading, error };
 }
