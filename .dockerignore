@@ -1,0 +1,31 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+
+# Development files
+.git
+.gitignore
+*.md
+.vscode
+.idea
+.cursor
+
+# Environment files (if you have any)
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker files (not needed in build context)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
