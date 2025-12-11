@@ -1,12 +1,8 @@
-const BASE_URLS = {
-  public: 'https://infinite-wasp-terminally.ngrok-free.app',
-  local: 'http://192.168.20.70:5678',
-};
+const BASE_URL = 'http://192.168.20.70:5678';
 
-const getApiEndpoint = (isTestMode: boolean, isLocalNetwork: boolean) => {
-  const baseUrl = isLocalNetwork ? BASE_URLS.local : BASE_URLS.public;
+const getApiEndpoint = (isTestMode: boolean) => {
   const path = isTestMode ? '/webhook-test/api/resources/search' : '/webhook/api/resources/search';
-  return `${baseUrl}${path}`;
+  return `${BASE_URL}${path}`;
 };
 
 export interface ResourceSkills {
@@ -86,10 +82,9 @@ interface SearchRequestBody {
 export async function searchResources(
   filters: ApiFilters,
   searchQuery: string,
-  isTestMode: boolean,
-  isLocalNetwork: boolean = false
+  isTestMode: boolean
 ): Promise<SearchResponse> {
-  const endpoint = getApiEndpoint(isTestMode, isLocalNetwork);
+  const endpoint = getApiEndpoint(isTestMode);
 
   const requestBody: SearchRequestBody = {
     filters: {

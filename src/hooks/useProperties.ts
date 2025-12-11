@@ -7,11 +7,11 @@ interface UsePropertiesResult {
   error: string | null;
 }
 
-// Cache key format: "test-local", "test-public", "prod-local", "prod-public"
+// Cache key format: "test", "prod"
 const propertiesCache: Record<string, PropertiesResponse | null> = {};
 
-export function useProperties(isTestMode: boolean, isLocalNetwork: boolean = false): UsePropertiesResult {
-  const cacheKey = `${isTestMode ? 'test' : 'prod'}-${isLocalNetwork ? 'local' : 'public'}`;
+export function useProperties(isTestMode: boolean): UsePropertiesResult {
+  const cacheKey = isTestMode ? 'test' : 'prod';
   
   const [properties, setProperties] = useState<PropertiesResponse | null>(
     propertiesCache[cacheKey] || null
@@ -39,7 +39,7 @@ export function useProperties(isTestMode: boolean, isLocalNetwork: boolean = fal
       setError(null);
       
       try {
-        const result = await fetchProperties(isTestMode, isLocalNetwork);
+        const result = await fetchProperties(isTestMode);
         propertiesCache[cacheKey] = result;
         setProperties(result);
       } catch (err) {
@@ -52,7 +52,7 @@ export function useProperties(isTestMode: boolean, isLocalNetwork: boolean = fal
     };
     
     loadProperties();
-  }, [isTestMode, isLocalNetwork, cacheKey]);
+  }, [isTestMode, cacheKey]);
 
   return { properties, isLoading, error };
 }

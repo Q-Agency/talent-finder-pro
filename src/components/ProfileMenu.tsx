@@ -1,4 +1,4 @@
-import { User, LogOut, Settings, FlaskConical, Rocket, Globe, Wifi } from "lucide-react";
+import { User, LogOut, Settings, FlaskConical, Rocket } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,15 +17,11 @@ import { useAuth } from "@/contexts/AuthContext";
 interface ProfileMenuProps {
   isTestMode?: boolean;
   onTestModeToggle?: (isTest: boolean) => void;
-  isLocalNetwork?: boolean;
-  onLocalNetworkToggle?: (isLocal: boolean) => void;
 }
 
 export function ProfileMenu({ 
   isTestMode = false, 
   onTestModeToggle,
-  isLocalNetwork = false,
-  onLocalNetworkToggle,
 }: ProfileMenuProps) {
   const { toast } = useToast();
   const { logout } = useAuth();
@@ -61,25 +57,6 @@ export function ProfileMenu({
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {onLocalNetworkToggle && (
-          <>
-            <div className="flex items-center justify-between px-2 py-2">
-              <div className="flex items-center gap-2">
-                {isLocalNetwork ? (
-                  <Wifi className="h-4 w-4 text-blue-500" />
-                ) : (
-                  <Globe className="h-4 w-4 text-violet-500" />
-                )}
-                <span className="text-sm">{isLocalNetwork ? 'Local (Office)' : 'Public'}</span>
-              </div>
-              <Switch
-                checked={isLocalNetwork}
-                onCheckedChange={onLocalNetworkToggle}
-              />
-            </div>
-            <DropdownMenuSeparator />
-          </>
-        )}
         {onTestModeToggle && (
           <>
             <div className="flex items-center justify-between px-2 py-2">

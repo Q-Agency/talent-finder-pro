@@ -42,10 +42,6 @@ const Index = () => {
   const [filters, setFilters] = useState<Filters>(initialFilters);
   const [searchQuery, setSearchQuery] = useState('');
   const [isTestMode, setIsTestMode] = useState(false);
-  const [isLocalNetwork, setIsLocalNetwork] = useState(() => {
-    const saved = localStorage.getItem('isLocalNetwork');
-    return saved === 'true';
-  });
   const [resources, setResources] = useState<Resource[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
@@ -76,13 +72,8 @@ const Index = () => {
     localStorage.setItem('globalSkillLevels', JSON.stringify(globalSkillLevels));
   }, [globalSkillLevels]);
 
-  // Persist local network preference
-  useEffect(() => {
-    localStorage.setItem('isLocalNetwork', String(isLocalNetwork));
-  }, [isLocalNetwork]);
-  
   // Fetch dynamic filter options
-  const { properties, isLoading: isLoadingProperties } = useProperties(isTestMode, isLocalNetwork);
+  const { properties, isLoading: isLoadingProperties } = useProperties(isTestMode);
   
   const dynamicOptions = useMemo(() => {
     if (!properties) return undefined;
@@ -102,7 +93,7 @@ const Index = () => {
         ...filters,
         skills: filters.skills,
       };
-      const response = await searchResources(apiFilters, '', isTestMode, isLocalNetwork);
+      const response = await searchResources(apiFilters, '', isTestMode);
       if (response.success) {
         setResources(response.results);
       } else {
@@ -119,7 +110,7 @@ const Index = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [filters, isTestMode, isLocalNetwork, toast]);
+  }, [filters, isTestMode, toast]);
 
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
@@ -277,8 +268,6 @@ const Index = () => {
             <ProfileMenu 
               isTestMode={isTestMode} 
               onTestModeToggle={setIsTestMode}
-              isLocalNetwork={isLocalNetwork}
-              onLocalNetworkToggle={setIsLocalNetwork}
             />
           }
         >
@@ -291,7 +280,7 @@ const Index = () => {
           <ThemeToggle />
           <SortSelect value={sortOption} onChange={setSortOption} />
           <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
-          <RefreshDatasetButton isTestMode={isTestMode} isLocalNetwork={isLocalNetwork} onRefreshComplete={fetchResources} />
+          <RefreshDatasetButton isTestMode={isTestMode} onRefreshComplete={fetchResources} />
         </SearchHeader>
 
         {hasActiveFilters && (
