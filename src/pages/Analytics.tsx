@@ -51,11 +51,7 @@ const Analytics = () => {
   const [resources, setResources] = useState<Resource[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isTestMode, setIsTestMode] = useState(false);
-  const [isLocalNetwork, setIsLocalNetwork] = useState(() => {
-    const saved = localStorage.getItem('isLocalNetwork');
-    return saved === 'true';
-  });
-  const { properties } = useProperties(isTestMode, isLocalNetwork);
+  const { properties } = useProperties(isTestMode);
 
   useEffect(() => {
     const fetchAllResources = async () => {
@@ -72,8 +68,7 @@ const Analytics = () => {
             verticals: [],
           },
           '',
-          isTestMode,
-          isLocalNetwork
+          isTestMode
         );
         if (response.success) {
           setResources(response.results);
@@ -86,7 +81,7 @@ const Analytics = () => {
     };
 
     fetchAllResources();
-  }, [isTestMode, isLocalNetwork]);
+  }, [isTestMode]);
 
   // Skill analysis
   const skillAnalysis = useMemo(() => {
@@ -272,8 +267,6 @@ const Analytics = () => {
             <ProfileMenu
               isTestMode={isTestMode} 
               onTestModeToggle={setIsTestMode}
-              isLocalNetwork={isLocalNetwork}
-              onLocalNetworkToggle={setIsLocalNetwork}
             />
           </div>
         </div>
