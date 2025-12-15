@@ -1,6 +1,10 @@
 import { BASE_URL } from "./apiConfig";
 
 function extractAssistantText(payload: unknown): string {
+  if (Array.isArray(payload)) {
+    if (payload.length === 0) return "No response from server.";
+    return extractAssistantText(payload[0]);
+  }
   if (typeof payload === "string") return payload;
   if (!payload || typeof payload !== "object") return "No response from server.";
 
