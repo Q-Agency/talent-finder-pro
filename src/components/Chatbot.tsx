@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { postResourcingChatbot } from "@/services/chatbotApi";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface Message {
   id: string;
@@ -132,7 +134,27 @@ export function Chatbot({ isTestMode = false }: { isTestMode?: boolean }) {
                         : "bg-muted rounded-bl-md"
                     )}
                   >
-                    {message.content}
+                    {message.role === "assistant" ? (
+                      <div className="prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-pre:my-2 prose-pre:rounded-md prose-pre:bg-background/60 prose-pre:p-3 prose-code:before:content-[''] prose-code:after:content-['']">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            a: ({ node, ...props }) => (
+                              <a
+                                {...props}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline underline-offset-2"
+                              />
+                            ),
+                          }}
+                        >
+                          {message.content}
+                        </ReactMarkdown>
+                      </div>
+                    ) : (
+                      message.content
+                    )}
                   </div>
                   {message.role === 'user' && (
                     <div className="h-7 w-7 rounded-full bg-secondary flex items-center justify-center shrink-0">
