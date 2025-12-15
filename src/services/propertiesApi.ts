@@ -23,7 +23,7 @@ export interface PropertiesResponse {
   verticals: VerticalItem[];
 }
 
-const BASE_URL = 'http://192.168.20.70:5678';
+import { BASE_URL } from "./apiConfig";
 
 const getPropertiesUrl = (isTestMode: boolean) => {
   const path = isTestMode ? '/webhook-test/resourcing_get_properties' : '/webhook/resourcing_get_properties';

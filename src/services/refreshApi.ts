@@ -1,4 +1,4 @@
-const BASE_URL = 'http://192.168.20.70:5678';
+import { BASE_URL } from "./apiConfig";
 
 const getRefreshUrl = (isTestMode: boolean) => {
   const path = isTestMode ? '/webhook-test/resources_refresh_dataset' : '/webhook/resources_refresh_dataset';

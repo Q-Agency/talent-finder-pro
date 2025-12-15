@@ -313,7 +313,7 @@ const Index = () => {
         </ScrollArea>
       </div>
 
-      <Chatbot />
+      <Chatbot isTestMode={isTestMode} />
     </div>
   );
 };

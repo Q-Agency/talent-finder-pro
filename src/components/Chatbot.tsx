@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { postResourcingChatbot } from "@/services/chatbotApi";
 
 interface Message {
   id: string;
@@ -11,15 +12,7 @@ interface Message {
   content: string;
 }
 
-const MOCK_RESPONSES = [
-  "I can help you find the right resources for your project. Try using the filters on the left to narrow down by skills, seniority, or employment type.",
-  "To search for specific resources, use the search bar at the top. You can search by name, role, or skills.",
-  "Need someone with specific certifications? Use the Certificates filter to find qualified team members.",
-  "You can switch between grid and list views using the toggle in the header for different viewing preferences.",
-  "The test/production toggle allows you to switch between API environments for validation purposes.",
-];
-
-export function Chatbot() {
+export function Chatbot({ isTestMode = false }: { isTestMode?: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -41,27 +34,38 @@ export function Chatbot() {
   const handleSend = async () => {
     if (!input.trim()) return;
 
+    const text = input.trim();
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: input.trim(),
+      content: text,
     };
 
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsTyping(true);
 
-    // Simulate AI response delay
-    setTimeout(() => {
-      const randomResponse = MOCK_RESPONSES[Math.floor(Math.random() * MOCK_RESPONSES.length)];
+    try {
+      const reply = await postResourcingChatbot(text, isTestMode);
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: randomResponse,
+        content: reply,
       };
       setMessages((prev) => [...prev, assistantMessage]);
+    } catch (e) {
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content:
+          e instanceof Error
+            ? `Sorry — I couldn't reach the chatbot service. ${e.message}`
+            : "Sorry — I couldn't reach the chatbot service.",
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1000 + Math.random() * 1000);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -169,7 +173,7 @@ export function Chatbot() {
               </Button>
             </div>
             <p className="text-[10px] text-muted-foreground text-center mt-2">
-              Demo mode • Enable Cloud for AI responses
+              {isTestMode ? "Test mode" : "Production"} • Connected to: /resourcing_chatbot
             </p>
           </div>
         </div>
