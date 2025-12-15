@@ -25,13 +25,16 @@ export function Chatbot({ isTestMode = false }: { isTestMode?: boolean }) {
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages]);
+    if (!isOpen) return;
+    // Wait for the DOM to paint the new message before scrolling.
+    const id = requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({ block: "end", behavior: "smooth" });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [messages, isTyping, isOpen]);
 
   const handleSend = async () => {
     if (!input.trim()) return;
@@ -111,7 +114,7 @@ export function Chatbot({ isTestMode = false }: { isTestMode?: boolean }) {
           </div>
 
           {/* Messages */}
-          <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+          <ScrollArea className="flex-1 p-4">
             <div className="space-y-4">
               {messages.map((message) => (
                 <div
@@ -177,6 +180,7 @@ export function Chatbot({ isTestMode = false }: { isTestMode?: boolean }) {
                   </div>
                 </div>
               )}
+              <div ref={bottomRef} />
             </div>
           </ScrollArea>
 
