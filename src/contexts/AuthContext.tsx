@@ -1,4 +1,12 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import {
+  AUTH_SESSION_EXPIRES_AT_KEY,
+  credentialsMatch,
+  clearLoginSecurityState,
+  persistSessionExpiry,
+  clearSessionExpiry,
+  isSessionExpired,
+} from '@/lib/authSecurity';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -8,26 +16,58 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+const AUTH_FLAG_KEY = 'isAuthenticated';
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem('isAuthenticated') === 'true';
+    if (localStorage.getItem(AUTH_FLAG_KEY) !== 'true') return false;
+    if (isSessionExpired()) {
+      localStorage.removeItem(AUTH_FLAG_KEY);
+      clearSessionExpiry();
+      return false;
+    }
+    return true;
   });
 
   useEffect(() => {
-    localStorage.setItem('isAuthenticated', String(isAuthenticated));
+    localStorage.setItem(AUTH_FLAG_KEY, String(isAuthenticated));
+  }, [isAuthenticated]);
+
+  /** Enforce session expiry while the app stays open */
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const tick = () => {
+      if (isSessionExpired()) {
+        setIsAuthenticated(false);
+        localStorage.removeItem(AUTH_FLAG_KEY);
+        clearSessionExpiry();
+      }
+    };
+    const id = window.setInterval(tick, 60_000);
+    return () => window.clearInterval(id);
+  }, [isAuthenticated]);
+
+  /** Start or refresh session window for existing logins missing expiry (migration). */
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const raw = localStorage.getItem(AUTH_SESSION_EXPIRES_AT_KEY);
+    if (!raw) persistSessionExpiry();
   }, [isAuthenticated]);
 
   const login = (username: string, password: string): boolean => {
-    if (username === 'resourcing' && password === 'resourcing123') {
-      setIsAuthenticated(true);
-      return true;
+    if (!credentialsMatch(username, password)) {
+      return false;
     }
-    return false;
+    clearLoginSecurityState();
+    persistSessionExpiry();
+    setIsAuthenticated(true);
+    return true;
   };
 
   const logout = () => {
     setIsAuthenticated(false);
-    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem(AUTH_FLAG_KEY);
+    clearSessionExpiry();
   };
 
   return (

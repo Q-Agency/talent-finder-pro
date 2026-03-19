@@ -9,7 +9,7 @@ This app is a **Vite + React SPA**. Amplify runs `npm ci` and `npm run build`, t
 | [`amplify.yml`](../amplify.yml) | Build phases, `dist` artifacts, `node_modules` cache |
 | [`.nvmrc`](../.nvmrc) | Node 20 for `nvm install` / `nvm use` in Amplify |
 | [`public/_redirects`](../public/_redirects) | SPA rewrite so `/login`, `/analytics`, etc. load `index.html` (200) |
-| [`.env.example`](../.env.example) | Documents `VITE_API_BASE_URL` |
+| [`.env.example`](../.env.example) | Documents API URL, login env vars, optional auth tuning |
 
 ## One-time Amplify setup
 
@@ -19,9 +19,11 @@ This app is a **Vite + React SPA**. Amplify runs `npm ci` and `npm run build`, t
    - **Build command:** `npm run build`
    - **Output directory:** `dist`
 4. **Environment variables** (App settings → **Environment variables**):
-   - `VITE_API_BASE_URL` = your public API base URL, e.g. `https://api.example.com`  
-     - **No trailing slash.**  
-     - Vite inlines this at **build time** — change the variable and **redeploy** to apply.
+   - `VITE_API_BASE_URL` — public API base URL, e.g. `https://api.example.com` (**no trailing slash**).
+   - `VITE_LOGIN_USERNAME` — allowed sign-in username.
+   - `VITE_LOGIN_PASSWORD` — allowed password (if it contains `#`, wrap the value carefully in the Amplify UI or use the console/API so it is stored correctly).
+   - Optional: `VITE_SESSION_MAX_AGE_MS`, `VITE_LOGIN_MAX_ATTEMPTS`, `VITE_LOGIN_LOCKOUT_MS` (see `.env.example`).
+   - Vite inlines these at **build time** — change any variable and **redeploy** to apply.
 5. Save and **deploy**.
 
 ## Backend / CORS / HTTPS

@@ -13,7 +13,7 @@ Internal resourcing hub for finding the right employee based on skills, experien
 - **AI chatbot** — In-app assistant for resourcing questions; supports test and production backends.
 - **Test vs production mode** — Profile menu toggle to use test webhook endpoints (`/webhook-test/`) or production (`/webhook/`).
 - **Dataset refresh** — Trigger backend dataset refresh (with 60s timeout); respects test/prod mode.
-- **Auth** — Simple login (credentials in `AuthContext`); session persisted in `localStorage`; protected routes for main app and analytics.
+- **Auth** — Login via `VITE_LOGIN_USERNAME` / `VITE_LOGIN_PASSWORD` (build-time env); constant-time compare, lockout after failed attempts, session max age; `localStorage` session flag + expiry; protected routes.
 - **Theme** — Light/dark/system via `next-themes` and theme toggle in header.
 
 ---
@@ -40,7 +40,7 @@ src/
 ├── main.tsx                # Entry, root render
 ├── index.css               # Global + Tailwind
 ├── contexts/
-│   └── AuthContext.tsx     # Login state, login/logout, localStorage
+│   └── AuthContext.tsx     # Login state, session expiry, localStorage
 ├── pages/
 │   ├── Index.tsx           # Main hub: filters, search, grid/list, chatbot
 │   ├── Login.tsx           # Login form
@@ -64,6 +64,9 @@ src/
 ├── hooks/
 │   ├── useProperties.ts    # Cached fetch of filter options (test/prod)
 │   └── use-toast.ts
+├── lib/
+│   ├── utils.ts
+│   └── authSecurity.ts     # Login env creds, lockout, session expiry
 └── data/
     └── mockData.ts         # employmentTypes, seniorities (fallbacks)
 ```
@@ -87,16 +90,22 @@ cd talent-finder-pro-frontend
 npm install
 ```
 
-### 2. Environment (optional)
+### 2. Environment
 
-Create a `.env` or `.env.local` and set the API base URL if different from the default:
+Create `.env.local` (see [`.env.example`](.env.example)):
 
 ```bash
-# Optional: defaults to http://192.168.20.70:5678 if unset
+# API (optional — defaults to http://192.168.20.70:5678 if unset)
 VITE_API_BASE_URL=https://your-api-host.example.com
+
+# Login — required (use quotes if password contains # or spaces)
+VITE_LOGIN_USERNAME=resourcing
+VITE_LOGIN_PASSWORD="your-password"
 ```
 
-Values are read at **build time** via `import.meta.env.VITE_API_BASE_URL`.
+Optional tuning (defaults in `src/lib/authSecurity.ts`): `VITE_LOGIN_MAX_ATTEMPTS`, `VITE_LOGIN_LOCKOUT_MS`, `VITE_SESSION_MAX_AGE_MS`.
+
+All `VITE_*` values are read at **build time**. Credentials still end up in the client bundle — this is suitable for a light internal gate only; use real SSO/API auth when you need strong security.
 
 ### 3. Run development server
 
@@ -108,7 +117,7 @@ App runs at **http://localhost:8080** (or the host shown in the terminal).
 
 ### 4. Login
 
-Use the credentials configured in `AuthContext` (e.g. username `resourcing`, password `resourcing123`). Change these in `src/contexts/AuthContext.tsx` for your environment.
+Use the username and password from `VITE_LOGIN_USERNAME` and `VITE_LOGIN_PASSWORD`. After too many failed attempts, sign-in is temporarily locked; sessions expire after `VITE_SESSION_MAX_AGE_MS` (default 8 hours).
 
 ---
 
@@ -167,12 +176,12 @@ The repo includes everything Amplify needs:
 | [`amplify.yml`](amplify.yml) | `npm ci` → `npm run build`, publish `dist/`, cache `node_modules` |
 | [`.nvmrc`](.nvmrc) | Node **20** for the Amplify build (`nvm install` / `nvm use`) |
 | [`public/_redirects`](public/_redirects) | SPA **200 rewrite** to `index.html` so React Router routes work on refresh |
-| [`.env.example`](.env.example) | Documents `VITE_API_BASE_URL` |
+| [`.env.example`](.env.example) | Documents `VITE_API_BASE_URL`, login & optional auth tuning |
 
 **Amplify Console checklist**
 
 1. Connect the Git repo; Amplify picks up `amplify.yml` automatically.
-2. Under **Environment variables**, set **`VITE_API_BASE_URL`** to your API origin (HTTPS, no trailing slash). Redeploy after changes — Vite inlines env at build time.
+2. Under **Environment variables**, set at least **`VITE_API_BASE_URL`**, **`VITE_LOGIN_USERNAME`**, and **`VITE_LOGIN_PASSWORD`** (quote the password in the console if it contains `#`). Redeploy after changes — Vite inlines env at build time.
 3. Ensure your API allows **CORS** from your Amplify domain (and custom domain if used). Avoid **HTTP** APIs from an **HTTPS** Amplify site (mixed content).
 
 Full step-by-step: [`docs/deployment-aws-amplify.md`](docs/deployment-aws-amplify.md).
