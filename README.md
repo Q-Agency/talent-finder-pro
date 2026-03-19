@@ -158,6 +158,25 @@ The app expects a backend that provides:
 - **Preview:** `npm run preview` to test the built app locally.
 - For production, serve `dist/` with a static host (e.g. Nginx, Vercel, Netlify). Ensure `VITE_API_BASE_URL` is set at build time for the correct API.
 
+### AWS Amplify Hosting
+
+The repo includes everything Amplify needs:
+
+| Item | Role |
+|------|------|
+| [`amplify.yml`](amplify.yml) | `npm ci` → `npm run build`, publish `dist/`, cache `node_modules` |
+| [`.nvmrc`](.nvmrc) | Node **20** for the Amplify build (`nvm install` / `nvm use`) |
+| [`public/_redirects`](public/_redirects) | SPA **200 rewrite** to `index.html` so React Router routes work on refresh |
+| [`.env.example`](.env.example) | Documents `VITE_API_BASE_URL` |
+
+**Amplify Console checklist**
+
+1. Connect the Git repo; Amplify picks up `amplify.yml` automatically.
+2. Under **Environment variables**, set **`VITE_API_BASE_URL`** to your API origin (HTTPS, no trailing slash). Redeploy after changes — Vite inlines env at build time.
+3. Ensure your API allows **CORS** from your Amplify domain (and custom domain if used). Avoid **HTTP** APIs from an **HTTPS** Amplify site (mixed content).
+
+Full step-by-step: [`docs/deployment-aws-amplify.md`](docs/deployment-aws-amplify.md).
+
 ---
 
 ## License and attribution

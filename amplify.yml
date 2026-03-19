@@ -1,0 +1,26 @@
+# AWS Amplify Hosting build specification (Gen 1 / Git-based CI)
+# Docs: https://docs.aws.amazon.com/amplify/latest/userguide/build-settings.html
+#
+# Required in Amplify Console → App settings → Environment variables:
+#   VITE_API_BASE_URL = https://your-api.example.com   (no trailing slash)
+#
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        # Use Node version from .nvmrc (Amplify build image includes nvm)
+        - nvm install
+        - nvm use
+        - node -v
+        - npm ci
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    baseDirectory: dist
+    files:
+      - "**/*"
+  cache:
+    paths:
+      - node_modules/**/*
