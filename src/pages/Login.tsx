@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { getSupabaseSetupUserMessage, isSupabaseConfigured } from '@/lib/supabaseClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,14 +10,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import {
-  getAuthSetupIssue,
-  getAuthSetupUserMessage,
-  getLoginLockoutState,
-  registerFailedLoginAttempt,
-} from '@/lib/authSecurity';
-import {
   Lock,
-  User,
+  Mail,
   Eye,
   EyeOff,
   Loader2,
@@ -34,78 +29,65 @@ const highlights = [
 ];
 
 export default function Login() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
-  const { login } = useAuth();
+  const { signIn, isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const clearError = () => setLoginError(null);
 
-  const authSetupIssue = useMemo(() => getAuthSetupIssue(), []);
-  const authConfigMessage =
-    authSetupIssue !== 'ok' ? getAuthSetupUserMessage(import.meta.env.DEV) : null;
+  const authConfigMessage = useMemo(
+    () => (isSupabaseConfigured() ? null : getSupabaseSetupUserMessage(import.meta.env.DEV)),
+    [],
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError(null);
     setIsLoading(true);
 
-    if (authSetupIssue !== 'ok') {
-      setLoginError(getAuthSetupUserMessage(import.meta.env.DEV));
+    if (!isSupabaseConfigured()) {
+      setLoginError(getSupabaseSetupUserMessage(import.meta.env.DEV));
       setIsLoading(false);
       return;
     }
 
-    const lockout = getLoginLockoutState();
-    if (lockout.locked && lockout.retryAfterMs != null) {
-      const mins = Math.max(1, Math.ceil(lockout.retryAfterMs / 60_000));
-      setLoginError(
-        `Too many sign-in attempts. Please try again in about ${mins} minute${mins === 1 ? '' : 's'}.`,
-      );
-      setIsLoading(false);
-      return;
-    }
+    const { error } = await signIn(email, password);
 
-    await new Promise((resolve) => setTimeout(resolve, 400));
-
-    const success = login(username.trim(), password);
-
-    if (success) {
+    if (!error) {
       toast({
         title: 'Signed in',
         description: 'Welcome to Resourcing Hub.',
       });
       navigate('/');
     } else {
-      registerFailedLoginAttempt();
       setPassword('');
-      const after = getLoginLockoutState();
-      if (after.locked && after.retryAfterMs != null) {
-        const mins = Math.max(1, Math.ceil(after.retryAfterMs / 60_000));
-        setLoginError(
-          `Too many sign-in attempts. Please try again in about ${mins} minute${mins === 1 ? '' : 's'}.`,
-        );
-        toast({
-          title: 'Account temporarily locked',
-          description: `Try again in about ${mins} minute${mins === 1 ? '' : 's'}.`,
-          variant: 'destructive',
-        });
-      } else {
-        setLoginError('The username or password you entered is incorrect. Please try again.');
-        toast({
-          title: 'Sign-in failed',
-          description: 'Check your credentials and try again.',
-          variant: 'destructive',
-        });
-      }
+      setLoginError(error.message || 'Sign-in failed. Check your email and password.');
+      toast({
+        title: 'Sign-in failed',
+        description: error.message || 'Try again.',
+        variant: 'destructive',
+      });
     }
 
     setIsLoading(false);
   };
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-label="Loading" />
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-background">
@@ -171,7 +153,7 @@ export default function Login() {
             <CardHeader className="space-y-1 pb-4 hidden lg:block">
               <CardTitle className="text-2xl font-semibold tracking-tight">Sign in</CardTitle>
               <CardDescription className="text-base">
-                Enter your credentials to continue to the dashboard.
+                Use your Supabase account email and password.
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-0 lg:pt-2">
@@ -195,25 +177,25 @@ export default function Login() {
                 )}
 
                 <div className="space-y-2">
-                  <Label htmlFor="username" className="text-sm font-medium">
-                    Username
+                  <Label htmlFor="email" className="text-sm font-medium">
+                    Email
                   </Label>
                   <div className="relative">
-                    <User
+                    <Mail
                       className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
                       aria-hidden
                     />
                     <Input
-                      id="username"
-                      name="username"
-                      type="text"
-                      autoComplete="username"
-                      inputMode="text"
+                      id="email"
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      inputMode="email"
                       spellCheck={false}
-                      placeholder="e.g. resourcing"
-                      value={username}
+                      placeholder="you@company.com"
+                      value={email}
                       onChange={(e) => {
-                        setUsername(e.target.value);
+                        setEmail(e.target.value);
                         clearError();
                       }}
                       className={cn(
@@ -293,7 +275,7 @@ export default function Login() {
 
           <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
             <Shield className="h-3.5 w-3.5 shrink-0 text-muted-foreground/80" aria-hidden />
-            <span>Session secured for internal use</span>
+            <span>Authentication via Supabase</span>
           </div>
         </div>
       </main>

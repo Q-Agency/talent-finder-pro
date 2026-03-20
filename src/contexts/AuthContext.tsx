@@ -1,80 +1,84 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import {
-  AUTH_SESSION_EXPIRES_AT_KEY,
-  credentialsMatch,
-  clearLoginSecurityState,
-  persistSessionExpiry,
-  clearSessionExpiry,
-  isSessionExpired,
-} from '@/lib/authSecurity';
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+  useCallback,
+} from 'react';
+import type { Session, User } from '@supabase/supabase-js';
+import { isSupabaseConfigured, supabase } from '@/lib/supabaseClient';
 
 interface AuthContextType {
+  session: Session | null;
+  user: User | null;
+  isLoading: boolean;
   isAuthenticated: boolean;
-  login: (username: string, password: string) => boolean;
-  logout: () => void;
+  signIn: (email: string, password: string) => Promise<{ error: { message: string } | null }>;
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-const AUTH_FLAG_KEY = 'isAuthenticated';
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    if (localStorage.getItem(AUTH_FLAG_KEY) !== 'true') return false;
-    if (isSessionExpired()) {
-      localStorage.removeItem(AUTH_FLAG_KEY);
-      clearSessionExpiry();
-      return false;
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured()) {
+      setSession(null);
+      setIsLoading(false);
+      return;
     }
-    return true;
-  });
 
-  useEffect(() => {
-    localStorage.setItem(AUTH_FLAG_KEY, String(isAuthenticated));
-  }, [isAuthenticated]);
+    let cancelled = false;
 
-  /** Enforce session expiry while the app stays open */
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    const tick = () => {
-      if (isSessionExpired()) {
-        setIsAuthenticated(false);
-        localStorage.removeItem(AUTH_FLAG_KEY);
-        clearSessionExpiry();
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      if (!cancelled) {
+        setSession(s);
+        setIsLoading(false);
       }
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, s) => {
+      setSession(s);
+      setIsLoading(false);
+    });
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
     };
-    const id = window.setInterval(tick, 60_000);
-    return () => window.clearInterval(id);
-  }, [isAuthenticated]);
+  }, []);
 
-  /** Start or refresh session window for existing logins missing expiry (migration). */
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    const raw = localStorage.getItem(AUTH_SESSION_EXPIRES_AT_KEY);
-    if (!raw) persistSessionExpiry();
-  }, [isAuthenticated]);
-
-  const login = (username: string, password: string): boolean => {
-    if (!credentialsMatch(username, password)) {
-      return false;
+  const signIn = useCallback(async (email: string, password: string) => {
+    if (!isSupabaseConfigured()) {
+      return { error: { message: 'Supabase is not configured' } };
     }
-    clearLoginSecurityState();
-    persistSessionExpiry();
-    setIsAuthenticated(true);
-    return true;
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+    return { error: error ? { message: error.message } : null };
+  }, []);
+
+  const signOut = useCallback(async () => {
+    if (!isSupabaseConfigured()) return;
+    await supabase.auth.signOut();
+  }, []);
+
+  const value: AuthContextType = {
+    session,
+    user: session?.user ?? null,
+    isLoading,
+    isAuthenticated: !!session,
+    signIn,
+    signOut,
   };
 
-  const logout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem(AUTH_FLAG_KEY);
-    clearSessionExpiry();
-  };
-
-  return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

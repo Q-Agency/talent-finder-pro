@@ -13,7 +13,7 @@ Internal resourcing hub for finding the right employee based on skills, experien
 - **AI chatbot** — In-app assistant for resourcing questions; supports test and production backends.
 - **Test vs production mode** — Profile menu toggle to use test webhook endpoints (`/webhook-test/`) or production (`/webhook/`).
 - **Dataset refresh** — Trigger backend dataset refresh (with 60s timeout); respects test/prod mode.
-- **Auth** — Login via `VITE_LOGIN_USERNAME` + password (`VITE_LOGIN_PASSWORD` or Amplify-friendly alias `VITE_LOGIN_PASS`); build-time env; lockout + session max age; `localStorage` session flag + expiry; protected routes.
+- **Auth** — [Supabase Auth](https://supabase.com/docs/guides/auth) email/password (`signInWithPassword`); session persisted by the Supabase client; `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` at build time; protected routes.
 - **Theme** — Light/dark/system via `next-themes` and theme toggle in header.
 
 ---
@@ -28,6 +28,7 @@ Internal resourcing hub for finding the right employee based on skills, experien
 | Components     | shadcn/ui (Radix), Tailwind CSS, CVA, Lucide icons |
 | Data           | TanStack Query, React Hook Form, Zod |
 | Charts         | Recharts |
+| Auth           | @supabase/supabase-js |
 | Other          | date-fns, react-markdown, remark-gfm, sonner, cmdk, next-themes |
 
 ---
@@ -40,7 +41,7 @@ src/
 ├── main.tsx                # Entry, root render
 ├── index.css               # Global + Tailwind
 ├── contexts/
-│   └── AuthContext.tsx     # Login state, session expiry, localStorage
+│   └── AuthContext.tsx     # Supabase session, sign-in / sign-out
 ├── pages/
 │   ├── Index.tsx           # Main hub: filters, search, grid/list, chatbot
 │   ├── Login.tsx           # Login form
@@ -66,7 +67,7 @@ src/
 │   └── use-toast.ts
 ├── lib/
 │   ├── utils.ts
-│   └── authSecurity.ts     # Login env creds, lockout, session expiry
+│   └── supabaseClient.ts   # Supabase browser client + env helpers
 └── data/
     └── mockData.ts         # employmentTypes, seniorities (fallbacks)
 ```
@@ -98,14 +99,12 @@ Create `.env.local` (see [`.env.example`](.env.example)):
 # API (optional — defaults to http://192.168.20.70:5678 if unset)
 VITE_API_BASE_URL=https://your-api-host.example.com
 
-# Login — required (alphanumeric password avoids quoting issues in Amplify)
-VITE_LOGIN_USERNAME=resourcing
-VITE_LOGIN_PASSWORD=yourPassword
+# Supabase — required for sign-in (Project Settings → API)
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-public-key
 ```
 
-Optional tuning (defaults in `src/lib/authSecurity.ts`): `VITE_LOGIN_MAX_ATTEMPTS`, `VITE_LOGIN_LOCKOUT_MS`, `VITE_SESSION_MAX_AGE_MS`.
-
-All `VITE_*` values are read at **build time**. Credentials still end up in the client bundle — this is suitable for a light internal gate only; use real SSO/API auth when you need strong security.
+`VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are read at **build time** and bundled into the client (standard for Supabase SPAs). The **anon** key is public; protect data with [Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security) in Supabase.
 
 ### 3. Run development server
 
@@ -117,7 +116,7 @@ App runs at **http://localhost:8080** (or the host shown in the terminal).
 
 ### 4. Login
 
-Use the username and password from `VITE_LOGIN_USERNAME` and `VITE_LOGIN_PASSWORD`. After too many failed attempts, sign-in is temporarily locked; sessions expire after `VITE_SESSION_MAX_AGE_MS` (default 8 hours).
+Create a user in **Supabase → Authentication → Users** (with Email provider enabled), then sign in on `/login` with that **email** and password. Sessions refresh automatically via the Supabase client.
 
 ---
 
@@ -155,7 +154,7 @@ The app expects a backend that provides:
 
 ## Main UI flows
 
-1. **Login** → Enter credentials → redirect to `/`.
+1. **Login** → Email + password (Supabase) → redirect to `/`.
 2. **Hub (`/`)** → Set filters in sidebar, optional free-text search, sort and view toggle → results in grid or list; click resource for detail modal; use chatbot or “Refresh dataset” as needed.
 3. **Analytics (`/analytics`)** → Summary cards and tabs: Skills (bar chart + heatmap), Certificates, Industries (pie + list), Workforce (employment, seniority, roles).
 
@@ -176,12 +175,12 @@ The repo includes everything Amplify needs:
 | [`amplify.yml`](amplify.yml) | `npm ci` → `npm run build`, publish `dist/`, cache `node_modules` |
 | [`.nvmrc`](.nvmrc) | Node **20** for the Amplify build (`nvm install` / `nvm use`) |
 | [`public/_redirects`](public/_redirects) | SPA **200 rewrite** to `index.html` so React Router routes work on refresh |
-| [`.env.example`](.env.example) | Documents `VITE_API_BASE_URL`, login & optional auth tuning |
+| [`.env.example`](.env.example) | Documents `VITE_API_BASE_URL` and Supabase |
 
 **Amplify Console checklist**
 
 1. Connect the Git repo; Amplify picks up `amplify.yml` automatically.
-2. Under **Environment variables**, set at least **`VITE_API_BASE_URL`**, **`VITE_LOGIN_USERNAME`**, and a password (**`VITE_LOGIN_PASSWORD`** or, if Amplify omits it, **`VITE_LOGIN_PASS`** with the same value). Redeploy after changes — Vite inlines env at build time.
+2. Under **Environment variables**, set **`VITE_API_BASE_URL`**, **`VITE_SUPABASE_URL`**, and **`VITE_SUPABASE_ANON_KEY`**. Redeploy after changes — Vite inlines env at build time.
 3. Ensure your API allows **CORS** from your Amplify domain (and custom domain if used). Avoid **HTTP** APIs from an **HTTPS** Amplify site (mixed content).
 
 Full step-by-step: [`docs/deployment-aws-amplify.md`](docs/deployment-aws-amplify.md).

@@ -24,11 +24,11 @@ export function ProfileMenu({
   onTestModeToggle,
 }: ProfileMenuProps) {
   const { toast } = useToast();
-  const { logout } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
     toast({
       title: "Logged out",
       description: "You have been logged out successfully.",
@@ -50,10 +50,10 @@ export function ProfileMenu({
       <DropdownMenuContent className="w-56 bg-popover" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">resourcing</p>
-            <p className="text-xs leading-none text-muted-foreground">
-              Resourcing Team
+            <p className="text-sm font-medium leading-none truncate max-w-[200px]">
+              {user?.email ?? 'Signed in'}
             </p>
+            <p className="text-xs leading-none text-muted-foreground">Resourcing Hub</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
