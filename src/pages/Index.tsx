@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { FilterSidebar, Filters, SkillLevel } from '@/components/FilterSidebar';
 import { SearchHeader } from '@/components/SearchHeader';
 import { ResourceGrid } from '@/components/ResourceGrid';
@@ -16,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Chatbot } from '@/components/Chatbot';
 import { useProperties } from '@/hooks/useProperties';
 import { BarChart3 } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const initialFilters: Filters = {
   employmentTypes: [],
@@ -61,6 +63,8 @@ const Index = () => {
     return ALL_LEVELS;
   });
   const { toast } = useToast();
+  const { user } = useAuth();
+  const needsPasswordSetup = user?.user_metadata?.password_setup_complete !== true;
 
   // Persist filter mode preference
   useEffect(() => {
@@ -282,6 +286,22 @@ const Index = () => {
           <ViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
           <RefreshDatasetButton isTestMode={isTestMode} onRefreshComplete={fetchResources} />
         </SearchHeader>
+
+        {needsPasswordSetup && (
+          <div className="px-6 pt-4 bg-background border-b border-border/50">
+            <Alert className="border-amber-500/40 bg-amber-500/10 text-amber-950 dark:text-amber-100">
+              <AlertTitle className="text-sm font-semibold">Set your password</AlertTitle>
+              <AlertDescription className="text-sm mt-1 flex flex-wrap items-center gap-x-3 gap-y-2">
+                <span>
+                  After accepting your invite, choose a password so you can sign in next time.
+                </span>
+                <Button variant="outline" size="sm" className="shrink-0 border-amber-600/40" asChild>
+                  <Link to="/set-password">Set password</Link>
+                </Button>
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
 
         {hasActiveFilters && (
           <div className="px-6 pt-4 pb-0 bg-background border-b border-border/50">

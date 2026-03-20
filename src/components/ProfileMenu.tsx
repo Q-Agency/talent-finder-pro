@@ -1,4 +1,4 @@
-import { User, LogOut, Settings, FlaskConical, Rocket } from "lucide-react";
+import { User, LogOut, Settings, FlaskConical, Rocket, KeyRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -79,6 +79,10 @@ export function ProfileMenu({
         <DropdownMenuItem>
           <Settings className="mr-2 h-4 w-4" />
           <span>Settings</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate('/set-password')}>
+          <KeyRound className="mr-2 h-4 w-4" />
+          <span>Set password</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">

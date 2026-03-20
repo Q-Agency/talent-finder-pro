@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
+import SetPassword from "./pages/SetPassword";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Analytics />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/set-password"
+                element={
+                  <ProtectedRoute>
+                    <SetPassword />
                   </ProtectedRoute>
                 }
               />
