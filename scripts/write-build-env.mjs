@@ -23,6 +23,14 @@ for (const k of KEYS) {
   }
 }
 
+const present = KEYS.filter((k) => process.env[k] !== undefined && process.env[k] !== "");
+console.log(`[write-build-env] Keys present in build env (names only): ${present.join(", ") || "(none)"}`);
+if (!present.includes("VITE_LOGIN_PASSWORD") && !present.includes("VITE_LOGIN_PASSWORD_B64")) {
+  console.warn(
+    "[write-build-env] WARNING: Neither VITE_LOGIN_PASSWORD nor VITE_LOGIN_PASSWORD_B64 is set. Add one in Amplify → Hosting → Environment variables for this branch, then redeploy.",
+  );
+}
+
 if (lines.length > 0) {
   writeFileSync(OUT, `${lines.join("\n")}\n`);
   console.log(`[write-build-env] Wrote ${lines.length} key(s) to ${OUT}`);

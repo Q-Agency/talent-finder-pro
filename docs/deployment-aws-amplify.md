@@ -63,3 +63,11 @@ Open the preview URL and confirm `/login` and `/analytics` work after a full pag
 | API errors / blocked requests | CORS, HTTPS vs HTTP, correct `VITE_API_BASE_URL`. |
 | Old API URL after env change | Redeploy; Vite bakes env at build time. |
 | Build fails on `npm ci` | Commit `package-lock.json`; don’t delete it. |
+| **“Built without a login password”** | The **build** never saw `VITE_LOGIN_PASSWORD` (or `VITE_LOGIN_PASSWORD_B64`). In Amplify: open **this app** → **Hosting** → select the **same branch** as your site (e.g. `main`) → **Environment variables** → add **`VITE_LOGIN_PASSWORD`** (exact spelling, case-sensitive). Save, then **Redeploy** (not just “retry” — need a full new build). In the build log, find **`[write-build-env]`**: it lists which keys were present (names only). If `VITE_LOGIN_PASSWORD` is missing from that list, Amplify is not passing it into the build (wrong branch, typo, or variable only set at account level). |
+
+### Confirm env vars in the build log
+
+After each deploy, search the build log for:
+
+- `[write-build-env] Keys present in build env (names only):` — you should see `VITE_LOGIN_USERNAME` and `VITE_LOGIN_PASSWORD` (or `VITE_LOGIN_PASSWORD_B64`).
+- If you see a **WARNING** about password missing, the variable is not available to the Node build process — fix Amplify configuration and redeploy.

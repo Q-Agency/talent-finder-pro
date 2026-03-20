@@ -83,7 +83,7 @@ export function getAuthSetupUserMessage(isDev: boolean): string {
     return `This deployment was built without a login username. ${adminHint}`;
   }
   if (issue === "missing_password") {
-    return `This deployment was built without a login password. ${adminHint}`;
+    return `This deployment was built without a login password. The name must be exactly VITE_LOGIN_PASSWORD (or use VITE_LOGIN_PASSWORD_B64). Set it for the same Git branch you deploy, then trigger a new build. ${adminHint}`;
   }
   if (issue === "invalid_password_b64") {
     return "VITE_LOGIN_PASSWORD_B64 is not valid Base64. Fix it in Amplify and redeploy.";
