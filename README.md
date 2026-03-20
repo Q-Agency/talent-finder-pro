@@ -13,7 +13,7 @@ Internal resourcing hub for finding the right employee based on skills, experien
 - **AI chatbot** — In-app assistant for resourcing questions; supports test and production backends.
 - **Test vs production mode** — Profile menu toggle to use test webhook endpoints (`/webhook-test/`) or production (`/webhook/`).
 - **Dataset refresh** — Trigger backend dataset refresh (with 60s timeout); respects test/prod mode.
-- **Auth** — Login via `VITE_LOGIN_USERNAME` / `VITE_LOGIN_PASSWORD` (build-time env); constant-time compare, lockout after failed attempts, session max age; `localStorage` session flag + expiry; protected routes.
+- **Auth** — Login via `VITE_LOGIN_USERNAME` + password (`VITE_LOGIN_PASSWORD` or Amplify-friendly alias `VITE_LOGIN_PASS`); build-time env; lockout + session max age; `localStorage` session flag + expiry; protected routes.
 - **Theme** — Light/dark/system via `next-themes` and theme toggle in header.
 
 ---
@@ -181,7 +181,7 @@ The repo includes everything Amplify needs:
 **Amplify Console checklist**
 
 1. Connect the Git repo; Amplify picks up `amplify.yml` automatically.
-2. Under **Environment variables**, set at least **`VITE_API_BASE_URL`**, **`VITE_LOGIN_USERNAME`**, and **`VITE_LOGIN_PASSWORD`**. A password with **only letters and numbers** is easiest (no quoting issues). If you ever need `#` or similar, use **`VITE_LOGIN_PASSWORD_B64`** instead (see `.env.example`). Redeploy after changes — Vite inlines env at build time.
+2. Under **Environment variables**, set at least **`VITE_API_BASE_URL`**, **`VITE_LOGIN_USERNAME`**, and a password (**`VITE_LOGIN_PASSWORD`** or, if Amplify omits it, **`VITE_LOGIN_PASS`** with the same value). Redeploy after changes — Vite inlines env at build time.
 3. Ensure your API allows **CORS** from your Amplify domain (and custom domain if used). Avoid **HTTP** APIs from an **HTTPS** Amplify site (mixed content).
 
 Full step-by-step: [`docs/deployment-aws-amplify.md`](docs/deployment-aws-amplify.md).

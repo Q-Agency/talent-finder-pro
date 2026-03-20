@@ -22,7 +22,8 @@ This app is a **Vite + React SPA**. Amplify runs `npm ci` and `npm run build`, t
 4. **Environment variables** (App settings → **Environment variables**):
    - `VITE_API_BASE_URL` — public API base URL, e.g. `https://api.example.com` (**no trailing slash**).
    - `VITE_LOGIN_USERNAME` — allowed sign-in username.
-   - `VITE_LOGIN_PASSWORD` — allowed password. **Letters and numbers only** is the simplest (no quoting issues). If the password must include **`#`** or similar, use **`VITE_LOGIN_PASSWORD_B64`** instead (UTF‑8 → Base64, one line, no quotes). Generate locally:  
+   - **Password** — use **`VITE_LOGIN_PASSWORD`** (letters/numbers only is simplest). If the build log shows username + API but **never** password, try **`VITE_LOGIN_PASS`** instead with the **same value** (some AWS Amplify setups do not inject env vars whose names contain **`PASSWORD`** into the frontend build). The app treats both as equivalent.
+   - Optional: **`VITE_LOGIN_PASSWORD_B64`** if the password must include **`#`** (UTF‑8 → Base64). Generate locally:  
      `node -e "console.log(Buffer.from('your exact password').toString('base64'))"`
    - Optional: `VITE_SESSION_MAX_AGE_MS`, `VITE_LOGIN_MAX_ATTEMPTS`, `VITE_LOGIN_LOCKOUT_MS` (see `.env.example`).
    - Vite inlines these at **build time** — change any variable and **redeploy** to apply.
@@ -63,7 +64,7 @@ Open the preview URL and confirm `/login` and `/analytics` work after a full pag
 | API errors / blocked requests | CORS, HTTPS vs HTTP, correct `VITE_API_BASE_URL`. |
 | Old API URL after env change | Redeploy; Vite bakes env at build time. |
 | Build fails on `npm ci` | Commit `package-lock.json`; don’t delete it. |
-| **“Built without a login password”** | The **build** never saw `VITE_LOGIN_PASSWORD` (or `VITE_LOGIN_PASSWORD_B64`). In Amplify: open **this app** → **Hosting** → select the **same branch** as your site (e.g. `main`) → **Environment variables** → add **`VITE_LOGIN_PASSWORD`** (exact spelling, case-sensitive). Save, then **Redeploy** (not just “retry” — need a full new build). In the build log, find **`[write-build-env]`**: it lists which keys were present (names only). If `VITE_LOGIN_PASSWORD` is missing from that list, Amplify is not passing it into the build (wrong branch, typo, or variable only set at account level). |
+| **“Built without a login password”** | The **build** never saw a password variable. Check **`[write-build-env] Password-related keys present:`** in the log. If **`VITE_LOGIN_PASSWORD`** never appears even though you set it in the console, add **`VITE_LOGIN_PASS`** (same value) — some Amplify builds omit variables with **`PASSWORD`** in the name. Then **Redeploy**. |
 
 ### Confirm env vars in the build log
 

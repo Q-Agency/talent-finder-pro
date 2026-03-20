@@ -52,11 +52,25 @@ export type AuthSetupIssue =
   | "missing_password"
   | "invalid_password_b64";
 
+/**
+ * Plain login password from env (build-time). Order: VITE_LOGIN_PASSWORD, then aliases.
+ * Aliases help when hosts (e.g. AWS Amplify) do not inject variables whose names contain "PASSWORD".
+ */
+function getPlainPasswordFromEnv(): string | undefined {
+  const a = import.meta.env.VITE_LOGIN_PASSWORD as string | undefined;
+  if (a != null && String(a).length > 0) return String(a);
+  const b = import.meta.env.VITE_LOGIN_PASS as string | undefined;
+  if (b != null && String(b).length > 0) return String(b);
+  const c = import.meta.env.VITE_AUTH_PASS as string | undefined;
+  if (c != null && String(c).length > 0) return String(c);
+  return undefined;
+}
+
 export function getAuthSetupIssue(): AuthSetupIssue {
   const username = (import.meta.env.VITE_LOGIN_USERNAME as string | undefined)?.trim();
-  const plain = import.meta.env.VITE_LOGIN_PASSWORD as string | undefined;
   const b64 = import.meta.env.VITE_LOGIN_PASSWORD_B64 as string | undefined;
-  const hasPlain = plain != null && String(plain).length > 0;
+  const plain = getPlainPasswordFromEnv();
+  const hasPlain = plain != null && plain.length > 0;
   const hasB64 = b64 != null && String(b64).trim().length > 0;
 
   if (!username) return "missing_username";
@@ -74,16 +88,16 @@ export function getAuthSetupIssue(): AuthSetupIssue {
 export function getAuthSetupUserMessage(isDev: boolean): string {
   const issue = getAuthSetupIssue();
   const adminHint =
-    "In AWS Amplify: App → Hosting → Environment variables → select this branch → set VITE_LOGIN_USERNAME and VITE_LOGIN_PASSWORD → Save → Redeploy.";
+    "In AWS Amplify: Hosting → Environment variables for this branch → set username + password vars → Save → Redeploy.";
   if (issue === "ok") return "";
   if (isDev) {
-    return "Sign-in is not configured. Add VITE_LOGIN_USERNAME and VITE_LOGIN_PASSWORD to .env.local (see .env.example).";
+    return "Sign-in is not configured. Add VITE_LOGIN_USERNAME and a password (VITE_LOGIN_PASSWORD or VITE_LOGIN_PASS) in .env.local — see .env.example.";
   }
   if (issue === "missing_username") {
     return `This deployment was built without a login username. ${adminHint}`;
   }
   if (issue === "missing_password") {
-    return `This deployment was built without a login password. The name must be exactly VITE_LOGIN_PASSWORD (or use VITE_LOGIN_PASSWORD_B64). Set it for the same Git branch you deploy, then trigger a new build. ${adminHint}`;
+    return `This deployment was built without a login password. If VITE_LOGIN_PASSWORD is not injected by Amplify, use VITE_LOGIN_PASS instead (same value). Redeploy after saving. ${adminHint}`;
   }
   if (issue === "invalid_password_b64") {
     return "VITE_LOGIN_PASSWORD_B64 is not valid Base64. Fix it in Amplify and redeploy.";
@@ -97,7 +111,7 @@ export function getExpectedLoginCredentials(): { username: string; password: str
   if (issue !== "ok") {
     if (import.meta.env.DEV) {
       console.warn(
-        "[auth] Set VITE_LOGIN_USERNAME and VITE_LOGIN_PASSWORD (or VITE_LOGIN_PASSWORD_B64) in .env.local — see .env.example.",
+        "[auth] Set VITE_LOGIN_USERNAME and password (VITE_LOGIN_PASSWORD, VITE_LOGIN_PASS, or VITE_LOGIN_PASSWORD_B64) in .env.local — see .env.example.",
       );
     }
     return null;
@@ -109,9 +123,9 @@ export function getExpectedLoginCredentials(): { username: string; password: str
     const decoded = decodeBase64Utf8(String(b64));
     if (decoded) return { username, password: decoded };
   }
-  const plain = import.meta.env.VITE_LOGIN_PASSWORD as string | undefined;
-  if (plain != null && String(plain).length > 0) {
-    return { username, password: String(plain) };
+  const plain = getPlainPasswordFromEnv();
+  if (plain != null && plain.length > 0) {
+    return { username, password: plain };
   }
   return null;
 }

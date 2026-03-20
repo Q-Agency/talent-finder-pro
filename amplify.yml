@@ -19,7 +19,7 @@ frontend:
         # `npm run build` runs scripts/write-build-env.mjs so Amplify VITE_* vars are written to .env.production.local for Vite
         - |
           if [ -z "$VITE_LOGIN_USERNAME" ]; then echo "WARNING VITE_LOGIN_USERNAME is empty for this build"; fi
-          if [ -z "$VITE_LOGIN_PASSWORD" ] && [ -z "$VITE_LOGIN_PASSWORD_B64" ]; then echo "WARNING neither VITE_LOGIN_PASSWORD nor VITE_LOGIN_PASSWORD_B64 is set"; fi
+          if [ -z "$VITE_LOGIN_PASSWORD" ] && [ -z "$VITE_LOGIN_PASSWORD_B64" ] && [ -z "$VITE_LOGIN_PASS" ] && [ -z "$VITE_AUTH_PASS" ]; then echo "WARNING no login password env (use VITE_LOGIN_PASSWORD or VITE_LOGIN_PASS)"; fi
         - npm run build
   artifacts:
     baseDirectory: dist
