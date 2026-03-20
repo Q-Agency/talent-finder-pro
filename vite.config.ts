@@ -4,6 +4,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
+// Login/API env: use .env.local (dev) or scripts/write-build-env.mjs (CI) → .env.production.local
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",

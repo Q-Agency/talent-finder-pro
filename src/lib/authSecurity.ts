@@ -29,19 +29,91 @@ function sessionMaxAgeMs(): number {
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : DEFAULT_SESSION_MS;
 }
 
+function decodeBase64Utf8(b64: string): string | null {
+  const t = b64.trim();
+  if (!t) return null;
+  try {
+    const bin = atob(t);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Why login might be unavailable (for user-facing messages; no secrets).
+ * Prefer VITE_LOGIN_PASSWORD_B64 on Amplify if your password contains # or special chars.
+ */
+export type AuthSetupIssue =
+  | "ok"
+  | "missing_username"
+  | "missing_password"
+  | "invalid_password_b64";
+
+export function getAuthSetupIssue(): AuthSetupIssue {
+  const username = (import.meta.env.VITE_LOGIN_USERNAME as string | undefined)?.trim();
+  const plain = import.meta.env.VITE_LOGIN_PASSWORD as string | undefined;
+  const b64 = import.meta.env.VITE_LOGIN_PASSWORD_B64 as string | undefined;
+  const hasPlain = plain != null && String(plain).length > 0;
+  const hasB64 = b64 != null && String(b64).trim().length > 0;
+
+  if (!username) return "missing_username";
+  if (hasB64) {
+    const decoded = decodeBase64Utf8(String(b64));
+    if (decoded) return "ok";
+    if (hasPlain) return "ok";
+    return "invalid_password_b64";
+  }
+  if (!hasPlain) return "missing_password";
+  return "ok";
+}
+
+/** User-facing explanation (no secrets). Use for login page banner and submit errors. */
+export function getAuthSetupUserMessage(isDev: boolean): string {
+  const issue = getAuthSetupIssue();
+  const adminHint =
+    "In AWS Amplify: App → Hosting → Environment variables → select this branch → set VITE_LOGIN_USERNAME and VITE_LOGIN_PASSWORD → Save → Redeploy.";
+  if (issue === "ok") return "";
+  if (isDev) {
+    return "Sign-in is not configured. Add VITE_LOGIN_USERNAME and VITE_LOGIN_PASSWORD to .env.local (see .env.example).";
+  }
+  if (issue === "missing_username") {
+    return `This deployment was built without a login username. ${adminHint}`;
+  }
+  if (issue === "missing_password") {
+    return `This deployment was built without a login password. ${adminHint}`;
+  }
+  if (issue === "invalid_password_b64") {
+    return "VITE_LOGIN_PASSWORD_B64 is not valid Base64. Fix it in Amplify and redeploy.";
+  }
+  return `Sign-in is not configured for this deployment. ${adminHint}`;
+}
+
 /** Read expected credentials from build-time env (never commit real values). */
 export function getExpectedLoginCredentials(): { username: string; password: string } | null {
-  const username = (import.meta.env.VITE_LOGIN_USERNAME as string | undefined)?.trim();
-  const password = import.meta.env.VITE_LOGIN_PASSWORD as string | undefined;
-  if (!username || password === undefined || password === '') {
+  const issue = getAuthSetupIssue();
+  if (issue !== "ok") {
     if (import.meta.env.DEV) {
       console.warn(
-        '[auth] Set VITE_LOGIN_USERNAME and VITE_LOGIN_PASSWORD in .env.local (see .env.example).',
+        "[auth] Set VITE_LOGIN_USERNAME and VITE_LOGIN_PASSWORD (or VITE_LOGIN_PASSWORD_B64) in .env.local — see .env.example.",
       );
     }
     return null;
   }
-  return { username, password };
+
+  const username = (import.meta.env.VITE_LOGIN_USERNAME as string).trim();
+  const b64 = import.meta.env.VITE_LOGIN_PASSWORD_B64 as string | undefined;
+  if (b64 != null && String(b64).trim() !== "") {
+    const decoded = decodeBase64Utf8(String(b64));
+    if (decoded) return { username, password: decoded };
+  }
+  const plain = import.meta.env.VITE_LOGIN_PASSWORD as string | undefined;
+  if (plain != null && String(plain).length > 0) {
+    return { username, password: String(plain) };
+  }
+  return null;
 }
 
 /** Reduce timing leaks when comparing secrets (best-effort in JS). */

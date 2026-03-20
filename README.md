@@ -98,9 +98,9 @@ Create `.env.local` (see [`.env.example`](.env.example)):
 # API (optional — defaults to http://192.168.20.70:5678 if unset)
 VITE_API_BASE_URL=https://your-api-host.example.com
 
-# Login — required (use quotes if password contains # or spaces)
+# Login — required (alphanumeric password avoids quoting issues in Amplify)
 VITE_LOGIN_USERNAME=resourcing
-VITE_LOGIN_PASSWORD="your-password"
+VITE_LOGIN_PASSWORD=yourPassword
 ```
 
 Optional tuning (defaults in `src/lib/authSecurity.ts`): `VITE_LOGIN_MAX_ATTEMPTS`, `VITE_LOGIN_LOCKOUT_MS`, `VITE_SESSION_MAX_AGE_MS`.
@@ -126,7 +126,7 @@ Use the username and password from `VITE_LOGIN_USERNAME` and `VITE_LOGIN_PASSWOR
 | Command           | Description |
 |-------------------|-------------|
 | `npm run dev`     | Start Vite dev server (port 8080) |
-| `npm run build`   | Production build |
+| `npm run build`   | Writes CI `VITE_*` to `.env.production.local`, then production build |
 | `npm run build:dev` | Build in development mode |
 | `npm run preview` | Preview production build locally |
 | `npm run lint`    | Run ESLint |
@@ -181,7 +181,7 @@ The repo includes everything Amplify needs:
 **Amplify Console checklist**
 
 1. Connect the Git repo; Amplify picks up `amplify.yml` automatically.
-2. Under **Environment variables**, set at least **`VITE_API_BASE_URL`**, **`VITE_LOGIN_USERNAME`**, and **`VITE_LOGIN_PASSWORD`** (quote the password in the console if it contains `#`). Redeploy after changes — Vite inlines env at build time.
+2. Under **Environment variables**, set at least **`VITE_API_BASE_URL`**, **`VITE_LOGIN_USERNAME`**, and **`VITE_LOGIN_PASSWORD`**. A password with **only letters and numbers** is easiest (no quoting issues). If you ever need `#` or similar, use **`VITE_LOGIN_PASSWORD_B64`** instead (see `.env.example`). Redeploy after changes — Vite inlines env at build time.
 3. Ensure your API allows **CORS** from your Amplify domain (and custom domain if used). Avoid **HTTP** APIs from an **HTTPS** Amplify site (mixed content).
 
 Full step-by-step: [`docs/deployment-aws-amplify.md`](docs/deployment-aws-amplify.md).

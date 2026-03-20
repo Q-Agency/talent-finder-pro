@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import {
-  getExpectedLoginCredentials,
+  getAuthSetupIssue,
+  getAuthSetupUserMessage,
   getLoginLockoutState,
   registerFailedLoginAttempt,
 } from '@/lib/authSecurity';
@@ -44,17 +45,17 @@ export default function Login() {
 
   const clearError = () => setLoginError(null);
 
+  const authSetupIssue = useMemo(() => getAuthSetupIssue(), []);
+  const authConfigMessage =
+    authSetupIssue !== 'ok' ? getAuthSetupUserMessage(import.meta.env.DEV) : null;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError(null);
     setIsLoading(true);
 
-    if (!getExpectedLoginCredentials()) {
-      setLoginError(
-        import.meta.env.DEV
-          ? 'Sign-in is not configured. Add VITE_LOGIN_USERNAME and VITE_LOGIN_PASSWORD to .env.local (see .env.example).'
-          : 'Sign-in is temporarily unavailable. Please contact your administrator.',
-      );
+    if (authSetupIssue !== 'ok') {
+      setLoginError(getAuthSetupUserMessage(import.meta.env.DEV));
       setIsLoading(false);
       return;
     }
@@ -175,13 +176,16 @@ export default function Login() {
             </CardHeader>
             <CardContent className="pt-0 lg:pt-2">
               <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-                {import.meta.env.DEV && !getExpectedLoginCredentials() && (
-                  <Alert className="border-amber-500/40 bg-amber-500/10 py-3 text-amber-950 dark:text-amber-100">
-                    <AlertDescription className="text-sm">
-                      Dev only: set <code className="rounded bg-amber-500/20 px-1">VITE_LOGIN_USERNAME</code> and{' '}
-                      <code className="rounded bg-amber-500/20 px-1">VITE_LOGIN_PASSWORD</code> in{' '}
-                      <code className="rounded bg-amber-500/20 px-1">.env.local</code>.
-                    </AlertDescription>
+                {authConfigMessage && (
+                  <Alert
+                    variant={import.meta.env.DEV ? 'default' : 'destructive'}
+                    className={
+                      import.meta.env.DEV
+                        ? 'border-amber-500/40 bg-amber-500/10 py-3 text-amber-950 dark:text-amber-100'
+                        : 'py-3'
+                    }
+                  >
+                    <AlertDescription className="text-sm">{authConfigMessage}</AlertDescription>
                   </Alert>
                 )}
                 {loginError && (

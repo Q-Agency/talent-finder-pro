@@ -7,6 +7,7 @@ This app is a **Vite + React SPA**. Amplify runs `npm ci` and `npm run build`, t
 | File | Purpose |
 |------|---------|
 | [`amplify.yml`](../amplify.yml) | Build phases, `dist` artifacts, `node_modules` cache |
+| [`scripts/write-build-env.mjs`](../scripts/write-build-env.mjs) | Runs before `vite build`; writes Amplify `VITE_*` into `.env.production.local` so login/API env is embedded reliably |
 | [`.nvmrc`](../.nvmrc) | Node 20 for `nvm install` / `nvm use` in Amplify |
 | [`public/_redirects`](../public/_redirects) | SPA rewrite so `/login`, `/analytics`, etc. load `index.html` (200) |
 | [`.env.example`](../.env.example) | Documents API URL, login env vars, optional auth tuning |
@@ -21,7 +22,8 @@ This app is a **Vite + React SPA**. Amplify runs `npm ci` and `npm run build`, t
 4. **Environment variables** (App settings → **Environment variables**):
    - `VITE_API_BASE_URL` — public API base URL, e.g. `https://api.example.com` (**no trailing slash**).
    - `VITE_LOGIN_USERNAME` — allowed sign-in username.
-   - `VITE_LOGIN_PASSWORD` — allowed password (if it contains `#`, wrap the value carefully in the Amplify UI or use the console/API so it is stored correctly).
+   - `VITE_LOGIN_PASSWORD` — allowed password. **Letters and numbers only** is the simplest (no quoting issues). If the password must include **`#`** or similar, use **`VITE_LOGIN_PASSWORD_B64`** instead (UTF‑8 → Base64, one line, no quotes). Generate locally:  
+     `node -e "console.log(Buffer.from('your exact password').toString('base64'))"`
    - Optional: `VITE_SESSION_MAX_AGE_MS`, `VITE_LOGIN_MAX_ATTEMPTS`, `VITE_LOGIN_LOCKOUT_MS` (see `.env.example`).
    - Vite inlines these at **build time** — change any variable and **redeploy** to apply.
 5. Save and **deploy**.
